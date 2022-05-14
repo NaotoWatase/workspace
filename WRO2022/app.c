@@ -64,11 +64,11 @@ int TIME;
 SYSTIM NOWTIME;
 SYSTIM STARTTIME;
 
-typedef enum sensorType_t {
+typedef enum sensorType {
     RIGHT,
     LEFT,
     BOTH
-} sensorType ;
+} sensortype_t ;
 
 void steering(float length, int power, int steering){
     int true_steering = 0;
@@ -128,7 +128,7 @@ void tank_turn_color(int power_L, int power_R){
     
 }
 
-void steering_color(colorid_t color_stop, int power, int steering, ){
+void steering_color(colorid_t color_stop, int power, int steering){
     colorid_t color;
     if(steering > 0) {
         (void)ev3_motor_rotate(EV3_PORT_B, 10000000, -power, false);
@@ -159,7 +159,7 @@ void steering_time(colorid_t time_stop_4d, int power, int steering){
     ev3_motor_stop(EV3_PORT_C, true);
 }
 
-void linetrace_color(sensor_type_t type, colorid_t color_stop, int power){
+void linetrace_color(sensortype_t type, colorid_t color_stop, int power){
     colorid_t color2 = COLOR_NONE;
     colorid_t color3 = COLOR_NONE;
 
