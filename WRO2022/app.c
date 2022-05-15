@@ -22,6 +22,7 @@
 
 #define MSEC (1000)
 
+
 /**
  * Define the connection ports of the sensors and motors.
  * By default, this application uses the following ports:
@@ -48,15 +49,9 @@ static void button_clicked_handler(intptr_t button) {
 int kakudo_C; 
 float robot1cm = 18.48;
 float turn = 0.1326;
-int reflect2;
-int reflect3;
-int reflect;
-int steer;
 int power = 50;
-float p;
-float i;
-float d;
-float d2;
+int steer;
+
 int start;
 colorid_t color;
 
@@ -162,6 +157,13 @@ void steering_time(colorid_t time_stop_4d, int power, int steering){
 void linetrace_color(sensortype_t type, colorid_t color_stop, int power){
     colorid_t color2 = COLOR_NONE;
     colorid_t color3 = COLOR_NONE;
+    int reflect2;
+    int reflect3;
+    int reflect;
+    float p;
+    float i;
+    float d;
+    float d2;
 
     while (true) {
         color2 = ev3_color_sensor_get_color(EV3_PORT_2);
@@ -187,6 +189,13 @@ void linetrace_color(sensortype_t type, colorid_t color_stop, int power){
 }
 
 void linetrace_length(float length, int power){
+    int reflect2;
+    int reflect3;
+    int reflect;
+    float p;
+    float i;
+    float d;
+    float d2;
     ev3_motor_reset_counts(EV3_PORT_C);
     while (length * robot1cm > kakudo_C) {
         kakudo_C = ev3_motor_get_counts(EV3_PORT_C);
