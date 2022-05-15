@@ -21,7 +21,8 @@
 #endif
 
 #define MSEC (1000)
-
+#define ROBOT1CM (18.48)
+#define TURN (0.1326)
 
 /**
  * Define the connection ports of the sensors and motors.
@@ -52,6 +53,9 @@ float turn = 0.1326;
 int power = 50;
 int steer;
 
+int reflect, reflect2, reflect3;
+float p, i, d, d2;
+
 int start;
 colorid_t color;
 
@@ -71,20 +75,20 @@ void steering(float length, int power, int steering){
     ev3_motor_reset_counts(EV3_PORT_C);
     	
     if(steering > 0) {
-        (void)ev3_motor_rotate(EV3_PORT_B, length*robot1cm, -power, false);
-        (void)ev3_motor_rotate(EV3_PORT_C, length*robot1cm, power-(power*steering/50), false);
+        (void)ev3_motor_rotate(EV3_PORT_B, length*ROBOT1CM, -power, false);
+        (void)ev3_motor_rotate(EV3_PORT_C, length*ROBOT1CM, power-(power*steering/50), false);
     }
     else {
-        (void)ev3_motor_rotate(EV3_PORT_B, length*robot1cm, -(power+(power*steering/50)), false);
-        (void)ev3_motor_rotate(EV3_PORT_C, length*robot1cm, power, false);
+        (void)ev3_motor_rotate(EV3_PORT_B, length*ROBOT1CM, -(power+(power*steering/50)), false);
+        (void)ev3_motor_rotate(EV3_PORT_C, length*ROBOT1CM, power, false);
     }
     while(true_steering < 1){
-        if (ev3_motor_get_counts(EV3_PORT_B) > length*robot1cm) {
+        if (ev3_motor_get_counts(EV3_PORT_B) > length*ROBOT1CM) {
             (void)ev3_motor_stop(EV3_PORT_B, true);
             (void)ev3_motor_stop(EV3_PORT_C, true);
             true_steering = true_steering + 1;
         }
-        else if (ev3_motor_get_counts(EV3_PORT_C) > length*robot1cm) {
+        else if (ev3_motor_get_counts(EV3_PORT_C) > length*ROBOT1CM) {
             (void)ev3_motor_stop(EV3_PORT_B, true);
             (void)ev3_motor_stop(EV3_PORT_C, true);
             true_steering = true_steering + 1;
@@ -93,8 +97,8 @@ void steering(float length, int power, int steering){
 }
 
 void tank_turn(float angle, int power_L, int power_R){
-    (void)ev3_motor_rotate(EV3_PORT_B, angle*turn*robot1cm, (int16_t)-power_L, false);
-    (void)ev3_motor_rotate(EV3_PORT_C, angle*turn*robot1cm, (int16_t)power_R, true);
+    (void)ev3_motor_rotate(EV3_PORT_B, angle*TURN*ROBOT1CM, (int16_t)-power_L, false);
+    (void)ev3_motor_rotate(EV3_PORT_C, angle*TURN*ROBOT1CM, (int16_t)power_R, true);
 }
 
 void tank_turn_color(int power_L, int power_R){
@@ -157,14 +161,6 @@ void steering_time(colorid_t time_stop_4d, int power, int steering){
 void linetrace_color(sensortype_t type, colorid_t color_stop, int power){
     colorid_t color2 = COLOR_NONE;
     colorid_t color3 = COLOR_NONE;
-    int reflect2;
-    int reflect3;
-    int reflect;
-    float p;
-    float i;
-    float d;
-    float d2;
-
     while (true) {
         color2 = ev3_color_sensor_get_color(EV3_PORT_2);
         color3 = ev3_color_sensor_get_color(EV3_PORT_3);
@@ -189,13 +185,6 @@ void linetrace_color(sensortype_t type, colorid_t color_stop, int power){
 }
 
 void linetrace_length(float length, int power){
-    int reflect2;
-    int reflect3;
-    int reflect;
-    float p;
-    float i;
-    float d;
-    float d2;
     ev3_motor_reset_counts(EV3_PORT_C);
     while (length * robot1cm > kakudo_C) {
         kakudo_C = ev3_motor_get_counts(EV3_PORT_C);
