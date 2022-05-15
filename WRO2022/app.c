@@ -48,8 +48,6 @@ static void button_clicked_handler(intptr_t button) {
 }
 
 int kakudo_C; 
-float robot1cm = 18.48;
-float turn = 0.1326;
 int power = 50;
 int steer;
 
@@ -186,7 +184,7 @@ void linetrace_color(sensortype_t type, colorid_t color_stop, int power){
 
 void linetrace_length(float length, int power){
     ev3_motor_reset_counts(EV3_PORT_C);
-    while (length * robot1cm > kakudo_C) {
+    while (length * ROBOT1CM > kakudo_C) {
         kakudo_C = ev3_motor_get_counts(EV3_PORT_C);
         reflect2 = ev3_color_sensor_get_reflect(EV3_PORT_2);
         reflect3 = ev3_color_sensor_get_reflect(EV3_PORT_3);
