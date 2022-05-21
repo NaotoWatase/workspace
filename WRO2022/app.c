@@ -51,12 +51,14 @@ int kakudo_C;
 int power = 50;
 int steer;
 
+/*ライントレース用の変数の定義*/
 int reflect, reflect2, reflect3;
 float p, i, d, d2;
 
 int start;
 colorid_t color;
 
+/*タイムアウトタスクの変数の定義*/
 int TIME;
 SYSTIM NOWTIME;
 SYSTIM STARTTIME;
