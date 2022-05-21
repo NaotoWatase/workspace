@@ -104,24 +104,24 @@ void tank_turn(float angle, int power_L, int power_R){
 void tank_turn_color(int power_L, int power_R){
     
     colorid_t color_check = COLOR_NONE;
-    (void)ev3_motor_rotate(EV3_PORT_B, 10000000, (int16_t)-power_L, false);
-    (void)ev3_motor_rotate(EV3_PORT_C, 10000000, (int16_t)power_R, false);
-    while(color_check != COLOR_WHITE) {
+    (void)ev3_motor_rotate(EV3_PORT_B, 1, (int16_t)-power_L, false);
+    (void)ev3_motor_rotate(EV3_PORT_C, 1, (int16_t)power_R, false);
+    while(color_check == COLOR_NONE) {
         if(power_L > 0) {
             color_check = ev3_color_sensor_get_color(EV3_PORT_2);
-    } 
+        } 
         else {
             color_check = ev3_color_sensor_get_color(EV3_PORT_3);
         }
     }
-    while(color_check != COLOR_BLACK) {
+    /*while(color_check != COLOR_BLACK) {
         if(power_L > 0) {
             color_check = ev3_color_sensor_get_color(EV3_PORT_2);
         }
         else {
             color_check = ev3_color_sensor_get_color(EV3_PORT_3);
         }
-    }
+    }*/
     (void)ev3_motor_stop(EV3_PORT_B, true);
     (void)ev3_motor_stop(EV3_PORT_C, true);
     
@@ -260,5 +260,5 @@ void main_task(intptr_t unused) {
             break;
     }
     while(1) {}*/
-    tank_turn_color(30. -30);
+    tank_turn_color(5, -5);
 }   
