@@ -259,5 +259,5 @@ void main_task(intptr_t unused) {
             break;
     }
     while(1) {}*/
-    steering_color(COLOR_WHITE, 30, 50);
+    steering_color(COLOR_WHITE, 30, 100);
 }   
