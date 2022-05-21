@@ -104,8 +104,8 @@ void tank_turn(float angle, int power_L, int power_R){
 void tank_turn_color(int power_L, int power_R){
     
     colorid_t color_check = COLOR_NONE;
-    (void)ev3_motor_rotate(EV3_PORT_B, 1, (int16_t)-power_L, false);
-    (void)ev3_motor_rotate(EV3_PORT_C, 1, (int16_t)power_R, false);
+    (void)ev3_motor_rotate(EV3_PORT_B, 10000000, (int16_t)-power_L, false);
+    (void)ev3_motor_rotate(EV3_PORT_C, 10000000, (int16_t)power_R, false);
     while(color_check == COLOR_NONE) {
         if(power_L > 0) {
             color_check = ev3_color_sensor_get_color(EV3_PORT_2);
