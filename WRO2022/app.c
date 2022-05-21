@@ -111,7 +111,6 @@ void tank_turn_color(colorid_t color_stop, int power){
         (void)ev3_motor_rotate(EV3_PORT_B, 10000000, -(power+(power*100/50)), false);
         (void)ev3_motor_rotate(EV3_PORT_C, 10000000, power, false);
     }
-    if(power > 0){
         while(color != COLOR_WHITE) {
             if(power > 0) {
                 color = ev3_color_sensor_get_color(EV3_PORT_2);
@@ -120,8 +119,6 @@ void tank_turn_color(colorid_t color_stop, int power){
                 color = ev3_color_sensor_get_color(EV3_PORT_3);
             }
         }
-    }
-    if(power > 0) {
         while(color != COLOR_BLACK) {
             if(power > 0) {
                 color = ev3_color_sensor_get_color(EV3_PORT_2);
@@ -130,8 +127,6 @@ void tank_turn_color(colorid_t color_stop, int power){
                 color = ev3_color_sensor_get_color(EV3_PORT_3);
             }
         }
-    }
-    
     (void)ev3_motor_stop(EV3_PORT_B, true);
     (void)ev3_motor_stop(EV3_PORT_C, true);    
 }
