@@ -232,7 +232,7 @@ void main_task(intptr_t unused) {
 
     /*ここからコーディング */
     
-    color = ev3_color_sensor_get_color(EV3_PORT_1); 
+    /*color = ev3_color_sensor_get_color(EV3_PORT_1); 
     switch(color){
         case COLOR_NONE:
             start = 1;
@@ -259,5 +259,6 @@ void main_task(intptr_t unused) {
             steering(11.5, 20, 0);
             break;
     }
-    while(1) {}
+    while(1) {}*/
+    tank_turn_color(30. -30);
 }   
