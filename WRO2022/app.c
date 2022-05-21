@@ -175,16 +175,21 @@ void linetrace_color(sensortype_t type, colorid_t color_stop, int power){
         i = (reflect + i);
         d = (reflect - d2); 
         d2 = reflect;
-        steer =  p * P_GEIN + i * I_GEIN + d * D_GEIN;
-        (void)ev3_motor_steer(EV3_PORT_B, EV3_PORT_C, power, steer);
-        
+        steer =  p * P_GEIN; 
+        if(steer > 0) {
+            (void)ev3_motor_rotate(EV3_PORT_B, 1000000, -power, false);
+            (void)ev3_motor_rotate(EV3_PORT_C, 1000000, power-(power*steer/50), false);
+        }
+        else {
+            (void)ev3_motor_rotate(EV3_PORT_B, 1000000, -(power+(power*steer/50)), false);
+            (void)ev3_motor_rotate(EV3_PORT_C, 1000000, power, false);
+        }
         if(color2 == color_stop && color3 == color_stop && type == BOTH) break;
         if(color2 == color_stop && type == RIGHT) break;
         if(color3 == color_stop && type == LEFT) break;
     }  
     (void)ev3_motor_stop(EV3_PORT_B, true);
     (void)ev3_motor_stop(EV3_PORT_C, true);
-    
     
 }
 
@@ -199,8 +204,16 @@ void linetrace_length(float length, int power){
         i = (reflect + i);
         d = (reflect - d2); 
         d2 = reflect;
-        steer =  p * P_GEIN + i * I_GEIN + d * D_GEIN;
-        (void)ev3_motor_steer(EV3_PORT_B, EV3_PORT_C, power, steer);
+        steer =  p * P_GEIN; 
+        if(steer > 0) {
+            (void)ev3_motor_rotate(EV3_PORT_B, 1000000, -power, false);
+            (void)ev3_motor_rotate(EV3_PORT_C, 1000000, power-(power*steer/50), false);
+        }
+        else {
+            (void)ev3_motor_rotate(EV3_PORT_B, 1000000, -(power+(power*steer/50)), false);
+            (void)ev3_motor_rotate(EV3_PORT_C, 1000000, power, false);
+        }
+
     }
     (void)ev3_motor_stop(EV3_PORT_B, true);
     (void)ev3_motor_stop(EV3_PORT_C, true);
@@ -251,8 +264,11 @@ void main_task(intptr_t unused) {
             steering_color(COLOR_WHITE, 30, 0);
             steering_color(COLOR_BLACK, 15, 0);
             steering(11.5, 20, 0);
-            tank_turn_color(20, -20);
-            
+            tank_turn(90, 25, -25);
+            linetrace_length(10, 15);
+            linetrace_color(BOTH, COLOR_BLACK, 40);
+            linetrace_length(10, 40);
+            linetrace_color(LEFT, COLOR_BLACK, 40);                     
             break;
         case 2:
             tank_turn(50, 0, 20);
@@ -264,5 +280,8 @@ void main_task(intptr_t unused) {
             break;
     }
     while(1) {}*/
-    tank_turn_color(COLOR_WHITE, 30);
+    while(true){
+        (void)ev3_motor_rotate(EV3_PORT_B, 1000000, -30, false);
+        (void)ev3_motor_rotate(EV3_PORT_C, 1000000, 30-(30*0/50), false);
+    }
 }   
