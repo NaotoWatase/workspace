@@ -32,8 +32,8 @@
  * Left motor:   Port B
  * Right motor:  Port C
  */
-static const sensor_port_t  PortSensorTouch = EV3_PORT_2;
-static const sensor_port_t  PortSensorColor = EV3_PORT_3;
+static const sensor_port_t  PortSensorColor2 = EV3_PORT_2;
+static const sensor_port_t  PortSensorColor3 = EV3_PORT_3;
 static const motor_port_t   PortMotorLeft   = EV3_PORT_B;
 static const motor_port_t   PortMotorRight  = EV3_PORT_C;
 
@@ -101,32 +101,27 @@ void tank_turn(float angle, int power_L, int power_R){
     (void)ev3_motor_rotate(EV3_PORT_C, angle*TURN*ROBOT1CM, (int16_t)power_R, true);
 }
 
-void tank_turn_color(colorid_t color_stop, int power){
+void tank_turn_color(int power_L, int power_R){
+
     colorid_t color;
-    if(power > 0) {
-        (void)ev3_motor_rotate(EV3_PORT_B, 10000000, -power, false);
-        (void)ev3_motor_rotate(EV3_PORT_C, 10000000, power-(power*100/50), false);
-    }
-    else {
-        (void)ev3_motor_rotate(EV3_PORT_B, 10000000, -(power+(power*100/50)), false);
-        (void)ev3_motor_rotate(EV3_PORT_C, 10000000, power, false);
-    }
-        while(color != COLOR_WHITE) {
-            if(power > 0) {
-                color = ev3_color_sensor_get_color(EV3_PORT_2);
-            } 
-            else {
-                color = ev3_color_sensor_get_color(EV3_PORT_3);
-            }
+    ev3_motor_set_power(EV3_PORT_C, -power_L);
+    ev3_motor_set_power(EV3_PORT_B, power_R);
+    while(color != COLOR_WHITE) {
+        if(power_L > 0) {
+            color = ev3_color_sensor_get_color(EV3_PORT_2);
+        } 
+        else {
+            color = ev3_color_sensor_get_color(EV3_PORT_3);
         }
-        while(color != COLOR_BLACK) {
-            if(power > 0) {
-                color = ev3_color_sensor_get_color(EV3_PORT_2);
-            } 
-            else {
-                color = ev3_color_sensor_get_color(EV3_PORT_3);
-            }
+    }
+    while(color != COLOR_BLACK) {
+        if(power_L > 0) {
+            color = ev3_color_sensor_get_color(EV3_PORT_2);
+        } 
+        else {
+            color = ev3_color_sensor_get_color(EV3_PORT_3);
         }
+    }
     (void)ev3_motor_stop(EV3_PORT_B, true);
     (void)ev3_motor_stop(EV3_PORT_C, true);    
 }
@@ -134,12 +129,12 @@ void tank_turn_color(colorid_t color_stop, int power){
 void steering_color(colorid_t color_stop, int power, int steering){
     colorid_t color;
     if(steering > 0) {
-        (void)ev3_motor_rotate(EV3_PORT_B, 10000000, -power, false);
-        (void)ev3_motor_rotate(EV3_PORT_C, 10000000, power-(power*steering/50), false);
+        (void)ev3_motor_rotate(EV3_PORT_B, 100, -power, false);
+        (void)ev3_motor_rotate(EV3_PORT_C, 100, power-(power*steering/50), false);
     }
     else {
-        (void)ev3_motor_rotate(EV3_PORT_B, 10000000, -(power+(power*steering/50)), false);
-        (void)ev3_motor_rotate(EV3_PORT_C, 10000000, power, false);
+        (void)ev3_motor_rotate(EV3_PORT_B, 100, -(power+(power*steering/50)), false);
+        (void)ev3_motor_rotate(EV3_PORT_C, 100, power, false);
     }
     while (color_stop != color) {
         color = ev3_color_sensor_get_color(EV3_PORT_3);
@@ -150,12 +145,12 @@ void steering_color(colorid_t color_stop, int power, int steering){
 
 void steering_time(colorid_t time_stop_4d, int power, int steering){
     if(steering > 0) {
-        (void)ev3_motor_rotate(EV3_PORT_B, 10000000, -power, false);
-        (void)ev3_motor_rotate(EV3_PORT_C, 10000000, power-(power*steering/50), false);
+        (void)ev3_motor_rotate(EV3_PORT_B, 100, -power, false);
+        (void)ev3_motor_rotate(EV3_PORT_C, 100, power-(power*steering/50), false);
     }
     else {
-        (void)ev3_motor_rotate(EV3_PORT_B, 10000000, -(power+(power*steering/50)), false);
-        (void)ev3_motor_rotate(EV3_PORT_C, 10000000, power, false);
+        (void)ev3_motor_rotate(EV3_PORT_B, 100, -(power+(power*steering/50)), false);
+        (void)ev3_motor_rotate(EV3_PORT_C, 100, power, false);
     }
     tslp_tsk(time_stop_4d * MSEC);
     ev3_motor_stop(EV3_PORT_B, true);
@@ -177,12 +172,12 @@ void linetrace_color(sensortype_t type, colorid_t color_stop, int power){
         d2 = reflect;
         steer =  p * P_GEIN; 
         if(steer > 0) {
-            (void)ev3_motor_rotate(EV3_PORT_B, 1000000, -power, false);
-            (void)ev3_motor_rotate(EV3_PORT_C, 1000000, power-(power*steer/50), false);
+            (void)ev3_motor_rotate(EV3_PORT_B, 100, -power, false);
+            (void)ev3_motor_rotate(EV3_PORT_C, 100, power-(power*steer/50), false);
         }
         else {
-            (void)ev3_motor_rotate(EV3_PORT_B, 1000000, -(power+(power*steer/50)), false);
-            (void)ev3_motor_rotate(EV3_PORT_C, 1000000, power, false);
+            (void)ev3_motor_rotate(EV3_PORT_B, 100, -(power+(power*steer/50)), false);
+            (void)ev3_motor_rotate(EV3_PORT_C, 100, power, false);
         }
         if(color2 == color_stop && color3 == color_stop && type == BOTH) break;
         if(color2 == color_stop && type == RIGHT) break;
@@ -206,17 +201,36 @@ void linetrace_length(float length, int power){
         d2 = reflect;
         steer =  p * P_GEIN; 
         if(steer > 0) {
-            (void)ev3_motor_rotate(EV3_PORT_B, 1000000, -power, false);
-            (void)ev3_motor_rotate(EV3_PORT_C, 1000000, power-(power*steer/50), false);
+            (void)ev3_motor_rotate(EV3_PORT_B, 100, -power, false);
+            (void)ev3_motor_rotate(EV3_PORT_C, 100, power-(power*steer/50), false);
         }
         else {
-            (void)ev3_motor_rotate(EV3_PORT_B, 1000000, -(power+(power*steer/50)), false);
-            (void)ev3_motor_rotate(EV3_PORT_C, 1000000, power, false);
+            (void)ev3_motor_rotate(EV3_PORT_B, 100, -(power+(power*steer/50)), false);
+            (void)ev3_motor_rotate(EV3_PORT_C, 100, power, false);
         }
 
     }
     (void)ev3_motor_stop(EV3_PORT_B, true);
     (void)ev3_motor_stop(EV3_PORT_C, true);
+}
+
+void sensor_check(motor_port_t port) {
+    switch (port) {
+    case EV3_PORT_1:
+        /* code */
+        break;
+    case EV3_PORT_2:
+        /* code */
+        break;
+    case EV3_PORT_3:
+        /* code */
+        break;    
+    case EV3_PORT_4:
+        /* code */
+        break;
+    default:
+        break;
+    }
 }
 
 void timeout_task(intptr_t unused) {
@@ -239,13 +253,18 @@ void main_task(intptr_t unused) {
     ev3_motor_config(PortMotorRight, LARGE_MOTOR);
 
     /* Configure sensors */
-    ev3_sensor_config(PortSensorTouch, TOUCH_SENSOR);
-    ev3_sensor_config(PortSensorColor, COLOR_SENSOR);
+    ev3_sensor_config(PortSensorColor2, COLOR_SENSOR);
+    ev3_sensor_config(PortSensorColor3, COLOR_SENSOR);
 
     get_tim(&STARTTIME);
     ev3_lcd_set_font(EV3_FONT_SMALL);
 
-    (void)sta_cyc(TIMEOUT_CYC);
+    ev3_color_sensor_get_color(EV3_PORT_3);
+    ev3_color_sensor_get_color(EV3_PORT_2);
+
+
+
+//    (void)sta_cyc(TIMEOUT_CYC);
 
     /*ここからコーディング */
     
@@ -280,8 +299,7 @@ void main_task(intptr_t unused) {
             break;
     }
     while(1) {}*/
-    while(true){
-        (void)ev3_motor_rotate(EV3_PORT_B, 1000000, -30, false);
-        (void)ev3_motor_rotate(EV3_PORT_C, 1000000, 30-(30*0/50), false);
-    }
+    
+    tank_turn_color(30, -30);
+
 }   
