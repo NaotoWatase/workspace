@@ -64,6 +64,7 @@ void main_task(intptr_t unused) {
     rotateAngleLeft = temp  / 56 / 314;
     rotateAngleRight = rotateAngleLeft;	/* 直進なので、左右で同じ回転角度 */
 
-    (void)ev3_motor_rotate(EV3_PORT_B, rotateAngleLeft, (uint32_t)100U, false);
-    (void)ev3_motor_rotate(EV3_PORT_C, rotateAngleRight, (uint32_t)100U, true);
+    ev3_motor_set_power(EV3_PORT_B, 30);
+    tslp_tsk(3000 * 1000);
+    ev3_motor_stop(EV3_PORT_B, true);
 }
