@@ -99,8 +99,8 @@ void steering(float length, int power, int steering){
 void tank_turn(float angle, int power_L, int power_R){
     (void)ev3_motor_rotate(EV3_PORT_B, angle*TURN*ROBOT1CM, (int16_t)-power_L, false);
     (void)ev3_motor_rotate(EV3_PORT_C, angle*TURN*ROBOT1CM, (int16_t)power_R, true);
-    ev3_motor_stop(EV3_PORT_B, true);
-    ev3_motor_stop(EV3_PORT_C, false);
+    ev3_motor_stop(EV3_PORT_B, false);
+    ev3_motor_stop(EV3_PORT_C, true);
 }
 
 void tank_turn_color(int power_L, int power_R){
@@ -124,8 +124,8 @@ void tank_turn_color(int power_L, int power_R){
             color = ev3_color_sensor_get_color(EV3_PORT_3);
         }
     }
-    (void)ev3_motor_stop(EV3_PORT_B, true);
-    (void)ev3_motor_stop(EV3_PORT_C, true);    
+    ev3_motor_stop(EV3_PORT_B, false);
+    ev3_motor_stop(EV3_PORT_C, true);    
 }
 
 void steering_color(colorid_t color_stop, int power, int steering){
@@ -270,8 +270,7 @@ void main_task(intptr_t unused) {
 
     /*ここからコーディング */
 
-    ev3_motor_set_power(EV3_PORT_C, -25);
-    ev3_motor_set_power(EV3_PORT_B, -25);
+    tank_turn(75, 25,-25);
     tank_turn_color(25, -25);
 
 }   

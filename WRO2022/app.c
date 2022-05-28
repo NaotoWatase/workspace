@@ -99,13 +99,15 @@ void steering(float length, int power, int steering){
 void tank_turn(float angle, int power_L, int power_R){
     (void)ev3_motor_rotate(EV3_PORT_B, angle*TURN*ROBOT1CM, (int16_t)-power_L, false);
     (void)ev3_motor_rotate(EV3_PORT_C, angle*TURN*ROBOT1CM, (int16_t)power_R, true);
+    ev3_motor_stop(EV3_PORT_B, false);
+    ev3_motor_stop(EV3_PORT_C, true);
 }
 
 void tank_turn_color(int power_L, int power_R){
 
     colorid_t color;
-    ev3_motor_set_power(EV3_PORT_C, power_L);
-    ev3_motor_set_power(EV3_PORT_B, -power_R);
+    ev3_motor_set_power(EV3_PORT_C, power_R);
+    ev3_motor_set_power(EV3_PORT_B, -power_L);
     while(color != COLOR_WHITE) {
         if(power_L > 0) {
             color = ev3_color_sensor_get_color(EV3_PORT_2);
@@ -122,7 +124,7 @@ void tank_turn_color(int power_L, int power_R){
             color = ev3_color_sensor_get_color(EV3_PORT_3);
         }
     }
-    (void)ev3_motor_stop(EV3_PORT_B, true);
+    (void)ev3_motor_stop(EV3_PORT_B, false);
     (void)ev3_motor_stop(EV3_PORT_C, true);    
 }
 
@@ -285,6 +287,8 @@ void main_task(intptr_t unused) {
             steering(11.5, 20, 0);
             tank_turn(75, 25, -25);
             tank_turn_color(25, -25);
+            ev3_speaker_play_tone(NOTE_AS5, 100);		
+
             linetrace_length(10, 15);
             linetrace_color(BOTH, COLOR_BLACK, 40);
             linetrace_length(10, 40);
@@ -301,7 +305,6 @@ void main_task(intptr_t unused) {
     }
     while(1) {}
     
-    tank_turn(75, 25, -25);
-    tank_turn_color(25, -25);
+
 
 }   
