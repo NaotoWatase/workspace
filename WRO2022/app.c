@@ -104,8 +104,8 @@ void tank_turn(float angle, int power_L, int power_R){
 void tank_turn_color(int power_L, int power_R){
 
     colorid_t color;
-    ev3_motor_set_power(EV3_PORT_C, -power_L);
-    ev3_motor_set_power(EV3_PORT_B, power_R);
+    ev3_motor_set_power(EV3_PORT_C, power_L);
+    ev3_motor_set_power(EV3_PORT_B, -power_R);
     while(color != COLOR_WHITE) {
         if(power_L > 0) {
             color = ev3_color_sensor_get_color(EV3_PORT_2);
@@ -129,12 +129,12 @@ void tank_turn_color(int power_L, int power_R){
 void steering_color(colorid_t color_stop, int power, int steering){
     colorid_t color;
     if(steering > 0) {
-        (void)ev3_motor_rotate(EV3_PORT_B, 100, -power, false);
-        (void)ev3_motor_rotate(EV3_PORT_C, 100, power-(power*steering/50), false);
+        ev3_motor_set_power(EV3_PORT_B, -power);
+        ev3_motor_set_power(EV3_PORT_C, power-(power*steering/50));
     }
     else {
-        (void)ev3_motor_rotate(EV3_PORT_B, 100, -(power+(power*steering/50)), false);
-        (void)ev3_motor_rotate(EV3_PORT_C, 100, power, false);
+        ev3_motor_set_power(EV3_PORT_B, -(power+(power*steering/50)));
+        ev3_motor_set_power(EV3_PORT_C, power);
     }
     while (color_stop != color) {
         color = ev3_color_sensor_get_color(EV3_PORT_3);
@@ -145,12 +145,12 @@ void steering_color(colorid_t color_stop, int power, int steering){
 
 void steering_time(colorid_t time_stop_4d, int power, int steering){
     if(steering > 0) {
-        (void)ev3_motor_rotate(EV3_PORT_B, 100, -power, false);
-        (void)ev3_motor_rotate(EV3_PORT_C, 100, power-(power*steering/50), false);
+        ev3_motor_set_power(EV3_PORT_B, -power);
+        ev3_motor_set_power(EV3_PORT_C, power-(power*steering/50));
     }
     else {
-        (void)ev3_motor_rotate(EV3_PORT_B, 100, -(power+(power*steering/50)), false);
-        (void)ev3_motor_rotate(EV3_PORT_C, 100, power, false);
+        ev3_motor_set_power(EV3_PORT_B, -power);
+        ev3_motor_set_power(EV3_PORT_C, power-(power*steering/50));
     }
     tslp_tsk(time_stop_4d * MSEC);
     ev3_motor_stop(EV3_PORT_B, true);
@@ -172,12 +172,12 @@ void linetrace_color(sensortype_t type, colorid_t color_stop, int power){
         d2 = reflect;
         steer =  p * P_GEIN; 
         if(steer > 0) {
-            (void)ev3_motor_rotate(EV3_PORT_B, 100, -power, false);
-            (void)ev3_motor_rotate(EV3_PORT_C, 100, power-(power*steer/50), false);
+            ev3_motor_set_power(EV3_PORT_B, -power);
+            ev3_motor_set_power(EV3_PORT_C, power-(power*steering/50));
         }
         else {
-            (void)ev3_motor_rotate(EV3_PORT_B, 100, -(power+(power*steer/50)), false);
-            (void)ev3_motor_rotate(EV3_PORT_C, 100, power, false);
+            ev3_motor_set_power(EV3_PORT_B, -power);
+            ev3_motor_set_power(EV3_PORT_C, power-(power*steering/50));
         }
         if(color2 == color_stop && color3 == color_stop && type == BOTH) break;
         if(color2 == color_stop && type == RIGHT) break;
@@ -201,12 +201,12 @@ void linetrace_length(float length, int power){
         d2 = reflect;
         steer =  p * P_GEIN; 
         if(steer > 0) {
-            (void)ev3_motor_rotate(EV3_PORT_B, 100, -power, false);
-            (void)ev3_motor_rotate(EV3_PORT_C, 100, power-(power*steer/50), false);
+            ev3_motor_set_power(EV3_PORT_B, -power);
+            ev3_motor_set_power(EV3_PORT_C, power-(power*steering/50));
         }
         else {
-            (void)ev3_motor_rotate(EV3_PORT_B, 100, -(power+(power*steer/50)), false);
-            (void)ev3_motor_rotate(EV3_PORT_C, 100, power, false);
+            ev3_motor_set_power(EV3_PORT_B, -power);
+            ev3_motor_set_power(EV3_PORT_C, power-(power*steering/50));
         }
 
     }
@@ -264,11 +264,11 @@ void main_task(intptr_t unused) {
 
 
 
-//    (void)sta_cyc(TIMEOUT_CYC);
+   (void)sta_cyc(TIMEOUT_CYC);
 
     /*ここからコーディング */
     
-    /*color = ev3_color_sensor_get_color(EV3_PORT_1); 
+    color = ev3_color_sensor_get_color(EV3_PORT_1); 
     switch(color){
         case COLOR_NONE:
             start = 1;
@@ -298,7 +298,7 @@ void main_task(intptr_t unused) {
             steering(11.5, 20, 0);
             break;
     }
-    while(1) {}*/
+    while(1) {}
     
     tank_turn_color(30, -30);
 
