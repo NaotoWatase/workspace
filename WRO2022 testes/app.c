@@ -291,7 +291,57 @@ void main_task(intptr_t unused) {
 
     /*ここからコーディング */
 
-    tank_turn(180, 0, -35);
-    tank_turn(180, 0, -35);
+    color = ev3_color_sensor_get_color(EV3_PORT_1); 
+    switch(color){
+        case COLOR_NONE:
+            start = 1;
+            break;
+        default:
+            ev3_speaker_play_tone(NOTE_AS5, 100);
+            start = 2;
+            break;
+    }
+
+    switch(start){
+        case 1:
+            steering(80, 60, 0);
+            steering_color(COLOR_WHITE, 30, 0);
+            steering_color(COLOR_BLACK, 15, 0);
+            steering(11.5, 20, 0);
+            tank_turn(75, 25, -25);
+            tank_turn_color(25, -25);
+            ev3_speaker_play_tone(NOTE_AS5, 100);		
+
+            linetrace_length(10, 15);
+            linetrace_color(BOTH, COLOR_BLACK, 20);
+            ev3_speaker_play_tone(NOTE_AS5, 100);
+            linetrace_length(15, 40);
+            linetrace_color(LEFT, COLOR_BLACK, 20);
+            ev3_speaker_play_tone(NOTE_AS5, 100);
+            steering(11.5, 20, 0);
+            tank_turn(75, -25, 25);
+            tank_turn_color(-25, 25);
+            linetrace_color(BOTH, COLOR_BLUE, 20);
+
+            break;
+        case 2:
+            tank_turn(200, 0, 30);
+            ev3_speaker_play_tone(NOTE_AS5, 100);
+            tank_turn(200, 30, 0);
+            ev3_speaker_play_tone(NOTE_AS5, 100);
+            steering(50, 60, 0);
+            steering_color(COLOR_WHITE, 30, 0);
+            steering_color(COLOR_BLACK, 15, 0);
+            steering(20, 20, 0);
+            tank_turn(180, 0, -35);
+            linetrace_color(LEFT, COLOR_BLACK, 20);
+            steering(11.5, 20, 0);
+            tank_turn(75, -25, 25);
+            tank_turn_color(-25, 25);
+            break;
+    }
+    while(1) {}
+    
+
 
 }   
