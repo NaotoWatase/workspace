@@ -52,6 +52,9 @@ int kakudo_C;
 int power = 50;
 int steer;
 
+
+
+
 /*ライントレース用の変数の定義*/
 int reflect, reflect2, reflect3;
 float p, i, d, d2;
@@ -69,6 +72,18 @@ typedef enum sensorType {
     LEFT,
     BOTH
 } sensortype_t ;
+
+typedef enum object {  
+    CHILD = 3,
+    ADULT = 2,
+    FIRE = 5,
+    CHEMICAL = 1,
+    NOTHING = 0
+} object_t ;
+
+int location[12];
+
+
 
 void steering(float length, int power, int steering){
     int true_steering = 0;
@@ -252,6 +267,34 @@ void sensor_check(motor_port_t port) {
     }
 }
 
+void map_check(int num) {
+    colorid_t obj_under;
+    colorid_t obj;
+    obj_under = ev3_color_sensor_get_color(EV3_PORT_1);
+    switch (obj_under){
+    
+    case COLOR_BLACK:
+        location[num] = CHEMICAL;
+        break;
+    case COLOR_RED:
+        location[num] = FIRE;
+        break;
+    case COLOR_WHITE:
+        obj = ev3_color_sensor_get_color(EV3_PORT_2);
+        if(obj == COLOR_GREEN) {
+            location[num] = CHILD;
+        }
+        else {
+            location[num] = ADULT;
+        }
+        break;
+    default:
+        location[num] = NOTHING;
+        break;
+    }
+    
+}
+
 void timeout_task(intptr_t unused) {
     SYSTIM nowtime, time;   
     char str[64];
@@ -338,6 +381,9 @@ void main_task(intptr_t unused) {
             linetrace_color(BOTH, COLOR_BLUE, 20);            
             break;
     }
+    steering(5, 20,0);
+    map_check(0);
+
     while(1) {}
     
 
