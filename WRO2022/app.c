@@ -22,7 +22,7 @@
 
 #define MSEC (1000)
 #define ROBOT1CM (18.48)
-#define TURN (0.1326)
+#define TURN (0.17)
 
 /**
  * Define the connection ports of the sensors and motors.
@@ -173,7 +173,7 @@ void linetrace_color(sensortype_t type, colorid_t color_stop, int power){
     colorid_t color3 = COLOR_NONE;
     int reflect_stop = 0;
     if (color_stop == COLOR_BLACK) {
-        reflect_stop = 11;
+        reflect_stop = 15;
     }
     while (true) {
         color2 = ev3_color_sensor_get_color(EV3_PORT_2);
@@ -185,7 +185,13 @@ void linetrace_color(sensortype_t type, colorid_t color_stop, int power){
         i = (reflect + i);
         d = (reflect - d2); 
         d2 = reflect;
-        steer =  p * P_GEIN; 
+        steer =  p * P_GEIN;    
+        if(color_stop != COLOR_BLACK && color2 == color_stop && color3 == color_stop && type == BOTH) break;
+        if(color_stop != COLOR_BLACK && color3 == color_stop && type == RIGHT) break;
+        if(color_stop != COLOR_BLACK && color2 == color_stop && type == LEFT) break;
+        if(color_stop == COLOR_BLACK && reflect2 < reflect_stop && reflect3 < reflect_stop && type == BOTH) break;
+        if(color_stop == COLOR_BLACK && reflect3 < reflect_stop && type == RIGHT) break;
+        if(color_stop == COLOR_BLACK && reflect2 < reflect_stop && type == LEFT) break;        
         if(steer > 0) {
             ev3_motor_set_power(EV3_PORT_B, -power);
             ev3_motor_set_power(EV3_PORT_C, power-(power*steer/50));
@@ -193,18 +199,9 @@ void linetrace_color(sensortype_t type, colorid_t color_stop, int power){
         else {
             ev3_motor_set_power(EV3_PORT_B, -power);
             ev3_motor_set_power(EV3_PORT_C, power-(power*steer/50));
-        }
-        if (color_stop != COLOR_BLACK) {
-            if(color2 == color_stop && color3 == color_stop && type == BOTH) break;
-            if(color3 == color_stop && type == RIGHT) break;
-            if(color2 == color_stop && type == LEFT) break;
-        }
-        if (color_stop == COLOR_BLACK) {
-            if(reflect2 == reflect_stop && reflect3 == reflect_stop && type == BOTH) break;
-            if(reflect3 == color_stop && type == RIGHT) break;
-            if(reflect2 == color_stop && type == LEFT) break;
-        }
+        }     
     }  
+    ev3_speaker_play_tone(NOTE_AS5, 100);
     (void)ev3_motor_stop(EV3_PORT_B, true);
     (void)ev3_motor_stop(EV3_PORT_C, true);
     
@@ -325,19 +322,20 @@ void main_task(intptr_t unused) {
 
             break;
         case 2:
-            tank_turn(200, 0, 30);
+            tank_turn(160, 0, 30);
             ev3_speaker_play_tone(NOTE_AS5, 100);
-            tank_turn(200, 30, 0);
+            tank_turn(160, 30, 0);
             ev3_speaker_play_tone(NOTE_AS5, 100);
             steering(50, 60, 0);
             steering_color(COLOR_WHITE, 30, 0);
             steering_color(COLOR_BLACK, 15, 0);
-            steering(20, 20, 0);
+            steering(22, 20, 0);
             tank_turn(180, 0, -35);
             linetrace_color(LEFT, COLOR_BLACK, 20);
             steering(11.5, 20, 0);
             tank_turn(75, -25, 25);
             tank_turn_color(-25, 25);
+            linetrace_color(BOTH, COLOR_BLUE, 20);            
             break;
     }
     while(1) {}
