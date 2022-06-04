@@ -172,7 +172,7 @@ void linetrace_color(sensortype_t type, colorid_t color_stop, int power){
     colorid_t color2 = COLOR_NONE;
     colorid_t color3 = COLOR_NONE;
     int reflect_stop = 0;
-    if (color_stop = COLOR_BLACK) {
+    if (color_stop == COLOR_BLACK) {
         reflect_stop = 11;
     }
     while (true) {
