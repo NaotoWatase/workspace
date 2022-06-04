@@ -182,7 +182,6 @@ void linetrace_color(sensortype_t type, colorid_t color_stop, int power){
             ev3_motor_set_power(EV3_PORT_B, -power);
             ev3_motor_set_power(EV3_PORT_C, power-(power*steer/50));
         }
-        if(color_stop = COLOR_BLACK) reflect_stop =
         if(color2 == color_stop && color3 == color_stop && type == BOTH) break;
         if(color2 == color_stop && type == RIGHT) break;
         if(color3 == color_stop && type == LEFT) break;
@@ -276,3 +275,5 @@ void main_task(intptr_t unused) {
     tank_turn_color(25, -25);
 
 }   
+
+

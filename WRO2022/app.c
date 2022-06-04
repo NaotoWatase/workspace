@@ -32,6 +32,7 @@
  * Left motor:   Port B
  * Right motor:  Port C
  */
+static const sensor_port_t  PortSensorColor1 = EV3_PORT_1;
 static const sensor_port_t  PortSensorColor2 = EV3_PORT_2;
 static const sensor_port_t  PortSensorColor3 = EV3_PORT_3;
 static const motor_port_t   PortMotorLeft   = EV3_PORT_B;
@@ -97,10 +98,18 @@ void steering(float length, int power, int steering){
 }
 
 void tank_turn(float angle, int power_L, int power_R){
-    (void)ev3_motor_rotate(EV3_PORT_B, angle*TURN*ROBOT1CM, (int16_t)-power_L, false);
-    (void)ev3_motor_rotate(EV3_PORT_C, angle*TURN*ROBOT1CM, (int16_t)power_R, true);
-    ev3_motor_stop(EV3_PORT_B, false);
-    ev3_motor_stop(EV3_PORT_C, true);
+    if (power_R == 0) {
+        (void)ev3_motor_rotate(EV3_PORT_B, angle*TURN*ROBOT1CM, (int16_t)-power_L, true);
+    } 
+    if (power_L == 0) {
+        (void)ev3_motor_rotate(EV3_PORT_C, angle*TURN*ROBOT1CM, (int16_t)power_R, true);
+    }
+    if (power_L != 0 && power_R != 0) {
+        (void)ev3_motor_rotate(EV3_PORT_B, angle*TURN*ROBOT1CM, (int16_t)-power_L, false);
+        (void)ev3_motor_rotate(EV3_PORT_C, angle*TURN*ROBOT1CM, (int16_t)power_R, true);
+        ev3_motor_stop(EV3_PORT_B, false);
+        ev3_motor_stop(EV3_PORT_C, true);
+    }
 }
 
 void tank_turn_color(int power_L, int power_R){
@@ -182,8 +191,8 @@ void linetrace_color(sensortype_t type, colorid_t color_stop, int power){
             ev3_motor_set_power(EV3_PORT_C, power-(power*steer/50));
         }
         if(color2 == color_stop && color3 == color_stop && type == BOTH) break;
-        if(color2 == color_stop && type == RIGHT) break;
-        if(color3 == color_stop && type == LEFT) break;
+        if(color3 == color_stop && type == RIGHT) break;
+        if(color2 == color_stop && type == LEFT) break;
     }  
     (void)ev3_motor_stop(EV3_PORT_B, true);
     (void)ev3_motor_stop(EV3_PORT_C, true);
@@ -255,6 +264,7 @@ void main_task(intptr_t unused) {
     ev3_motor_config(PortMotorRight, LARGE_MOTOR);
 
     /* Configure sensors */
+    ev3_sensor_config(PortSensorColor1, COLOR_SENSOR);
     ev3_sensor_config(PortSensorColor2, COLOR_SENSOR);
     ev3_sensor_config(PortSensorColor3, COLOR_SENSOR);
 
@@ -263,7 +273,7 @@ void main_task(intptr_t unused) {
 
     ev3_color_sensor_get_color(EV3_PORT_3);
     ev3_color_sensor_get_color(EV3_PORT_2);
-
+    ev3_color_sensor_get_color(EV3_PORT_1);
 
 
    (void)sta_cyc(TIMEOUT_CYC);
@@ -276,7 +286,9 @@ void main_task(intptr_t unused) {
             start = 1;
             break;
         default:
+            ev3_speaker_play_tone(NOTE_AS5, 100);
             start = 2;
+            break;
     }
 
     switch(start){
@@ -290,14 +302,23 @@ void main_task(intptr_t unused) {
             ev3_speaker_play_tone(NOTE_AS5, 100);		
 
             linetrace_length(10, 15);
-            linetrace_color(BOTH, COLOR_BLACK, 40);
-            linetrace_length(10, 40);
-            linetrace_color(LEFT, COLOR_BLACK, 40);                     
+            linetrace_color(BOTH, COLOR_BLACK, 20);
+            ev3_speaker_play_tone(NOTE_AS5, 100);
+            linetrace_length(15, 40);
+            linetrace_color(LEFT, COLOR_BLACK, 20);
+            ev3_speaker_play_tone(NOTE_AS5, 100);
+            steering(11.5, 20, 0);
+            tank_turn(75, -25, 25);
+            tank_turn_color(-25, 25);
+            linetrace_color(BOTH, COLOR_BLUE, 20);
+
             break;
         case 2:
-            tank_turn(50, 0, 20);
-            tank_turn(50, 20, 0);
-            steering(80, 60, 0);
+            tank_turn(130, 0, 30);
+            ev3_speaker_play_tone(NOTE_AS5, 100);
+            tank_turn(130, 30, 0);
+            ev3_speaker_play_tone(NOTE_AS5, 100);
+            steering(80, 50, 0);
             steering_color(COLOR_WHITE, 30, 0);
             steering_color(COLOR_BLACK, 15, 0);
             steering(11.5, 20, 0);
