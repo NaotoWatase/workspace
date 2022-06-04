@@ -162,6 +162,7 @@ void steering_time(colorid_t time_stop_4d, int power, int steering){
 void linetrace_color(sensortype_t type, colorid_t color_stop, int power){
     colorid_t color2 = COLOR_NONE;
     colorid_t color3 = COLOR_NONE;
+    int reflect_stop = 0;
     while (true) {
         color2 = ev3_color_sensor_get_color(EV3_PORT_2);
         color3 = ev3_color_sensor_get_color(EV3_PORT_3);
@@ -181,6 +182,7 @@ void linetrace_color(sensortype_t type, colorid_t color_stop, int power){
             ev3_motor_set_power(EV3_PORT_B, -power);
             ev3_motor_set_power(EV3_PORT_C, power-(power*steer/50));
         }
+        if(color_stop = COLOR_BLACK) reflect_stop =
         if(color2 == color_stop && color3 == color_stop && type == BOTH) break;
         if(color2 == color_stop && type == RIGHT) break;
         if(color3 == color_stop && type == LEFT) break;
