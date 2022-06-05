@@ -67,12 +67,14 @@ int TIME;
 SYSTIM NOWTIME;
 SYSTIM STARTTIME;
 
+/*ライントレース終了条件の変数*/
 typedef enum sensorType {
     RIGHT,
     LEFT,
     BOTH
 } sensortype_t ;
 
+/*mapのデータ変数*/
 typedef enum object {  
     CHILD = 3,
     ADULT = 2,
@@ -331,6 +333,7 @@ void main_task(intptr_t unused) {
 
     /*ここからコーディング */
 
+    /*スタートの分岐チェック*/
     color = ev3_color_sensor_get_color(EV3_PORT_1); 
     switch(color){
         case COLOR_NONE:
@@ -342,6 +345,7 @@ void main_task(intptr_t unused) {
             break;
     }
 
+    /*スタート*/
     switch(start){
         case 1:
             steering(80, 60, 0);
