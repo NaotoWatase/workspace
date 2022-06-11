@@ -171,7 +171,7 @@ void steering_color(colorid_t color_stop, int power, int steering){
     (void)ev3_motor_stop(EV3_PORT_C, true);    
 }
 
-void steering_time(colorid_t time_stop_4d, int power, int steering){
+void steering_time(int time_stop_4d, int power, int steering){
     if(steering > 0) {
         ev3_motor_set_power(EV3_PORT_B, -power);
         ev3_motor_set_power(EV3_PORT_C, power-(power*steering/50));
@@ -385,8 +385,28 @@ void main_task(intptr_t unused) {
             linetrace_color(BOTH, COLOR_BLUE, 20);            
             break;
     }
-    steering(5, 20,0);
+    /*blue*/
+    steering(5, 20, 0);
     map_check(0);
+    steering(25, 20, 0);
+    tank_turn(90, -25, 25);
+    steering_time(1500, -50, 0);
+    steering_time(500, -10, 0);
+    tank_turn(180, 25, 0);
+    steering(2, 15, 0);
+    map_check(1);
+    /*green*/
+    steering(11, 20, 0);
+    map_check(2);
+
+    map_check(3);
+    /*yellow*/
+    map_check(4);
+    /*red*/
+    map_check(10);
+    map_check(11);
+    /*brown*/
+    /*white*/
 
     while(1) {}
     
