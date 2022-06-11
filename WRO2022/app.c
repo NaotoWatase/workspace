@@ -275,24 +275,30 @@ void map_check(int num) {
     obj_under = ev3_color_sensor_get_color(EV3_PORT_1);
     switch (obj_under){
     
-    case COLOR_BLACK:
-        location[num] = CHEMICAL;
-        break;
-    case COLOR_RED:
-        location[num] = FIRE;
-        break;
-    case COLOR_WHITE:
-        obj = ev3_color_sensor_get_color(EV3_PORT_2);
-        if(obj == COLOR_GREEN) {
-            location[num] = CHILD;
-        }
-        else {
-            location[num] = ADULT;
-        }
-        break;
-    default:
-        location[num] = NOTHING;
-        break;
+        case COLOR_BLACK:
+            location[num] = CHEMICAL;
+            ev3_speaker_play_tone(NOTE_C4, 100);
+            break;
+        case COLOR_RED:
+            location[num] = FIRE;
+            ev3_speaker_play_tone(NOTE_D5, 100);
+            break;
+        case COLOR_WHITE:
+            obj = ev3_color_sensor_get_color(EV3_PORT_4);
+            if(obj == COLOR_GREEN) {
+                location[num] = CHILD;
+                ev3_speaker_play_tone(NOTE_C5, 100);
+            }
+            else {
+                location[num] = ADULT;
+                ev3_speaker_play_tone(NOTE_E5, 100);
+
+            }
+            break;
+        default:
+            location[num] = NOTHING;
+            ev3_speaker_play_tone(NOTE_B6, 100);
+            break;
     }
     
 }
@@ -304,6 +310,7 @@ void timeout_task(intptr_t unused) {
     time = nowtime - STARTTIME;
     sprintf(str, "TIME:%ld", time);
     ev3_lcd_draw_string(str, 1, 1);
+    
 }
 
 void main_task(intptr_t unused) {
@@ -369,46 +376,76 @@ void main_task(intptr_t unused) {
 
             break;
         case 2:
-            tank_turn(160, 0, 30);
+            tank_turn(160, 0, 35);
             ev3_speaker_play_tone(NOTE_AS5, 100);
-            tank_turn(160, 30, 0);
+            tank_turn(160, 35, 0);
             ev3_speaker_play_tone(NOTE_AS5, 100);
-            steering(50, 60, 0);
+            steering(50, 80, 0);
             steering_color(COLOR_WHITE, 30, 0);
             steering_color(COLOR_BLACK, 15, 0);
-            steering(22, 20, 0);
+            steering(22, 30, 0);
             tank_turn(180, 0, -35);
             linetrace_color(LEFT, COLOR_BLACK, 20);
-            steering(11.5, 20, 0);
-            tank_turn(75, -25, 25);
+            linetrace_length(11.5, 25);
+            tank_turn(75, -30, 30);
             tank_turn_color(-25, 25);
-            linetrace_color(BOTH, COLOR_BLUE, 20);            
+            linetrace_color(BOTH, COLOR_BLUE, 20);
             break;
     }
     /*blue*/
-    steering(5, 20, 0);
+    steering(6.5, 20, 0);
     map_check(0);
-    steering(25, 20, 0);
-    tank_turn(90, -25, 25);
+    steering(23.7, 30, 0);
+    tank_turn(90, -30, 30);
     steering_time(1500, -50, 0);
     steering_time(500, -10, 0);
-    tank_turn(180, 25, 0);
-    steering(2, 15, 0);
+    tank_turn(180, 35, 0);
+    steering(3, 15, 0);
     map_check(1);
     /*green*/
-    steering(11, 20, 0);
+    steering(11, 30, 0);
     map_check(2);
-
+    steering(37, 30, 0);
     map_check(3);
     /*yellow*/
+    steering(17, -25, 0);
+    tank_turn(180, 0, 25);
+    steering_time(1500, -50, 0);
+    steering_time(500, -10, 0);
+    steering_color(COLOR_YELLOW, 30, 0);
+    steering(7.2, 20, 0);
     map_check(4);
     /*red*/
+    steering_color(COLOR_RED, 30, 0);
+    steering(7.2, 20, 0);
     map_check(10);
+    steering(27, 30, 0);
     map_check(11);
-    /*brown*/
+    /*yellow*/
+    steering(30, -30, 0);
+    tank_turn(180, -30, 0);
+    steering_time(500, 30, 0);
+    steering_time(1500, -50, 0);
+    steering_time(500, -10, 0);
+    tank_turn(95, 0, 25);
+    tank_turn(95, 25, 0);
+
+
+
+       
+
+    map_check(7);
+    
     /*white*/
+    map_check(6);
+    map_check(5);
+    /*brown*/
+    map_check(8);
+    map_check(9);
 
     while(1) {}
+
+
     
 
 
