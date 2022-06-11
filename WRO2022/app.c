@@ -380,7 +380,7 @@ void main_task(intptr_t unused) {
             ev3_speaker_play_tone(NOTE_AS5, 100);
             tank_turn(160, 35, 0);
             ev3_speaker_play_tone(NOTE_AS5, 100);
-            steering(50, 80, 0);
+            steering(50, 60, 0);
             steering_color(COLOR_WHITE, 30, 0);
             steering_color(COLOR_BLACK, 15, 0);
             steering(22, 30, 0);
@@ -399,6 +399,7 @@ void main_task(intptr_t unused) {
     tank_turn(90, -30, 30);
     steering_time(1500, -50, 0);
     steering_time(500, -10, 0);
+    steering(1, 20, 0);
     tank_turn(180, 35, 0);
     steering(3, 15, 0);
     map_check(1);
@@ -429,15 +430,13 @@ void main_task(intptr_t unused) {
     steering_time(500, -10, 0);
     tank_turn(95, 0, 25);
     tank_turn(95, 25, 0);
-
-
-
-       
-
+    steering(9.7, 25, 0);
     map_check(7);
-    
     /*white*/
+    steering_color(COLOR_WHITE, 20, 0);
+    steering(7.2, 20, 0);
     map_check(6);
+    steering(36.5, 30, 0);
     map_check(5);
     /*brown*/
     map_check(8);
