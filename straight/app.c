@@ -43,10 +43,6 @@ static void button_clicked_handler(intptr_t button) {
 }
 
 void main_task(intptr_t unused) {
-    int16_t distance = (int16_t )30;
-    int32_t temp;
-    int32_t rotateAngleLeft;
-    int32_t rotateAngleRight;
 
     /* Register button handlers */
     ev3_button_set_on_clicked(BACK_BUTTON, &button_clicked_handler, BACK_BUTTON);
@@ -60,11 +56,16 @@ void main_task(intptr_t unused) {
     ev3_sensor_config(PortSensorColor, COLOR_SENSOR);
 
     /* ここからコーディング */
-    temp = (int32_t)distance * 10 * 100 * 360; 	/* distance をint32_t型に変換している */
-    rotateAngleLeft = temp  / 56 / 314;
-    rotateAngleRight = rotateAngleLeft;	/* 直進なので、左右で同じ回転角度 */
 
-    ev3_motor_set_power(EV3_PORT_B, 30);
-    tslp_tsk(3000 * 1000);
-    ev3_motor_stop(EV3_PORT_B, true);
+    ev3_lcd_set_font(EV3_FONT_SMALL);
+
+    char str[64];
+
+     a = COLOR_BLACK;
+    colorid_t b = COLOR_BLACK;
+
+    
+    sprintf(str, "1:%d\n2:%d\n", a, b);
+    ev3_lcd_draw_string(str, 1, 1);
+    
 }

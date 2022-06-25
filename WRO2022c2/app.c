@@ -87,7 +87,6 @@ typedef enum object {
 int location[12];
 
 
-
 rgb_raw_t rgb_val;//カラーセンサーの値を保存するために必要な変数(必須)
 
 int red=0;
@@ -278,15 +277,19 @@ void sensor_check(motor_port_t port) {
 
 void map_check(int num) {
     colorid_t obj_under;
-    colorid_t obj;
-    obj_under = ev3_color_sensor_get_color(EV3_PORT_1);
-    switch (obj_under){
+    uint8_t obj;
+    ht_nxt_color_sensor_measure_color(EV3_PORT_4, &obj);
+    switch (obj){
     
-        case COLOR_BLACK:
+        case 0:
             location[num] = CHEMICAL;
             ev3_speaker_play_tone(NOTE_C4, 100);
             break;
-        case COLOR_RED:
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+        case 9:
             location[num] = FIRE;
             ev3_speaker_play_tone(NOTE_D5, 100);
             break;
@@ -320,18 +323,6 @@ void timeout_task(intptr_t unused) {
     
 }
 
-void color_task(intptr_t unused) {
-    int place;
-    char str[64];
-    int n = 0; 
-    while (n != 12) {
-        place = n;
-        sprintf(str, "%d:%d", place, location[n]);
-        ev3_lcd_draw_string(str, 1, n);
-        n = n + 1;
-    }
-}
-
 void main_task(intptr_t unused) {
 
     
@@ -346,7 +337,7 @@ void main_task(intptr_t unused) {
     ev3_sensor_config(PortSensorColor1, COLOR_SENSOR);
     ev3_sensor_config(PortSensorColor2, COLOR_SENSOR);
     ev3_sensor_config(PortSensorColor3, COLOR_SENSOR);
-    ev3_sensor_config(PortSensorColor4, COLOR_SENSOR);
+    ev3_sensor_config(PortSensorColor4, HT_NXT_COLOR_SENSOR);
 
     get_tim(&STARTTIME);
     ev3_lcd_set_font(EV3_FONT_SMALL);
@@ -356,8 +347,7 @@ void main_task(intptr_t unused) {
     ev3_color_sensor_get_color(EV3_PORT_1);
 
 
-    (void)sta_cyc(TIMEOUT_CYC);
-    (void)sta_cyc(COLOR_CYC);
+   (void)sta_cyc(TIMEOUT_CYC);
 
     /*ここからコーディング */
 

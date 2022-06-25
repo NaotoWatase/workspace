@@ -87,7 +87,6 @@ typedef enum object {
 int location[12];
 
 
-
 rgb_raw_t rgb_val;//カラーセンサーの値を保存するために必要な変数(必須)
 
 int red=0;
@@ -311,25 +310,8 @@ void map_check(int num) {
 }
 
 void timeout_task(intptr_t unused) {
-    SYSTIM nowtime, time;   
-    char str[64];
-    get_tim(&nowtime);
-    time = nowtime - STARTTIME;
-    sprintf(str, "TIME:%ld", time);
-    ev3_lcd_draw_string(str, 1, 1);
-    
-}
 
-void color_task(intptr_t unused) {
-    int place;
-    char str[64];
-    int n = 0; 
-    while (n != 12) {
-        place = n;
-        sprintf(str, "%d:%d", place, location[n]);
-        ev3_lcd_draw_string(str, 1, n);
-        n = n + 1;
-    }
+    
 }
 
 void main_task(intptr_t unused) {
@@ -356,116 +338,22 @@ void main_task(intptr_t unused) {
     ev3_color_sensor_get_color(EV3_PORT_1);
 
 
-    (void)sta_cyc(TIMEOUT_CYC);
-    (void)sta_cyc(COLOR_CYC);
+   (void)sta_cyc(TIMEOUT_CYC);
 
     /*ここからコーディング */
 
-    /*スタートの分岐チェック*/
-    color = ev3_color_sensor_get_color(EV3_PORT_1); 
-    switch(color){
-        case COLOR_NONE:
-            start = 1;
-            break;
-        default:
-            ev3_speaker_play_tone(NOTE_AS5, 100);
-            start = 2;
-            break;
+    while (1) {
+        int col;
+        uint8_t color;
+        char str[64];
+        col = ev3_color_sensor_get_color(EV3_PORT_4);
+        sprintf(str, "%d", col);
+        ev3_lcd_draw_string(str, 1, 1);
+        tslp_tsk(1000 * MSEC);
     }
 
-    /*スタート*/
-    switch(start){
-        case 1:
-            steering(80, 60, 0);
-            steering_color(COLOR_WHITE, 30, 0);
-            steering_color(COLOR_BLACK, 15, 0);
-            steering(11.5, 20, 0);
-            tank_turn(75, 25, -25);
-            tank_turn_color(25, -25);
-            ev3_speaker_play_tone(NOTE_AS5, 100);		
-
-            linetrace_length(10, 15);
-            linetrace_color(BOTH, COLOR_BLACK, 20);
-            ev3_speaker_play_tone(NOTE_AS5, 100);
-            linetrace_length(15, 40);
-            linetrace_color(LEFT, COLOR_BLACK, 20);
-            ev3_speaker_play_tone(NOTE_AS5, 100);
-            steering(11.5, 20, 0);
-            tank_turn(75, -25, 25);
-            tank_turn_color(-25, 25);
-            linetrace_color(BOTH, COLOR_BLUE, 20);
-
-            break;
-        case 2:
-            tank_turn(160, 0, 35);
-            ev3_speaker_play_tone(NOTE_AS5, 100);
-            tank_turn(160, 35, 0);
-            ev3_speaker_play_tone(NOTE_AS5, 100);
-            steering(50, 60, 0);
-            steering_color(COLOR_WHITE, 30, 0);
-            steering_color(COLOR_BLACK, 15, 0);
-            steering(22, 30, 0);
-            tank_turn(180, 0, -35);
-            linetrace_color(LEFT, COLOR_BLACK, 20);
-            linetrace_length(11.5, 25);
-            tank_turn(75, -30, 30);
-            tank_turn_color(-25, 25);
-            linetrace_color(BOTH, COLOR_BLUE, 20);
-            break;
-    }
-    /*blue*/
-    steering(6.5, 20, 0);
-    map_check(0);
-    steering(23.7, 30, 0);
-    tank_turn(90, -30, 30);
-    steering_time(1500, -50, 0);
-    steering_time(500, -10, 0);
-    steering(1, 20, 0);
-    tank_turn(180, 35, 0);
-    steering(3, 15, 0);
-    map_check(1);
-    /*green*/
-    steering(11, 30, 0);
-    map_check(2);
-    steering(37, 30, 0);
-    map_check(3);
-    /*yellow*/
-    steering(17, -25, 0);
-    tank_turn(180, 0, 25);
-    steering_time(1500, -50, 0);
-    steering_time(500, -10, 0);
-    steering_color(COLOR_YELLOW, 30, 0);
-    steering(7.2, 20, 0);
-    map_check(4);
-    /*red*/
-    steering_color(COLOR_RED, 30, 0);
-    steering(7.2, 20, 0);
-    map_check(10);
-    steering(27, 30, 0);
-    map_check(11);
-    /*yellow*/
-    steering(30, -30, 0);
-    tank_turn(180, -30, 0);
-    steering_time(500, 30, 0);
-    steering_time(1500, -50, 0);
-    steering_time(500, -10, 0);
-    tank_turn(95, 0, 25);
-    tank_turn(95, 25, 0);
-    steering(9.7, 25, 0);
-    map_check(7);
-    /*white*/
-    steering_color(COLOR_WHITE, 20, 0);
-    steering(7.2, 20, 0);
-    map_check(6);
-    steering(36.5, 30, 0);
-    map_check(5);
-    /*brown*/
-    map_check(8);
-    map_check(9);
-    while(1) {}
 
 
-    
 
-
-}   
+}
+ 

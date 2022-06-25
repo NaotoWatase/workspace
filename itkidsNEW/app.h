@@ -87,8 +87,8 @@ extern void	task(intptr_t exinf);
 extern void	main_task(intptr_t exinf);
 extern void balance_task(intptr_t exinf);
 extern void idle_task(intptr_t exinf);
-extern void timeout_task(intptr_t exinf);
-extern void color_task(intptr_t exinf);
+extern void music_task(intptr_t exinf);
+extern void stp_task(intptr_t exinf);
 //extern void	tex_routine(TEXPTN texptn, intptr_t exinf);
 //#ifdef CPUEXC1
 //extern void	cpuexc_handler(void *p_excinf);
