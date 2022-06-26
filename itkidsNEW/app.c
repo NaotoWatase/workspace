@@ -32,9 +32,10 @@
  * Left motor:   Port B
  * Right motor:  Port C
  */
-static const sensor_port_t  PortSensorColor1 = EV3_PORT_1;
+static const sensor_port_t  PortUltraSonic1 = EV3_PORT_1;
 static const sensor_port_t  PortSensorColor2 = EV3_PORT_2;
 static const sensor_port_t  PortSensorColor3 = EV3_PORT_3;
+static const sensor_port_t  PortSensorColor4 = EV3_PORT_3;
 static const motor_port_t   PortMotorLeft   = EV3_PORT_B;
 static const motor_port_t   PortMotorRight  = EV3_PORT_C;
 
@@ -212,12 +213,12 @@ void linetrace_color(sensortype_t type, colorid_t color_stop, int power){
         if(color_stop == COLOR_BLACK && reflect3 < reflect_stop && type == RIGHT) break;
         if(color_stop == COLOR_BLACK && reflect2 < reflect_stop && type == LEFT) break;        
         if(steer > 0) {
-            ev3_motor_set_power(EV3_PORT_B, -power);
-            ev3_motor_set_power(EV3_PORT_C, power-(power*steer/50));
+            ev3_motor_set_power(EV3_PORT_B, -power*stpp);
+            ev3_motor_set_power(EV3_PORT_C, power-(power*steer/50*stpp));
         }
         else {
-            ev3_motor_set_power(EV3_PORT_B, -power);
-            ev3_motor_set_power(EV3_PORT_C, power-(power*steer/50));
+            ev3_motor_set_power(EV3_PORT_B, -power*stpp);
+            ev3_motor_set_power(EV3_PORT_C, power-(power*steer/50*stpp));
         }     
     }  
     ev3_speaker_play_tone(NOTE_AS5, 100);
@@ -306,12 +307,12 @@ void map_check(int num) {
 }
 
 void music_task(intptr_t unused) {
-    ev3_speaker_play_tone(NOTE_C5,100);
+    ev3_speaker_play_tone(NOTE_B6,100);
 }
 
 void stp_task(intptr_t unused) {
-    stp = ev3_color_sensor_get_reflect(EV3_PORT_1);
-    if (stp < 10) {
+    stp = ev3_ultrasonic_sensor_get_distance(EV3_PORT_1);
+    if (stp < 20) {
         stpp = 0;
     }
     else {
@@ -331,21 +332,23 @@ void main_task(intptr_t unused) {
     ev3_motor_config(PortMotorRight, LARGE_MOTOR);
 
     /* Configure sensors */
-    ev3_sensor_config(PortSensorColor1, COLOR_SENSOR);
+    ev3_sensor_config(PortUltraSonic1, ULTRASONIC_SENSOR);
     ev3_sensor_config(PortSensorColor2, COLOR_SENSOR);
     ev3_sensor_config(PortSensorColor3, COLOR_SENSOR);
+    ev3_sensor_config(PortSensorColor4, HT_NXT_COLOR_SENSOR);
+    
 
     get_tim(&STARTTIME);
     ev3_lcd_set_font(EV3_FONT_SMALL);
 
     ev3_color_sensor_get_color(EV3_PORT_3);
     ev3_color_sensor_get_color(EV3_PORT_2);
-    ev3_color_sensor_get_color(EV3_PORT_1);
+
 
     ev3_speaker_set_volume(10);
 
    (void)sta_cyc(MUSIC_CYC);
-   (void)sta_cyc(STP_CYC);
+
 
 
     /*ここからコーディング */

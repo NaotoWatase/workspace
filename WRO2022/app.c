@@ -87,12 +87,15 @@ typedef enum object {
 int location[12];
 
 
-
 rgb_raw_t rgb_val;//カラーセンサーの値を保存するために必要な変数(必須)
 
 int red=0;
 int green=0;
 int blue=0;
+
+int ambient_normal;
+int ambient_special;
+int ambient_difference;
 
 void steering(float length, int power, int steering){
     int true_steering = 0;
@@ -277,37 +280,80 @@ void sensor_check(motor_port_t port) {
 }
 
 void map_check(int num) {
-    colorid_t obj_under;
-    colorid_t obj;
-    obj_under = ev3_color_sensor_get_color(EV3_PORT_1);
+
+    uint8_t obj_under;
+    ht_nxt_color_sensor_measure_color(EV3_PORT_4, &obj_under);
     switch (obj_under){
-    
-        case COLOR_BLACK:
-            location[num] = CHEMICAL;
-            ev3_speaker_play_tone(NOTE_C4, 100);
+        case 2:
+        case 3:
+            location[num] = ADULT;
+            ev3_speaker_play_tone(NOTE_E5, 100);
+            tslp_tsk(200*1000);
+            ev3_speaker_play_tone(NOTE_E5, 100);
+            tslp_tsk(200*1000);
+            ev3_speaker_play_tone(NOTE_E5, 100);
+            tslp_tsk(200*1000);
+            ev3_speaker_play_tone(NOTE_E5, 100);
             break;
-        case COLOR_RED:
+        case 4:
+            location[num] = CHILD;
+            ev3_speaker_play_tone(NOTE_C5, 100);
+            tslp_tsk(200*1000);
+            ev3_speaker_play_tone(NOTE_C5, 100);
+            tslp_tsk(200*1000);
+            ev3_speaker_play_tone(NOTE_C5, 100);
+            break;
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+        case 9:
             location[num] = FIRE;
             ev3_speaker_play_tone(NOTE_D5, 100);
+            tslp_tsk(200*1000);
+            ev3_speaker_play_tone(NOTE_D5, 100);
+            tslp_tsk(200*1000);
+            ev3_speaker_play_tone(NOTE_D5, 100);
+            tslp_tsk(200*1000);
+            ev3_speaker_play_tone(NOTE_D5, 100);
+            tslp_tsk(200*1000);
+            ev3_speaker_play_tone(NOTE_D5, 100);
             break;
-        case COLOR_WHITE:
-            obj = ev3_color_sensor_get_color(EV3_PORT_4);
-            if(obj == COLOR_GREEN) {
-                location[num] = CHILD;
-                ev3_speaker_play_tone(NOTE_C5, 100);
+        case 0:
+        case 11:
+        case 12:
+        case 13:
+        case 14:
+        case 15:
+        case 16:
+        case 17:
+            ambient_special = ev3_color_sensor_get_ambient(EV3_PORT_1);
+            ambient_difference = ambient_normal - ambient_special;
+            if (ambient_difference > 5) {
+                location[num] = CHEMICAL;
+                ev3_speaker_play_tone(NOTE_C4, 100);
+                tslp_tsk(100*1000);
+                ev3_speaker_play_tone(NOTE_C4, 100);
             }
             else {
-                location[num] = ADULT;
-                ev3_speaker_play_tone(NOTE_E5, 100);
-
+                location[num] = NOTHING;
+                ev3_speaker_play_tone(NOTE_B6, 100);
             }
             break;
         default:
-            location[num] = NOTHING;
-            ev3_speaker_play_tone(NOTE_B6, 100);
+            ev3_speaker_play_tone(NOTE_D6, 100);
+            tslp_tsk(200*1000);
+            ev3_speaker_play_tone(NOTE_D6, 100);
+            tslp_tsk(200*1000);
+            ev3_speaker_play_tone(NOTE_D6, 100);
+            tslp_tsk(200*1000);
+            ev3_speaker_play_tone(NOTE_D6, 100);
+            tslp_tsk(200*1000);
+            ev3_speaker_play_tone(NOTE_D6, 100);
+            tslp_tsk(200*1000);
+            ev3_speaker_play_tone(NOTE_D6, 100);
             break;
-    }
-    
+    } 
 }
 
 void timeout_task(intptr_t unused) {
@@ -318,18 +364,6 @@ void timeout_task(intptr_t unused) {
     sprintf(str, "TIME:%ld", time);
     ev3_lcd_draw_string(str, 1, 1);
     
-}
-
-void color_task(intptr_t unused) {
-    int place;
-    char str[64];
-    int n = 0; 
-    while (n != 12) {
-        place = n;
-        sprintf(str, "%d:%d", place, location[n]);
-        ev3_lcd_draw_string(str, 1, n);
-        n = n + 1;
-    }
 }
 
 void main_task(intptr_t unused) {
@@ -346,7 +380,7 @@ void main_task(intptr_t unused) {
     ev3_sensor_config(PortSensorColor1, COLOR_SENSOR);
     ev3_sensor_config(PortSensorColor2, COLOR_SENSOR);
     ev3_sensor_config(PortSensorColor3, COLOR_SENSOR);
-    ev3_sensor_config(PortSensorColor4, COLOR_SENSOR);
+    ev3_sensor_config(PortSensorColor4, HT_NXT_COLOR_SENSOR);
 
     get_tim(&STARTTIME);
     ev3_lcd_set_font(EV3_FONT_SMALL);
@@ -355,9 +389,7 @@ void main_task(intptr_t unused) {
     ev3_color_sensor_get_color(EV3_PORT_2);
     ev3_color_sensor_get_color(EV3_PORT_1);
 
-
-    (void)sta_cyc(TIMEOUT_CYC);
-    (void)sta_cyc(COLOR_CYC);
+   (void)sta_cyc(TIMEOUT_CYC);
 
     /*ここからコーディング */
 
@@ -382,7 +414,7 @@ void main_task(intptr_t unused) {
             steering(11.5, 20, 0);
             tank_turn(75, 25, -25);
             tank_turn_color(25, -25);
-            ev3_speaker_play_tone(NOTE_AS5, 100);		
+            ev3_speaker_play_tone(NOTE_AS5, 100);
 
             linetrace_length(10, 15);
             linetrace_color(BOTH, COLOR_BLACK, 20);
@@ -394,7 +426,6 @@ void main_task(intptr_t unused) {
             tank_turn(75, -25, 25);
             tank_turn_color(-25, 25);
             linetrace_color(BOTH, COLOR_BLUE, 20);
-
             break;
         case 2:
             tank_turn(160, 0, 35);
@@ -406,6 +437,7 @@ void main_task(intptr_t unused) {
             steering_color(COLOR_BLACK, 15, 0);
             steering(22, 30, 0);
             tank_turn(180, 0, -35);
+            steering(5, -25, 0);
             linetrace_color(LEFT, COLOR_BLACK, 20);
             linetrace_length(11.5, 25);
             tank_turn(75, -30, 30);
@@ -414,32 +446,36 @@ void main_task(intptr_t unused) {
             break;
     }
     /*blue*/
-    steering(6.5, 20, 0);
+    ambient_normal = ev3_color_sensor_get_ambient(EV3_PORT_1);
+    steering(5.5, 25, 0);
     map_check(0);
     steering(23.7, 30, 0);
     tank_turn(90, -30, 30);
     steering_time(1500, -50, 0);
     steering_time(500, -10, 0);
-    steering(1, 20, 0);
+    tslp_tsk(10 * MSEC);
+    steering(5, 30, 0);
+    steering(3, -30, 0);
+    tslp_tsk(10 * MSEC);
     tank_turn(180, 35, 0);
-    steering(3, 15, 0);
+    steering(4, 30, 0);
     map_check(1);
     /*green*/
     steering(11, 30, 0);
     map_check(2);
-    steering(37, 30, 0);
+    steering(36, 30, 0);
     map_check(3);
     /*yellow*/
-    steering(17, -25, 0);
+    steering(16, -30, 0);
     tank_turn(180, 0, 25);
     steering_time(1500, -50, 0);
     steering_time(500, -10, 0);
     steering_color(COLOR_YELLOW, 30, 0);
-    steering(7.2, 20, 0);
+    steering(7.2, 30, 0);
     map_check(4);
     /*red*/
     steering_color(COLOR_RED, 30, 0);
-    steering(7.2, 20, 0);
+    steering(7.2, 30, 0);
     map_check(10);
     steering(27, 30, 0);
     map_check(11);
@@ -451,11 +487,11 @@ void main_task(intptr_t unused) {
     steering_time(500, -10, 0);
     tank_turn(95, 0, 25);
     tank_turn(95, 25, 0);
-    steering(9.7, 25, 0);
+    steering(9.7, 30, 0);
     map_check(7);
     /*white*/
     steering_color(COLOR_WHITE, 20, 0);
-    steering(7.2, 20, 0);
+    steering(7.2, 30, 0);
     map_check(6);
     steering(36.5, 30, 0);
     map_check(5);
@@ -465,7 +501,7 @@ void main_task(intptr_t unused) {
     while(1) {}
 
 
-    
 
 
-}   
+
+}
