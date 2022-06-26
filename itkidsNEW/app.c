@@ -355,6 +355,6 @@ void main_task(intptr_t unused) {
 
     /*スタートの分岐チェック*/
 
-    linetrace_color(BOTH, COLOR_RED, 30);
+    linetrace_color(BOTH, COLOR_RED, 15);
 
 }

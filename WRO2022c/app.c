@@ -533,6 +533,11 @@ void main_task(intptr_t unused) {
 
     location[11] = 16 - (location[0] + location[1] + location[2] + location[3] + location[4] + location[5] + location[6] + location[7] + location[8] + location[9] + location[10]);
 
+    /*chemical*/
+    steering(40, -30, 0);
+    tank_turn(180, 25, -25);
+    
+
     while(1) {}
 
 
