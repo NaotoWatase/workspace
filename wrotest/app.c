@@ -86,8 +86,6 @@ typedef enum object {
 
 int location[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
 
-uint8_t test = 0;
-uint8_t obj = 0;
 
 rgb_raw_t rgb_val;//カラーセンサーの値を保存するために必要な変数(必須)
 
@@ -95,6 +93,7 @@ int red=0;
 int green=0;
 int blue=0;
 
+uint8_t test = 0;
 
 void steering(float length, int power, int steering){
     int true_steering = 0;
@@ -265,16 +264,12 @@ void linetrace_reflect(sensortype_t type, int reflect_stop, int power){
 
 
 void walltrace_length(float length, int power, int dist){
-    int PGEIN = 20;
     ev3_motor_reset_counts(EV3_PORT_C);
     while (length * ROBOT1CM > kakudo_C) {
         kakudo_C = ev3_motor_get_counts(EV3_PORT_C);
         int dist1 = ev3_ultrasonic_sensor_get_distance(EV3_PORT_1);
-        if (dist1 > 50) {
-            dist1 = 49; 
-        } 
         p = dist1 - dist;
-        steer =  p * PGEIN; 
+        steer =  p * P_GEIN; 
         if(steer > 0) {
             ev3_motor_set_power(EV3_PORT_B, -power);
             ev3_motor_set_power(EV3_PORT_C, power-(power*steer/50));
@@ -324,29 +319,25 @@ void sensor_check(uint8_t num) {
     }
 }
 
-void map_check(int num) {
+void map_check(int numb) {
 
-    while ( !ht_nxt_color_sensor_measure_color(EV3_PORT_4, &test) ) {
-        ;
-    }
-
-    
-    while ( !ht_nxt_color_sensor_measure_color(EV3_PORT_4, &obj) ) {
+    uint8_t obj_under;
+    while ( !ht_nxt_color_sensor_measure_color(EV3_PORT_4, &obj_under) ) {
         ;
     }      
 
     distance = ev3_ultrasonic_sensor_get_distance(EV3_PORT_1);
     if (distance < 6) {
-        switch (obj){
+        switch (obj_under){
             case 1:
             case 2:
             case 3:
-                location[num] = ADULT;
-                sensor_check(obj);
+                location[numb] = ADULT;
+                sensor_check(obj_under);
                 break;
             case 4:
-                location[num] = CHILD;
-                sensor_check(obj);
+                location[numb] = CHILD;
+                sensor_check(obj_under);
                 break;
             case 5:
             case 6:
@@ -354,13 +345,13 @@ void map_check(int num) {
             case 8:
             case 9:
             case 10:
-                location[num] = FIRE;
-                sensor_check(obj);
+                location[numb] = FIRE;
+                sensor_check(obj_under);
                 break;
             case 0:
             case 17:
-                location[num] = CHEMICAL;
-                sensor_check(obj);
+                location[numb] = CHEMICAL;
+                sensor_check(obj_under);
                 break;
             case 11:
             case 12:
@@ -374,7 +365,7 @@ void map_check(int num) {
         } 
     }
     else {
-        location[num] = NOTHING;
+        location[numb] = NOTHING;
     }
 }
 
@@ -407,7 +398,10 @@ void main_task(intptr_t unused) {
     get_tim(&STARTTIME);
     ev3_lcd_set_font(EV3_FONT_SMALL);
 
-    
+
+    while ( !ht_nxt_color_sensor_measure_color(EV3_PORT_4, &test) ) {
+        ;
+    }
     ev3_color_sensor_get_color(EV3_PORT_3);
     ev3_color_sensor_get_color(EV3_PORT_2);
     ev3_color_sensor_get_color(EV3_PORT_1);
@@ -416,115 +410,35 @@ void main_task(intptr_t unused) {
 
     /*ここからコーディング */
 
-    /*スタートの分岐チェック*/
-    distance = ev3_ultrasonic_sensor_get_distance(EV3_PORT_1); 
-    if (distance > 30) {
-        start = 1;
-    }
-    else {
-        ev3_speaker_play_tone(NOTE_AS5, 100);
-        start = 2;
-    }
 
-    /*スタート*/
-    switch(start){
-        case 1:
-            steering(80, 60, 0);
-            steering_color(COLOR_WHITE, 30, 0);
-            steering_color(COLOR_BLACK, 15, 0);
-            steering(11.5, 20, 0);
-            tank_turn(75, 25, -25);
-            tank_turn_color(25, -25);
-            ev3_speaker_play_tone(NOTE_AS5, 100);
-
-            linetrace_length(10, 15);
-            linetrace_color(BOTH, COLOR_BLACK, 20);
-            ev3_speaker_play_tone(NOTE_AS5, 100);
-            linetrace_length(15, 40);
-            linetrace_color(LEFT, COLOR_BLACK, 20);
-            ev3_speaker_play_tone(NOTE_AS5, 100);
-            steering(11.5, 20, 0);
-            tank_turn(75, -25, 25);
-            tank_turn_color(-25, 25);
-            linetrace_color(BOTH, COLOR_BLUE, 20);
-            break;
-        case 2:
-            walltrace_length(65, 40, 9);
-            steering_color(COLOR_WHITE, 30, 0);
-            linetrace_length(20, 30);
-            linetrace_color(BOTH, COLOR_BLUE, 20);
-            break;
-    }
     /*blue*/
-    steering(6.5, 25, 0);
+    
     map_check(0);
-
-    steering(22.9, 30, 0);
-    tank_turn(90, -30, 30);
-    steering_time(1500, -50, 0);
-    steering_time(500, -10, 0);
-    tslp_tsk(10 * MSEC);
-    steering(3.5, 30, 0);
-    steering(3, -30, 0);
-    tslp_tsk(10 * MSEC);
-    tank_turn(180, 35, 0);
-    steering(4, 30, 0);
+    tslp_tsk(1000*1000);
     map_check(1);
-    /*green*/
-    steering(11, 30, 0);
+    tslp_tsk(1000*1000);
     map_check(2);
-    steering(35, 25, 0);
-    steering_time(700, 20, 0);
+    tslp_tsk(1000*1000);
     map_check(3);
-    tslp_tsk(9000*MSEC);
-    /*yellow*/
-    steering(16, -30, 0);
-    tank_turn(180, 0, 25);
-    steering_time(1500, -50, 0);
-    steering_time(500, -10, 0);
-    steering_color(COLOR_YELLOW, 30, 0);
-    steering(7.2, 30, 0);
+    tslp_tsk(1000*1000);
     map_check(4);
-    tslp_tsk(1000*MSEC);
-    /*red*/
-    steering_color(COLOR_RED, 30, 0);
-    steering(7.2, 30, 0);
+    tslp_tsk(1000*1000);
+    map_check(5);
+    tslp_tsk(1000*1000);
+    map_check(6);
+    tslp_tsk(1000*1000);
+    map_check(7);
+    tslp_tsk(1000*1000);
+    map_check(8);
+    tslp_tsk(1000*1000);
+    map_check(9);
+    tslp_tsk(1000*1000);
     map_check(10);
 
-    /*yellow*/
 
-    tank_turn(180, -30, 0);
-    steering_time(500, 30, 0);
-    steering_time(1500, -50, 0);
-    steering_time(500, -10, 0);
-    tank_turn(98, 0, 25);
-    tank_turn(95, 25, 0);
-    steering(10.7, 30, 0);
-    map_check(7);
-    /*white*/
-    steering_color(COLOR_WHITE, 20, 0);
-    steering(7.8, 30, 0);
-    map_check(6);
-    steering(36.9, 30, 0);
-    map_check(5);
-    linetrace_color(BOTH, COLOR_BLACK, 20);
-    tank_turn(180, 30, 0);
-    linetrace_color(RIGHT, COLOR_BLACK, 20);
-    steering(11.5, 20, 0);
-    tank_turn(75, 25, -25);
-    tank_turn_color(25, -25);
-    linetrace_reflect(BOTH, 20, 30);
-    /*brown*/
-    steering(5.5, 25, 0);
-    map_check(8);
-    steering(36.8, 30, 0);
-    map_check(9);
 
     location[11] = 16 - (location[0] + location[1] + location[2] + location[3] + location[4] + location[5] + location[6] + location[7] + location[8] + location[9] + location[10]);
 
-    /*chemical*/
-    steering(40, -30, 0);
-    tank_turn(180, 25, -25);
 
     int n = 0;
 
@@ -581,11 +495,7 @@ void main_task(intptr_t unused) {
             break;
         }    
     }
-    
-    linetrace_color(BOTH, COLOR_BLACK, 25);
-    steering(45, 60, 13);
-    steering_color(COLOR_WHITE, 60, 13);
-    tank_turn(90, -25, 25);
+
 
 
     
