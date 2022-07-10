@@ -36,6 +36,7 @@ static const sensor_port_t  PortUltrasonic = EV3_PORT_1;
 static const sensor_port_t  PortSensorColor2 = EV3_PORT_2;
 static const sensor_port_t  PortSensorColor3 = EV3_PORT_3;
 static const sensor_port_t  PortSensorColor4 = EV3_PORT_4;
+static const motor_port_t   PortMotorWater   = EV3_PORT_D;
 static const motor_port_t   PortMotorLeft   = EV3_PORT_B;
 static const motor_port_t   PortMotorRight  = EV3_PORT_C;
 
@@ -52,10 +53,13 @@ static void button_clicked_handler(intptr_t button) {
 int kakudo_C; 
 int power = 50;
 int steer;
+int powers1;
+int powers2;
+int powers3;
+int powers4;
+
 
 int distance;
-
-int water_count = 0;
 
 
 /*ライントレース用の変数の定義*/
@@ -97,6 +101,7 @@ int red=0;
 int green=0;
 int blue=0;
 
+int water_count = 0;
 
 void steering(float length, int power, int steering){
     int true_steering = 0;
@@ -213,7 +218,9 @@ void linetrace_color(sensortype_t type, colorid_t color_stop, int power){
         i = (reflect + i);
         d = (reflect - d2); 
         d2 = reflect;
-        steer =  p * P_GEIN;    
+        steer =  p * P_GEIN;  
+        powers1 = -power;  
+        powers2 = power-(power*steer/50);  
         if(color_stop != COLOR_BLACK && color2 == color_stop && color3 == color_stop && type == BOTH) break;
         if(color_stop != COLOR_BLACK && color3 == color_stop && type == RIGHT) break;
         if(color_stop != COLOR_BLACK && color2 == color_stop && type == LEFT) break;
@@ -221,12 +228,12 @@ void linetrace_color(sensortype_t type, colorid_t color_stop, int power){
         if(color_stop == COLOR_BLACK && reflect3 < reflect_stop && type == RIGHT) break;
         if(color_stop == COLOR_BLACK && reflect2 < reflect_stop && type == LEFT) break;        
         if(steer > 0) {
-            ev3_motor_set_power(EV3_PORT_B, -power);
-            ev3_motor_set_power(EV3_PORT_C, power-(power*steer/50));
+            ev3_motor_set_power(EV3_PORT_B, powers1);
+            ev3_motor_set_power(EV3_PORT_C, powers2);
         }
         else {
-            ev3_motor_set_power(EV3_PORT_B, -power);
-            ev3_motor_set_power(EV3_PORT_C, power-(power*steer/50));
+            ev3_motor_set_power(EV3_PORT_B, powers1);
+            ev3_motor_set_power(EV3_PORT_C, powers2);
         }     
     }  
     ev3_speaker_play_tone(NOTE_AS5, 100);
@@ -245,18 +252,20 @@ void linetrace_reflect(sensortype_t type, int reflect_stop, int power){
         i = (reflect + i);
         d = (reflect - d2); 
         d2 = reflect;
-        steer =  p * P_GEIN;    
+        steer =  p * P_GEIN; 
+        powers1 = -power;  
+        powers2 = power-(power*steer/50);   
         if(reflect_stop > reflect2 && reflect_stop > reflect3 && type == BOTH) break;
         if(reflect_stop > reflect3 && type == RIGHT) break;
         if(reflect_stop > reflect2 && type == LEFT) break;
 
         if(steer > 0) {
-            ev3_motor_set_power(EV3_PORT_B, -power);
-            ev3_motor_set_power(EV3_PORT_C, power-(power*steer/50));
+            ev3_motor_set_power(EV3_PORT_B, powers1);
+            ev3_motor_set_power(EV3_PORT_C, powers2);
         }
         else {
-            ev3_motor_set_power(EV3_PORT_B, -power);
-            ev3_motor_set_power(EV3_PORT_C, power-(power*steer/50));
+            ev3_motor_set_power(EV3_PORT_B, powers1);
+            ev3_motor_set_power(EV3_PORT_C, powers2);
         }     
     }  
     ev3_speaker_play_tone(NOTE_AS5, 100);
@@ -268,22 +277,24 @@ void linetrace_reflect(sensortype_t type, int reflect_stop, int power){
 
 void walltrace_length(float length, int power, int dist){
     int PGEIN = 20;
-    ev3_motor_reset_counts(EV3_PORT_C);
-    while (length * ROBOT1CM > kakudo_C) {
+    while (true) {
         kakudo_C = ev3_motor_get_counts(EV3_PORT_C);
         int dist1 = ev3_ultrasonic_sensor_get_distance(EV3_PORT_1);
         if (dist1 > 50) {
             dist1 = 49; 
         } 
         p = dist1 - dist;
-        steer =  p * PGEIN; 
+        steer =  p * PGEIN;
+        powers1 = -power;  
+        powers2 = power-(power*steer/50);
+        if (length * ROBOT1CM < kakudo_C) break;
         if(steer > 0) {
-            ev3_motor_set_power(EV3_PORT_B, -power);
-            ev3_motor_set_power(EV3_PORT_C, power-(power*steer/50));
+            ev3_motor_set_power(EV3_PORT_B, powers1);
+            ev3_motor_set_power(EV3_PORT_C, powers2);
         }
         else {
-            ev3_motor_set_power(EV3_PORT_B, -power);
-            ev3_motor_set_power(EV3_PORT_C, power-(power*steer/50));
+            ev3_motor_set_power(EV3_PORT_B, powers1);
+            ev3_motor_set_power(EV3_PORT_C, powers2);
         }
 
     }
@@ -293,7 +304,7 @@ void walltrace_length(float length, int power, int dist){
 
 void linetrace_length(float length, int power){
     ev3_motor_reset_counts(EV3_PORT_C);
-    while (length * ROBOT1CM > kakudo_C) {
+    while (true) {
         kakudo_C = ev3_motor_get_counts(EV3_PORT_C);
         reflect2 = ev3_color_sensor_get_reflect(EV3_PORT_2);
         reflect3 = ev3_color_sensor_get_reflect(EV3_PORT_3);
@@ -303,13 +314,16 @@ void linetrace_length(float length, int power){
         d = (reflect - d2); 
         d2 = reflect;
         steer =  p * P_GEIN; 
+        powers1 = -power;  
+        powers2 = power-(power*steer/50);
+        if (length * ROBOT1CM < kakudo_C) break;
         if(steer > 0) {
-            ev3_motor_set_power(EV3_PORT_B, -power);
-            ev3_motor_set_power(EV3_PORT_C, power-(power*steer/50));
+            ev3_motor_set_power(EV3_PORT_B, powers1);
+            ev3_motor_set_power(EV3_PORT_C, powers2);
         }
         else {
-            ev3_motor_set_power(EV3_PORT_B, -power);
-            ev3_motor_set_power(EV3_PORT_C, power-(power*steer/50));
+            ev3_motor_set_power(EV3_PORT_B, powers1);
+            ev3_motor_set_power(EV3_PORT_C, powers2);
         }
 
     }
@@ -317,12 +331,12 @@ void linetrace_length(float length, int power){
     (void)ev3_motor_stop(EV3_PORT_C, true);
 }
 
-void water(n) {
+void water(int n) {
     ev3_motor_reset_counts(EV3_PORT_D);
     if (location[n] == FIRE) {
-        ev3_motor_rotate(EV3_PORT_D, 20 + water_count, 20, true);
-        ev3_motor_rotate(EV3_PORT_D, 20 + water_count, -20, false);
-        water_count = water_count + 65;
+        ev3_motor_rotate(EV3_PORT_D, 25 + water_count, 20, true);
+        ev3_motor_rotate(EV3_PORT_D, 25 + water_count, -20, false);
+        water_count = water_count + 60;
     }
 }
 
@@ -336,6 +350,8 @@ void sensor_check(uint8_t num) {
 }
 
 void map_check(int num) {
+
+    tslp_tsk(300 * MSEC);
 
     while ( !ht_nxt_color_sensor_measure_color(EV3_PORT_4, &test) ) {
         ;
@@ -408,6 +424,8 @@ void main_task(intptr_t unused) {
     /* Configure motors */
     ev3_motor_config(PortMotorLeft, LARGE_MOTOR);
     ev3_motor_config(PortMotorRight, LARGE_MOTOR);
+    ev3_motor_config(PortMotorWater, LARGE_MOTOR);
+
 
     /* Configure sensors */
     ev3_sensor_config(PortUltrasonic, ULTRASONIC_SENSOR);
@@ -425,6 +443,188 @@ void main_task(intptr_t unused) {
 
    (void)sta_cyc(TIMEOUT_CYC);
 
+    /*ここからコーディング */
+
+    /*スタートの分岐チェック*/
+    distance = ev3_ultrasonic_sensor_get_distance(EV3_PORT_1); 
+    if (distance > 30) {
+        start = 1;
+    }
+    else {
+        ev3_speaker_play_tone(NOTE_AS5, 100);
+        start = 2;
+    }
+
+    /*スタート*/
+    switch(start){
+        case 1:
+            steering(70, 40, 0);
+            steering_color(COLOR_WHITE, 30, 0);
+            tank_turn(180, 0, 25);
+            break;
+        case 2:
+            walltrace_length(77, 35, 9);
+            steering_color(COLOR_WHITE, 30, 0);
+            linetrace_length(25, 30);
+            linetrace_color(BOTH, COLOR_BLUE, 20);
+            break;
+    }
+    /*blue*/
+    steering(6.5, 25, 0);
+    map_check(0);
+
+    steering(22.9, 30, 0);
+    tank_turn(90, -30, 30);
+    steering_time(1500, -45, 0);
+    steering_time(500, -15, 0);
+    tslp_tsk(200 * MSEC);
+    steering_time(250, 20, 0);
+    tank_turn(180, 35, 0);
+    steering(4, 30, 0);
+    map_check(1);
+    water(0);
+    water(1);
+    /*green*/
+    steering(11, 30, 0);
+    map_check(2);
+    steering(35, 25, 0);
+    steering_time(800, 20, 0);
+    map_check(3);
+    /*yellow*/
+    steering(17.5, -30, 0);
+    tank_turn(180, 0, 25);
+    steering_time(1500, -50, 0);
+    steering_time(500, -10, 0);
+    water(2);
+    water(3);
+    steering_color(COLOR_YELLOW, 30, 0);
+    steering(7.2, 30, 0);
+    map_check(4);
+    tslp_tsk(1000*MSEC);
+    /*red*/
+    steering_color(COLOR_RED, 30, 0);
+    steering(7.2, 30, 0);
+    map_check(10);
+
+    /*yellow*/
+
+    tank_turn(180, -30, 0);
+    steering_time(500, 30, 0);
+    steering_time(1500, -50, 0);
+    steering_time(500, -10, 0);
+    tank_turn(98, 0, 25);
+    tank_turn(95, 25, 0);
+    steering(9.6, 27, 0);
+    tslp_tsk(300 * MSEC);
+    map_check(7);
+    water(4);
+    water(7);
+    /*white*/
+    steering_color(COLOR_WHITE, 20, 0);
+    steering(8, 30, 0);
+    map_check(6);
+    steering(36.9, 30, 0);
+    map_check(5);
+    water(5);
+    water(6);
+    linetrace_color(BOTH, COLOR_BLACK, 20);
+    tank_turn(180, 30, 0);
+    linetrace_length(9, 20);
+    linetrace_color(RIGHT, COLOR_BLACK, 20);
+    linetrace_length(11.5, 20);
+    ev3_speaker_play_tone(NOTE_A5, 100);
+    tank_turn(75, 25, -25);
+    tank_turn_color(25, -25);
+    linetrace_reflect(BOTH, 20, 30);
+    /*brown*/
+    steering(7, 25, 0);
+    map_check(8);
+    steering(36.8, 30, 0);
+    map_check(9);
+  
+
+    location[11] = 16 - (location[0] + location[1] + location[2] + location[3] + location[4] + location[5] + location[6] + location[7] + location[8] + location[9] + location[10]);
+
+    /*chemical*/
+    if (location[11] == FIRE || location[10] == FIRE) {
+        steering(30, 30, 0);
+        tank_turn(180, -25, 25);
+        water(11);
+        water(10);
+        steering(55, 30, 0);
+    }
+    else {
+        steering(14, -30, 0);
+        tank_turn(180, -25, 25);
+
+    }
+
+    water(8);
+    water(9);
+
+    int n = 0;
+
+    while (1) {
+        switch (location[n]) {
+                    
+            case ADULT:
+                ev3_speaker_play_tone(NOTE_C5, 100);
+                tslp_tsk(200*1000);
+                ev3_speaker_play_tone(NOTE_C5, 100);
+                tslp_tsk(200*1000);
+                ev3_speaker_play_tone(NOTE_C5, 100);
+                tslp_tsk(200*1000);
+                ev3_speaker_play_tone(NOTE_C5, 100);
+                break;
+
+            case CHILD:
+                ev3_speaker_play_tone(NOTE_C5, 100);
+                tslp_tsk(200*1000);
+                ev3_speaker_play_tone(NOTE_C5, 100);
+                tslp_tsk(200*1000);
+                ev3_speaker_play_tone(NOTE_C5, 100);
+                break;
+
+            case FIRE:
+                ev3_speaker_play_tone(NOTE_C5, 100);
+                tslp_tsk(200*1000);
+                ev3_speaker_play_tone(NOTE_C5, 100);
+                tslp_tsk(200*1000);
+                ev3_speaker_play_tone(NOTE_C5, 100);
+                tslp_tsk(200*1000);
+                ev3_speaker_play_tone(NOTE_C5, 100);
+                tslp_tsk(200*1000);
+                ev3_speaker_play_tone(NOTE_C5, 100);
+                break;
+
+            case CHEMICAL:
+                ev3_speaker_play_tone(NOTE_C5, 100);
+                tslp_tsk(200*1000);
+                ev3_speaker_play_tone(NOTE_C5, 100);
+                break;
+
+            case NOTHING:
+                ev3_speaker_play_tone(NOTE_C5, 100);
+                break;
+
+            default:
+                ev3_speaker_play_tone(NOTE_C6, 100);
+                break;
+        }
+        tslp_tsk(1000*1000);
+        n = n + 1;
+        if (n == 12) {
+            break;
+        }    
+    }
+    
+    walltrace_length(140, 40, 8);
+    steering_color(COLOR_WHITE, 25, 0);
+    tank_turn(90, -25, 25);
+
+    
+
+    
     
 
     while(1) {}

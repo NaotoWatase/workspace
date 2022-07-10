@@ -36,6 +36,8 @@ static const sensor_port_t  PortUltrasonic = EV3_PORT_1;
 static const sensor_port_t  PortSensorColor2 = EV3_PORT_2;
 static const sensor_port_t  PortSensorColor3 = EV3_PORT_3;
 static const sensor_port_t  PortSensorColor4 = EV3_PORT_4;
+static const motor_port_t   PortMotorWater   = EV3_PORT_D;
+static const motor_port_t   PortMotorArm   = EV3_PORT_A;
 static const motor_port_t   PortMotorLeft   = EV3_PORT_B;
 static const motor_port_t   PortMotorRight  = EV3_PORT_C;
 
@@ -52,10 +54,13 @@ static void button_clicked_handler(intptr_t button) {
 int kakudo_C; 
 int power = 50;
 int steer;
+int powers1;
+int powers2;
+int powers3;
+int powers4;
+
 
 int distance;
-
-int water_count = 0;
 
 
 /*ライントレース用の変数の定義*/
@@ -86,6 +91,11 @@ typedef enum object {
     NOTHING = 0
 } object_t ;
 
+typedef enum UpDown {
+    up = 1,
+    down = 0
+} arm_t ;
+
 int location[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
 
 uint8_t test = 0;
@@ -97,6 +107,7 @@ int red=0;
 int green=0;
 int blue=0;
 
+int water_count = 0;
 
 void steering(float length, int power, int steering){
     int true_steering = 0;
@@ -213,7 +224,9 @@ void linetrace_color(sensortype_t type, colorid_t color_stop, int power){
         i = (reflect + i);
         d = (reflect - d2); 
         d2 = reflect;
-        steer =  p * P_GEIN;    
+        steer =  p * P_GEIN;  
+        powers1 = -power;  
+        powers2 = power-(power*steer/50);  
         if(color_stop != COLOR_BLACK && color2 == color_stop && color3 == color_stop && type == BOTH) break;
         if(color_stop != COLOR_BLACK && color3 == color_stop && type == RIGHT) break;
         if(color_stop != COLOR_BLACK && color2 == color_stop && type == LEFT) break;
@@ -221,12 +234,12 @@ void linetrace_color(sensortype_t type, colorid_t color_stop, int power){
         if(color_stop == COLOR_BLACK && reflect3 < reflect_stop && type == RIGHT) break;
         if(color_stop == COLOR_BLACK && reflect2 < reflect_stop && type == LEFT) break;        
         if(steer > 0) {
-            ev3_motor_set_power(EV3_PORT_B, -power);
-            ev3_motor_set_power(EV3_PORT_C, power-(power*steer/50));
+            ev3_motor_set_power(EV3_PORT_B, powers1);
+            ev3_motor_set_power(EV3_PORT_C, powers2);
         }
         else {
-            ev3_motor_set_power(EV3_PORT_B, -power);
-            ev3_motor_set_power(EV3_PORT_C, power-(power*steer/50));
+            ev3_motor_set_power(EV3_PORT_B, powers1);
+            ev3_motor_set_power(EV3_PORT_C, powers2);
         }     
     }  
     ev3_speaker_play_tone(NOTE_AS5, 100);
@@ -245,18 +258,20 @@ void linetrace_reflect(sensortype_t type, int reflect_stop, int power){
         i = (reflect + i);
         d = (reflect - d2); 
         d2 = reflect;
-        steer =  p * P_GEIN;    
+        steer =  p * P_GEIN; 
+        powers1 = -power;  
+        powers2 = power-(power*steer/50);   
         if(reflect_stop > reflect2 && reflect_stop > reflect3 && type == BOTH) break;
         if(reflect_stop > reflect3 && type == RIGHT) break;
         if(reflect_stop > reflect2 && type == LEFT) break;
 
         if(steer > 0) {
-            ev3_motor_set_power(EV3_PORT_B, -power);
-            ev3_motor_set_power(EV3_PORT_C, power-(power*steer/50));
+            ev3_motor_set_power(EV3_PORT_B, powers1);
+            ev3_motor_set_power(EV3_PORT_C, powers2);
         }
         else {
-            ev3_motor_set_power(EV3_PORT_B, -power);
-            ev3_motor_set_power(EV3_PORT_C, power-(power*steer/50));
+            ev3_motor_set_power(EV3_PORT_B, powers1);
+            ev3_motor_set_power(EV3_PORT_C, powers2);
         }     
     }  
     ev3_speaker_play_tone(NOTE_AS5, 100);
@@ -267,23 +282,26 @@ void linetrace_reflect(sensortype_t type, int reflect_stop, int power){
 
 
 void walltrace_length(float length, int power, int dist){
-    int PGEIN = 20;
     ev3_motor_reset_counts(EV3_PORT_C);
-    while (length * ROBOT1CM > kakudo_C) {
+    int PGEIN = 20;
+    while (true) {
         kakudo_C = ev3_motor_get_counts(EV3_PORT_C);
         int dist1 = ev3_ultrasonic_sensor_get_distance(EV3_PORT_1);
         if (dist1 > 50) {
             dist1 = 49; 
         } 
         p = dist1 - dist;
-        steer =  p * PGEIN; 
+        steer =  p * PGEIN;
+        powers1 = -power;  
+        powers2 = power-(power*steer/50);
+        if(length * ROBOT1CM < kakudo_C) break;
         if(steer > 0) {
-            ev3_motor_set_power(EV3_PORT_B, -power);
-            ev3_motor_set_power(EV3_PORT_C, power-(power*steer/50));
+            ev3_motor_set_power(EV3_PORT_B, powers1);
+            ev3_motor_set_power(EV3_PORT_C, powers2);
         }
         else {
-            ev3_motor_set_power(EV3_PORT_B, -power);
-            ev3_motor_set_power(EV3_PORT_C, power-(power*steer/50));
+            ev3_motor_set_power(EV3_PORT_B, powers1);
+            ev3_motor_set_power(EV3_PORT_C, powers2);
         }
 
     }
@@ -293,7 +311,7 @@ void walltrace_length(float length, int power, int dist){
 
 void linetrace_length(float length, int power){
     ev3_motor_reset_counts(EV3_PORT_C);
-    while (length * ROBOT1CM > kakudo_C) {
+    while (true) {
         kakudo_C = ev3_motor_get_counts(EV3_PORT_C);
         reflect2 = ev3_color_sensor_get_reflect(EV3_PORT_2);
         reflect3 = ev3_color_sensor_get_reflect(EV3_PORT_3);
@@ -303,13 +321,16 @@ void linetrace_length(float length, int power){
         d = (reflect - d2); 
         d2 = reflect;
         steer =  p * P_GEIN; 
+        powers1 = -power;  
+        powers2 = power-(power*steer/50);
+        if(length * ROBOT1CM < kakudo_C) break;
         if(steer > 0) {
-            ev3_motor_set_power(EV3_PORT_B, -power);
-            ev3_motor_set_power(EV3_PORT_C, power-(power*steer/50));
+            ev3_motor_set_power(EV3_PORT_B, powers1);
+            ev3_motor_set_power(EV3_PORT_C, powers2);
         }
         else {
-            ev3_motor_set_power(EV3_PORT_B, -power);
-            ev3_motor_set_power(EV3_PORT_C, power-(power*steer/50));
+            ev3_motor_set_power(EV3_PORT_B, powers1);
+            ev3_motor_set_power(EV3_PORT_C, powers2);
         }
 
     }
@@ -317,12 +338,12 @@ void linetrace_length(float length, int power){
     (void)ev3_motor_stop(EV3_PORT_C, true);
 }
 
-void water(n) {
+void water(int n) {
     ev3_motor_reset_counts(EV3_PORT_D);
     if (location[n] == FIRE) {
-        ev3_motor_rotate(EV3_PORT_D, 20 + water_count, 20, true);
-        ev3_motor_rotate(EV3_PORT_D, 20 + water_count, -20, false);
-        water_count = water_count + 65;
+        ev3_motor_rotate(EV3_PORT_D, 25 + water_count, 20, true);
+        ev3_motor_rotate(EV3_PORT_D, 25 + water_count, -20, false);
+        water_count = water_count + 60;
     }
 }
 
@@ -336,6 +357,8 @@ void sensor_check(uint8_t num) {
 }
 
 void map_check(int num) {
+
+    tslp_tsk(300 * MSEC);
 
     while ( !ht_nxt_color_sensor_measure_color(EV3_PORT_4, &test) ) {
         ;
@@ -399,6 +422,19 @@ void timeout_task(intptr_t unused) {
     
 }
 
+void arm(arm_t type) {
+    switch (type)
+    {
+    case down:
+        ev3_motor_rotate(EV3_PORT_A, 290, 30, true);
+        break;
+    
+    case up:
+        ev3_motor_rotate(EV3_PORT_A, 290, -30, true);
+        break;
+    }
+}
+
 void main_task(intptr_t unused) {
 
     
@@ -408,6 +444,10 @@ void main_task(intptr_t unused) {
     /* Configure motors */
     ev3_motor_config(PortMotorLeft, LARGE_MOTOR);
     ev3_motor_config(PortMotorRight, LARGE_MOTOR);
+    ev3_motor_config(PortMotorWater, LARGE_MOTOR);
+    ev3_motor_config(PortMotorArm, LARGE_MOTOR);
+
+
 
     /* Configure sensors */
     ev3_sensor_config(PortUltrasonic, ULTRASONIC_SENSOR);
@@ -425,6 +465,47 @@ void main_task(intptr_t unused) {
 
    (void)sta_cyc(TIMEOUT_CYC);
 
+    /*ここからコーディング */
+
+    /*スタートの分岐チェック*/
+   
+
+    walltrace_length(155, 50, 8);
+    steering_time(700, 30, 0);
+    steering(11.5, -25, 0);
+    tank_turn(90, -25, 25);
+    steering_time(2000, -30, 0);
+    walltrace_length(55, 25, 13);
+    steering(10, 30, 0);
+    arm(down);
+    tank_turn(140, 0, -25);
+    tank_turn(220, 25, 0);
+
+    ev3_motor_rotate(EV3_PORT_A, 100, -30, true);
+    steering(3, -15, 0);
+    tank_turn(50, 0, 20);
+    tank_turn(50, 0, -20);
+    ev3_motor_rotate(EV3_PORT_A, 100, 30, true);
+    steering(8, -20, 0);
+
+    ev3_motor_rotate(EV3_PORT_A, 100, -30, true);
+    steering(3, -15, 0);
+    tank_turn(50, 0, 20);
+    tank_turn(50, 0, -20);
+    ev3_motor_rotate(EV3_PORT_A, 100, 30, true);
+    steering(8, -20, 0);
+
+    steering(11, -20, 0);
+    tslp_tsk(700 * MSEC);
+    arm(up);
+
+    steering(16, -20, 0);
+
+
+
+
+
+    
     
 
     while(1) {}
