@@ -468,7 +468,16 @@ void main_task(intptr_t unused) {
     /*ここからコーディング */
 
     /*スタートの分岐チェック*/
-   
+    
+    int map [6] = {0,0,0,0,0,0};  
+
+    if (location[0] == CHILD || location[0] == ADULT || location[1] == CHILD || location[1] == ADULT) map[0] = 1;
+    if (location[2] == CHILD || location[2] == ADULT || location[3] == CHILD || location[3] == ADULT) map[1] = 1;
+    if (location[5] == CHILD || location[5] == ADULT || location[6] == CHILD || location[6] == ADULT) map[2] = 1;
+    if (location[4] == CHILD || location[4] == ADULT || location[7] == CHILD || location[7] == ADULT) map[3] = 1;
+    if (location[8] == CHILD || location[8] == ADULT || location[9] == CHILD || location[9] == ADULT) map[4] = 1;
+    if (location[10] == CHILD || location[10] == ADULT || location[11] == CHILD || location[11] == ADULT) map[5] = 1;
+
 
     walltrace_length(155, 50, 8);
     steering_time(700, 30, 0);
@@ -481,22 +490,43 @@ void main_task(intptr_t unused) {
     tank_turn(140, 0, -25);
     tank_turn(220, 25, 0);
 
-    ev3_motor_rotate(EV3_PORT_A, 100, -30, true);
-    steering(3, -15, 0);
-    tank_turn(50, 0, 20);
-    tank_turn(50, 0, -20);
-    ev3_motor_rotate(EV3_PORT_A, 100, 30, true);
-    steering(8, -20, 0);
+    if (map[4] == 1) {
+        ev3_motor_rotate(EV3_PORT_A, 100, -30, true);
+        steering(3, -15, 0);
+        tank_turn(50, 0, 20);
+        tank_turn(50, 0, -20);
+        ev3_motor_rotate(EV3_PORT_A, 100, 30, true);
+        steering(8, -20, 0);
+    }
+    else {
+        steering(11, -20, 0);
+    }
 
-    ev3_motor_rotate(EV3_PORT_A, 100, -30, true);
-    steering(3, -15, 0);
-    tank_turn(50, 0, 20);
-    tank_turn(50, 0, -20);
-    ev3_motor_rotate(EV3_PORT_A, 100, 30, true);
-    steering(8, -20, 0);
+    if (map[2] == 1) {
+        ev3_motor_rotate(EV3_PORT_A, 100, -30, true);
+        steering(3, -15, 0);
+        tank_turn(50, 0, 20);
+        tank_turn(50, 0, -20);
+        ev3_motor_rotate(EV3_PORT_A, 100, 30, true);
+        steering(8, -20, 0);
+    }
+    else {
+        steering(11, -20, 0);
+    }
 
-    steering(11, -20, 0);
-    tslp_tsk(700 * MSEC);
+    if (map[0] == 1) {
+        ev3_motor_rotate(EV3_PORT_A, 100, -30, true);
+        steering(3, -15, 0);
+        tank_turn(50, 0, 20);
+        tank_turn(50, 0, -20);
+        ev3_motor_rotate(EV3_PORT_A, 100, 30, true);
+        steering(8, -20, 0);
+    }
+    else {
+        steering(11, -20, 0);
+    }
+    
+
     arm(up);
 
     steering(16, -20, 0);

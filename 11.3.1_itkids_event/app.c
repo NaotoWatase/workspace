@@ -6,6 +6,7 @@
 /** ファイル内だけで使う関数の宣言 **/
 static void prepareDevices(void);
 static void cleanUpDevices(void);
+static void ISR_button(intptr_t exif);
 
 
 /** ファイル内だけで使う定義 **/
@@ -28,6 +29,8 @@ void main_task(intptr_t exinf) {
 
     /* モーターやセンサーの設定を行う関数を実行する */
     prepareDevices();
+
+    (void)ev3_button_set_on_clicked(ENTER_BUTTON, &ISR_button, (intptr_t)ENTER_BUTTON);
 
     /* ボタンが押されていない状態から開始 */
     isPressed = false;
@@ -54,8 +57,6 @@ void main_task(intptr_t exinf) {
         /* 500ミリ秒待つ */
         tslp_tsk(500*1000);
 
-        /* 中央ボタンが押されているか、状態を取り込む */
-        isPressed = ev3_button_is_pressed(ENTER_BUTTON);
     }
 
     /* モーターやセンサーの終了時処理を行う */
@@ -99,4 +100,18 @@ static void cleanUpDevices(void) {
 
     /* 画面を消すために、画面いっぱいの白四角を描く */
     (void)ev3_lcd_fill_rect(0, 0, EV3_LCD_WIDTH, EV3_LCD_HEIGHT, EV3_LCD_WHITE);
+}
+
+
+static void ISR_button(intptr_t exif) {
+    button_t buttoNo = (button_t)exif;
+    switch(buttoNo) {
+    case ENTER_BUTTON:
+        isPressed = true;
+        break;
+    default:
+        break;
+    }
+
+
 }
