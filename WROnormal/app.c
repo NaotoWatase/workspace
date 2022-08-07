@@ -22,7 +22,7 @@
 
 #define MSEC (1000)
 #define ROBOT1CM (18.48)
-#define TURN (0.16)
+#define TURN (0.17)
 
 /**
  * Define the connection ports of the sensors and motors.
@@ -474,10 +474,19 @@ void map_check(int num) {
             case 14:
             case 16:
             case 17:
+                if (chemical_check > 0) {
+                    switch (obj) {
+                        default:
+                            break;
+                    }
+                }
+                else {
                     chemical_check = chemical_check + 1;
                     location[num] = CHEMICAL;
                     sensor_check(obj);
-                    break; 
+                    break;
+                }
+                
             default:
                 break;
         } 
@@ -584,7 +593,6 @@ void main_task(intptr_t unused) {
     /*スタートの分岐チェック*/
     start = 2;
 
-
     /*スタート*/
     switch(start){
         case 1:
@@ -632,7 +640,7 @@ void main_task(intptr_t unused) {
     water(0);
     water(1);
     /*green*/
-    steering(11, 30, 0);
+    steering(11, 35, 0);
     map_check(2);
     chemical_taker(2);
     steering(6.5, 35, 0);
@@ -916,41 +924,38 @@ void main_task(intptr_t unused) {
             }
             
             arm(up);
-            steering_time(1500, -25, 0);
-            steering(16, 27, 0);
+            steering(13, 27, 0);
             tank_turn(180, 0, -27);
-            steering_time(1000, 30, 0);
+            steering_time(900, 30, 0);
+            steering_time(300, -10, 0);
+            
 
             ev3_motor_stop(EV3_PORT_A, true);
-            steering_time(1000, 25, 0);
-            steering_time(450, -10, 0);
+            steering_color_u(COLOR_BLACK, 25, 0);
             
 
             ev3_motor_reset_counts(EV3_PORT_A);
             ev3_motor_set_power(EV3_PORT_A, 25);
             armc = 0;
             while (true) {
-                armc = ev3_motor_get_counts(EV3_PORT_A);
-                if (armc > 189)break;
+            armc = ev3_motor_get_counts(EV3_PORT_A);
+            if (armc > 189)break;
             }
         
 
             ev3_motor_stop(EV3_PORT_A, true);
             tank_turn(180, 30, -30);
-            ev3_motor_set_power(EV3_PORT_A, 25);
-            while (true) {
-                armc = ev3_motor_get_counts(EV3_PORT_A);
-                if (armc > 189)break;
-            }
-            steering(90, 50, 0);
+            steering(100, 50, 0);
             tank_turn(180, 30, -30);
             ev3_motor_rotate(EV3_PORT_A, 80, 50, true);
             arm(up);
             tslp_tsk(600*MSEC);
-            walltrace_length(15, 30, 5);
-            walltrace_length(15, 40, 5);
-            walltrace_length(15, 40, 5);
-            walltrace_length(10, 40, 4);
+            walltrace_length(10, 40, 10);
+            walltrace_length(10, 40, 9);
+            walltrace_length(10, 40, 8);
+            walltrace_length(10, 40, 7);
+            walltrace_length(15, 40, 6);
+            walltrace_length(10, 40, 5);
             walltrace_length(10, 40, 4);
             walltrace_length(10, 40, 3);
             walltrace_length(10, 40, 3);
@@ -960,6 +965,12 @@ void main_task(intptr_t unused) {
             steering_time(1000, 30, 0);
             /*ゴール*/
 
+
+            /*arm(up);
+            steering(4, -27, 0);
+            tank_turn(90, -27, 27);
+            ev3_motor_stop(EV3_PORT_A, true);
+            steering_time(2000, -25, -10);*/
 
             
 

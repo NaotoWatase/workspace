@@ -7,6 +7,9 @@
 static void prepareDevices(void);
 static void cleanUpDevices(void);
 static void ISR_button(intptr_t exif);
+static void ISR_buttonR(intptr_t exif);
+static void ISR_buttonU(intptr_t exif);
+static void ISR_buttonD(intptr_t exif);
 
 
 /** ファイル内だけで使う定義 **/
@@ -23,6 +26,11 @@ static void ISR_button(intptr_t exif);
 static bool_t isPressed = false; 
 
 
+static int16_t octaveVal = 1;
+
+static int16_t interval = 1;
+
+
 /** すべてのファイルから実行できる関数の定義 **/
 /** メインタスク関数 **/
 void main_task(intptr_t exinf) {
@@ -32,6 +40,11 @@ void main_task(intptr_t exinf) {
 
     (void)ev3_button_set_on_clicked(ENTER_BUTTON, &ISR_button, (intptr_t)ENTER_BUTTON);
 
+    (void)ev3_button_set_on_clicked(LEFT_BUTTON, &ISR_button, (intptr_t)LEFT_BUTTON);
+    (void)ev3_button_set_on_clicked(RIGHT_BUTTON, &ISR_buttonR, (intptr_t)RIGHT_BUTTON);
+    (void)ev3_button_set_on_clicked(UP_BUTTON, &ISR_buttonU, (intptr_t)UP_BUTTON);
+    (void)ev3_button_set_on_clicked(DOWN_BUTTON, &ISR_buttonD, (intptr_t)DOWN_BUTTON);
+
     /* ボタンが押されていない状態から開始 */
     isPressed = false;
 
@@ -39,19 +52,43 @@ void main_task(intptr_t exinf) {
     while (false == isPressed) {
         /* 音をならして、LEDを光らせる */
         /* 音を鳴らす関数の実行には時間がかかる */
-        (void)ev3_speaker_play_tone(NOTE_C4, 500L);
+        if (interval == 2) {
+            (void)ev3_speaker_play_tone((NOTE_F5 * octaveVal), 500L);
+        }
+        if (interval == 1) {
+            (void)ev3_speaker_play_tone((NOTE_C5 * octaveVal), 500L);
+        }
+        if (interval == 0) {
+            (void)ev3_speaker_play_tone((NOTE_F4 * octaveVal), 500L);
+        }
         (void)ev3_led_set_color (LED_RED);
 
         /* 500ミリ秒待つ */
         tslp_tsk(500*1000);
 
-        (void)ev3_speaker_play_tone(NOTE_D4, 500L);
+        if (interval == 2) {
+            (void)ev3_speaker_play_tone((NOTE_G5 * octaveVal), 500L);
+        }
+        if (interval == 1) {
+            (void)ev3_speaker_play_tone((NOTE_D5 * octaveVal), 500L);
+        }
+        if (interval == 0) {
+            (void)ev3_speaker_play_tone((NOTE_G4 * octaveVal), 500L);
+        }
         (void)ev3_led_set_color(LED_ORANGE);
 
         /* 500ミリ秒待つ */
         tslp_tsk(500*1000);
 
-        (void)ev3_speaker_play_tone(NOTE_E4, 500L);
+        if (interval == 2) {
+            (void)ev3_speaker_play_tone((NOTE_A5 * octaveVal), 500L);
+        }
+        if (interval == 1) {
+            (void)ev3_speaker_play_tone((NOTE_E5 * octaveVal), 500L);
+        }
+        if (interval == 0) {
+            (void)ev3_speaker_play_tone((NOTE_A4 * octaveVal), 500L);
+        }
         (void)ev3_led_set_color(LED_GREEN);
 
         /* 500ミリ秒待つ */
@@ -84,7 +121,7 @@ static void prepareDevices(void) {
     (void)ev3_lcd_set_font(EV3_FONT_MEDIUM);
 
     /* スピーカーの音量を最大にする */
-    (void)ev3_speaker_set_volume(100U);
+    (void)ev3_speaker_set_volume(50U);
 }
 
 
@@ -106,6 +143,14 @@ static void cleanUpDevices(void) {
 static void ISR_button(intptr_t exif) {
     button_t buttoNo = (button_t)exif;
     switch(buttoNo) {
+    case LEFT_BUTTON:
+        if (1 < octaveVal) {
+            octaveVal /= 2;
+        } else {
+            octaveVal = 1;
+        }
+        break;
+
     case ENTER_BUTTON:
         isPressed = true;
         break;
@@ -115,3 +160,28 @@ static void ISR_button(intptr_t exif) {
 
 
 }
+
+static void ISR_buttonR(intptr_t exif) {
+    if (octaveVal < 4) {
+        octaveVal *=2;
+    } else {
+        octaveVal = 4;
+    }
+}
+
+static void ISR_buttonU(intptr_t exif) {
+    if (interval < 2) {
+        interval +=1;
+    } else {
+        interval = 2;
+    }
+}
+
+static void ISR_buttonD(intptr_t exif) {
+    if (0 < interval) {
+        interval -=1;
+    } else {
+        interval = 0;
+    }
+}
+
