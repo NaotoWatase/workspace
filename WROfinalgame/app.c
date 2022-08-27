@@ -64,11 +64,16 @@ int powers4;
 int armc;
 int chemical_check = 0;
 
+int how_many = 31;
+
 int music;
 int kaisuu;
 
 float distance;
 
+int brown;
+
+int map [6] = {0,0,0,0,0,0};
 
 /*ライントレース用の変数の定義*/
 int reflect, reflect2, reflect3;
@@ -476,11 +481,12 @@ void chemical_taker(int n){
             steering(3, 30, 0, true);
         }
         if (chemical_check > 1) {
-            ev3_motor_rotate(EV3_PORT_A, 240, -20, true);
-            ev3_motor_rotate(EV3_PORT_A, 50, 20, true);
-            steering(15, 30, 0, true);
-            ev3_motor_rotate(EV3_PORT_A, 190, 15, true);
-            tslp_tsk(750*1000);
+            steering(20, 30, 0, true);
+            ev3_motor_rotate(EV3_PORT_A, 200, -20, true);
+            ev3_motor_rotate(EV3_PORT_A, 25, 20, true);
+            steering(3.7, -30, 0, true);
+            ev3_motor_rotate(EV3_PORT_A, 175, 15, true);
+            tslp_tsk(400*1000);
         }             
     }
 
@@ -509,6 +515,8 @@ void map_check(int num) {
             case 14:
             case 4:
             case 13:
+            case 16:
+            case 17:
                 location[num] = PERSON;
                 break;
             case 5:
@@ -638,7 +646,7 @@ void main_task(intptr_t unused) {
             walltrace_length_p(17, 20, 8.5, 22);
             steering_color(COLOR_BLACK, -30, 0);
             steering_color(COLOR_WHITE, -20, 0);
-            linetrace_length(34.5, 30);
+            linetrace_length(33.8, 30);
             break;
         case 2:
             tank_turn(85, 0, 40);
@@ -650,16 +658,18 @@ void main_task(intptr_t unused) {
             steering_color(COLOR_WHITE, -20, 0);
             ev3_speaker_play_tone(NOTE_A5, 100);
             tslp_tsk(400*MSEC);
-            linetrace_length(34.5, 30);
+            linetrace_length(33.8, 30);
             break;
     }
     
     /*blue*/
-    steering(6, 35, 0, true);
+    tank_turn(46, 0, 30);
+    tslp_tsk(100*1000);
+    tank_turn(46, 30, 0);
+    tslp_tsk(100*1000);
+
     map_check(0);
     chemical_taker(0);
-    tank_turn(30, 0, 47);
-    tank_turn(30, 47, 0);
     if(chemical_check == 2 && location[0] == CHEMICAL) {
         walltrace_length_p(4, 35, 10, 15);
     }
@@ -667,7 +677,7 @@ void main_task(intptr_t unused) {
         steering(4.5, 35, 0, true);
         walltrace_length_p(16.7, 35, 10, 15);
     }
-    steering(10, 35, 0, true);
+    steering(16, 35, 0, true);
     tslp_tsk(200 * MSEC);
 
     /*steering(22.9, 30, 0);
@@ -696,11 +706,11 @@ void main_task(intptr_t unused) {
     if(chemical_check == 2 && location[2] == CHEMICAL) {
         ev3_speaker_play_tone(NOTE_A4, 100);
         tslp_tsk(500 * MSEC);
-        walltrace_length_p(11.5, 35, 10.3, 5);
+        walltrace_length_p(11.5, 35, 10, 5);
     }
     else {
         steering(6.5, 35, 0, true);
-        walltrace_length_p(20, 35, 10.3, 5);
+        walltrace_length_p(20, 35, 10, 5);
     }
     
     /*steering(35, 25, 0);*/
@@ -708,7 +718,7 @@ void main_task(intptr_t unused) {
     map_check(3);
     
     /*yellow*/
-    steering(16.5, -30, 0, true);
+    steering(18, -30, 0, true);
     tank_turn(180, 0, 60);
     steering_time(1500, -50, 0);
     steering_time(500, -10, 0);
@@ -718,7 +728,7 @@ void main_task(intptr_t unused) {
     }
     water(2);
     water(3);
-    walltrace_length_p(13, 30, 9, 5);
+    walltrace_length_p(13, 30, 10, 5);
     steering_color(COLOR_YELLOW, 35, 0);
     steering(7.9, 30, 0, true);
     map_check(4);
@@ -728,7 +738,7 @@ void main_task(intptr_t unused) {
     }
     else {
         steering(6.5, 30, 0, true);
-        walltrace_length_p(16.5, 30, 9, 5);
+        walltrace_length_p(16.5, 30, 10, 5);
     }
     tslp_tsk(1000*MSEC);
     /*red*/
@@ -742,7 +752,7 @@ void main_task(intptr_t unused) {
     }
 
     steering(6, 35, 0, true);
-    walltrace_length_p(9, 35, 9, 5);
+    walltrace_length_p(9, 35, 10, 5);
     steering_time(700, 40, 0);
     map_check(11);
     if (location[11] == CHEMICAL) {
@@ -755,7 +765,7 @@ void main_task(intptr_t unused) {
     tank_turn(180, -35, 35);
     water(11);
     water(10);
-    steering(28.5, 35, 0, true);
+    steering(30, 35, 0, true);
 
     /*yellow*/
 
@@ -779,196 +789,239 @@ void main_task(intptr_t unused) {
     water(7);
     /*white*/
     map_check(6);
+    tslp_tsk(100*MSEC);
     chemical_taker(6);
     if(chemical_check == 2 && location[6] == CHEMICAL) {
         steering(22.5, 35, 0, true);
     }
     else {
+        tslp_tsk(100*MSEC);
         steering_color(COLOR_WHITE, 30, 0);
         steering(36.9, 35, 0, true);
     }
     map_check(5);
+    tslp_tsk(100*MSEC);
     chemical_taker(5);
 
     water(5);
     water(6);
-    steering_color_b(COLOR_BLACK, 50, 0);
-    steering(11.5, 50, 0, false);
-    tank_turn(75, 40, -40);
-    tank_turn_color(25, -25);
-    linetrace_length(11, 35);
-    tslp_tsk(100*MSEC);
-    linetrace_color(RIGHT, COLOR_BLACK, 30);
-    ev3_speaker_play_tone(NOTE_A5, 100);
-    steering(11, 30, 0, false);
-    tank_turn(75, 40, -40);
-    tank_turn_color(25, -25);
-    linetrace_reflect(BOTH, 25, 20);
-    /*brown*/
-    steering(7, 25, 0, true);
-    map_check(8);
-    if(chemical_check == 2 && location[8] == CHEMICAL) {
-        steering(3.5, -25, 0, true);
-        tslp_tsk(500*1000);
-        ev3_motor_rotate(EV3_PORT_A, 240, -20, true);
-        ev3_motor_rotate(EV3_PORT_A, 50, 20, true);
-        steering(15, 30, 0, true);
-        ev3_motor_rotate(EV3_PORT_A, 190, 15, true);
-        tslp_tsk(500*1000);
-        tank_turn(46, 0, 30);
-        tslp_tsk(100*1000);
-        tank_turn(46, 30, 0);
-        tslp_tsk(100*1000);
-        steering(17, 35, 0, true);
+
+    brown = how_many - (location[0] + location[1] + location[2] + location[3] + location[4] + location[5] + location[6] + location[7] + location[10] + location[11]);
+
+    int music_brown;
+    music_brown = brown;
+    while (music_brown == 0) {
+        ev3_speaker_play_tone(NOTE_C5, 100);
+        tslp_tsk(120*1000);
+        music_brown = music_brown - 1;
     }
-    else {
-        steering(3.5, -30, 0, true);
-        tslp_tsk(500*1000);
-        if (location[8] == CHEMICAL) {
-            ev3_motor_rotate(EV3_PORT_A, 270, 15, true);
+
+    if (brown == 0) {
+        location[8] = NOTHING;
+        location[9] = NOTHING;
+        steering_color_b(COLOR_BLACK, 50, 0);
+        steering(28, 35, 0, true);
+        tank_turn(90, -35, 35);
+        steering(10, -35, 0, true);
+        if (location[3] == CHEMICAL) {
+            steering(20, 30, 0, true);
+            ev3_motor_rotate(EV3_PORT_A, 130, -40, true);
+            tslp_tsk(400*MSEC);
+            ev3_motor_set_power(EV3_PORT_A, -20);
+            tslp_tsk(1300*MSEC);
+            ev3_motor_stop(EV3_PORT_A, true);
+            steering_time(2500, -40, 0);
         }
-        tslp_tsk(500*1000);
+        else {
+            ev3_motor_set_power(EV3_PORT_A, -40);
+            tslp_tsk(250*MSEC);
+            ev3_motor_set_power(EV3_PORT_A, -20);
+            tslp_tsk(1300*MSEC);
+            ev3_motor_stop(EV3_PORT_A, true);
+            steering_time(2000, -40, 0);
+        }
+        tank_turn(180, 35, 0);
+    }
+    else if (brown == 10) {
+        location[8] = PERSON;
+        location[9] = NOTHING;
+        steering_color_b(COLOR_BLACK, 50, 0);
+        steering(28, 35, 0, true);
+        tank_turn(90, -35, 35);
+        steering(10, -35, 0, true);
+        if (location[3] == CHEMICAL) {
+            steering(20, 30, 0, true);
+            ev3_motor_rotate(EV3_PORT_A, 130, -40, true);
+            tslp_tsk(400*MSEC);
+            ev3_motor_set_power(EV3_PORT_A, -20);
+            tslp_tsk(1300*MSEC);
+            ev3_motor_stop(EV3_PORT_A, true);
+            steering_time(2500, -40, 0);
+        }
+        else {
+            ev3_motor_set_power(EV3_PORT_A, -40);
+            tslp_tsk(250*MSEC);
+            ev3_motor_set_power(EV3_PORT_A, -20);
+            tslp_tsk(1300*MSEC);
+            ev3_motor_stop(EV3_PORT_A, true);
+            steering_time(2000, -40, 0);
+        }
+        tank_turn(180, 35, 0);
+    }
+    else if (brown == 5) {
+        location[8] = FIRE;
+        location[9] = NOTHING;
+        tank_turn(180, -30, 0);
+        steering(10, -30, 0, true);
+        water(8);
+        steering(10, 28, 0, true);
+        tank_turn(180, 30, 0);
+        steering_color_b(COLOR_BLACK, 50, 0);
+        steering(29, 35, 0, true);
+        tank_turn(90, -35, 35);
+        steering(10, -35, 0, true);
+        if (location[3] == CHEMICAL) {
+            steering(20, 30, 0, true);
+            ev3_motor_rotate(EV3_PORT_A, 130, -40, true);
+            tslp_tsk(400*MSEC);
+            ev3_motor_set_power(EV3_PORT_A, -20);
+            tslp_tsk(1300*MSEC);
+            ev3_motor_stop(EV3_PORT_A, true);
+            steering_time(2500, -40, 0);
+        }
+        else {
+            ev3_motor_set_power(EV3_PORT_A, -40);
+            tslp_tsk(250*MSEC);
+            ev3_motor_set_power(EV3_PORT_A, -20);
+            tslp_tsk(1300*MSEC);
+            ev3_motor_stop(EV3_PORT_A, true);
+            steering_time(2000, -40, 0);
+        }
+        tank_turn(180, 35, 0);
+    }
+    else {
+        steering_color_b(COLOR_BLACK, 50, 0);
+        steering(11.5, 50, 0, false);
+        tank_turn(75, 40, -40);
+        tank_turn_color(25, -25);
+        linetrace_length(11, 35);
+        tslp_tsk(100*MSEC);
+        linetrace_color(RIGHT, COLOR_BLACK, 30);
+        ev3_speaker_play_tone(NOTE_A5, 100);
+        steering(11, 30, 0, false);
+        tank_turn(75, 40, -40);
+        tank_turn_color(25, -25);
+        linetrace_reflect(BOTH, 25, 20);
+        /*brown*/
+
         tank_turn(46, 0, 30);
         tslp_tsk(100*1000);
         tank_turn(46, 30, 0);
         tslp_tsk(100*1000);
-        steering(3, 30, 0, true);
-        steering(29, 30, 0, true);
-    }
-    
-    tslp_tsk(300*MSEC);
-    map_check(9);
-    chemical_taker(9);
-    if(chemical_check == 2 && location[9] == CHEMICAL) {
-        steering(14.5, -35, 0, true);
-    }
+        map_check(8);
+        if(chemical_check == 2 && location[8] == CHEMICAL) {
 
-    else {
+            tslp_tsk(500*1000);
+            steering(10, 30, 0, true);
+            ev3_motor_rotate(EV3_PORT_A, 200, -30, true);
+            ev3_motor_rotate(EV3_PORT_A, 25, 30, true);
+            steering(5, 30, 0, true);
+            ev3_motor_rotate(EV3_PORT_A, 175, 15, true);
+            steering(7, 25, 0, true);
+            steering(14, 35, 0, true);
+        }
+        else {
+
+            tslp_tsk(500*1000);
+            if (location[8] == CHEMICAL) {
+                steering(3, -28, 0, true);
+                ev3_motor_rotate(EV3_PORT_A, 270, 15, true);
+                steering(3, 28, 0, true);
+            }
+            tslp_tsk(500*1000);
+            steering(7, 25, 0, true);
+            steering(29, 30, 0, true);
+        }
         
-    }
-  
+        tslp_tsk(300*MSEC);
+        map_check(9);
+        chemical_taker(9);
+        if(chemical_check == 2 && location[9] == CHEMICAL) {
+            steering(14.5, -35, 0, true);
+        }
 
-    /*location[11] = 16 - (location[0] + location[1] + location[2] + location[3] + location[4] + location[5] + location[6] + location[7] + location[8] + location[9] + location[10]);*/
+        else {
+            
+        }
+    
 
-    /*chemical*/
-    /*if (location[11] == FIRE || location[10] == FIRE) {
-        tank_turn(60, 0, 40);
-        tank_turn(60, 40, 0);
-        steering(12, 30, 0, true);
+        /*location[11] = 16 - (location[0] + location[1] + location[2] + location[3] + location[4] + location[5] + location[6] + location[7] + location[8] + location[9] + location[10]);*/
+
+        /*chemical*/
+        /*if (location[11] == FIRE || location[10] == FIRE) {
+            tank_turn(60, 0, 40);
+            tank_turn(60, 40, 0);
+            steering(12, 30, 0, true);
+            tank_turn(160, -40, 40);
+            tank_turn(35, 0, 30);
+            water(11);
+            water(10);
+            steering(35, 30, 0, true);
+        }*/
+        
+        steering(14, -30, 0, true);
         tank_turn(160, -40, 40);
         tank_turn(35, 0, 30);
-        water(11);
-        water(10);
-        steering(35, 30, 0, true);
-    }*/
-    
-    steering(14, -30, 0, true);
-    tank_turn(160, -40, 40);
-    tank_turn(35, 0, 30);
 
-    
+        
 
-    water(8);
-    water(9);
+        water(8);
+        water(9);
 
-    /*int n = 0;
 
-    while (1) {
-        switch (location[n]) {
-                    
-            case ADULT:
-                ev3_speaker_play_tone(NOTE_C5, 100);
-                tslp_tsk(100*1000);
-                ev3_speaker_play_tone(NOTE_C5, 100);
-                tslp_tsk(100*1000);
-                ev3_speaker_play_tone(NOTE_C5, 100);
-                tslp_tsk(100*1000);
-                ev3_speaker_play_tone(NOTE_C5, 100);
-                break;
+        
+        
 
-            case CHILD:
-                ev3_speaker_play_tone(NOTE_C5, 100);
-                tslp_tsk(100*1000);
-                ev3_speaker_play_tone(NOTE_C5, 100);
-                tslp_tsk(100*1000);
-                ev3_speaker_play_tone(NOTE_C5, 100);
-                break;
+        
 
-            case FIRE:
-                ev3_speaker_play_tone(NOTE_C5, 100);
-                tslp_tsk(100*1000);
-                ev3_speaker_play_tone(NOTE_C5, 100);
-                tslp_tsk(100*1000);
-                ev3_speaker_play_tone(NOTE_C5, 100);
-                tslp_tsk(100*1000);
-                ev3_speaker_play_tone(NOTE_C5, 100);
-                tslp_tsk(100*1000);
-                ev3_speaker_play_tone(NOTE_C5, 100);
-                break;
 
-            case CHEMICAL:
-                ev3_speaker_play_tone(NOTE_C5, 100);
-                tslp_tsk(100*1000);
-                ev3_speaker_play_tone(NOTE_C5, 100);
-                break;
-
-            case NOTHING:
-                ev3_speaker_play_tone(NOTE_C5, 100);
-                break;
-
-            default:
-                ev3_speaker_play_tone(NOTE_C6, 100);
-                break;
+        steering(9, 40, 0, false);
+        walltrace_length_p(20, 60, 6, 5);
+        steering_color(COLOR_WHITE, 35, 0);
+        steering_color(COLOR_BLACK, 35, 0);
+        steering(15, 40, 0, true);
+        tank_turn(180, 0, 60);
+        steering_time(1300, -30, 0);
+        tslp_tsk(100*MSEC);
+        steering(30, 70, 0, true);
+        steering_color(COLOR_WHITE, 35, 0);
+        steering_color(COLOR_BLACK, 35, 0);
+        if (location[3] == CHEMICAL) {
+            steering(20, 30, 0, true);
+            ev3_motor_rotate(EV3_PORT_A, 130, -40, true);
+            tslp_tsk(400*MSEC);
+            ev3_motor_set_power(EV3_PORT_A, -20);
+            tslp_tsk(1300*MSEC);
+            ev3_motor_stop(EV3_PORT_A, true);
+            steering(48, -40, 0, true);
         }
-        tslp_tsk(500*1000);
-        n = n + 1;
-        if (n == 12) {
-            break;
-        }    
-    } */
+        else {
+            ev3_motor_set_power(EV3_PORT_A, -40);
+            tslp_tsk(250*MSEC);
+            ev3_motor_set_power(EV3_PORT_A, -20);
+            tslp_tsk(1300*MSEC);
+            ev3_motor_stop(EV3_PORT_A, true);
+            steering(28, -40, 0, true);
+        }
+        tank_turn(90, 40, -40);
+    }
     
-    int map [6] = {0,0,0,0,0,0};
-
     if (location[0] == PERSON || location[1] == PERSON) map[0] = 1;
     if (location[2] == PERSON || location[3] == PERSON) map[1] = 1;
     if (location[5] == PERSON || location[6] == PERSON) map[2] = 1;
     if (location[4] == PERSON || location[7] == PERSON) map[3] = 1;
     if (location[8] == PERSON || location[9] == PERSON) map[4] = 1;
     if (location[10] == PERSON || location[11] == PERSON) map[5] = 1;
-
-
-    steering(9, 40, 0, false);
-    walltrace_length_p(20, 60, 6, 5);
-    steering_color(COLOR_WHITE, 35, 0);
-    steering_color(COLOR_BLACK, 35, 0);
-    steering(18, 40, 0, true);
-    tank_turn(180, 0, 60);
-    steering_time(1300, -30, 0);
-    tslp_tsk(100*MSEC);
-    steering(30, 70, 0, true);
-    steering_color(COLOR_WHITE, 35, 0);
-    steering_color(COLOR_BLACK, 35, 0);
-    if (location[3] == CHEMICAL) {
-        steering(20, 30, 0, true);
-        ev3_motor_rotate(EV3_PORT_A, 130, -40, true);
-        tslp_tsk(400*MSEC);
-        ev3_motor_set_power(EV3_PORT_A, -20);
-        tslp_tsk(1300*MSEC);
-        ev3_motor_stop(EV3_PORT_A, true);
-        steering(48, -40, 0, true);
-    }
-    else {
-        ev3_motor_set_power(EV3_PORT_A, -40);
-        tslp_tsk(250*MSEC);
-        ev3_motor_set_power(EV3_PORT_A, -20);
-        tslp_tsk(1300*MSEC);
-        ev3_motor_stop(EV3_PORT_A, true);
-        steering(28, -40, 0, true);
-    }
-    tank_turn(90, 40, -40);
-
-
-    
 
     arm(up);
     tslp_tsk(600*MSEC);
@@ -1067,8 +1120,8 @@ void main_task(intptr_t unused) {
             }
             else {
                 steering(15, 40, 0, true);
-                tank_turn(110, 40, -40);
-                tank_turn(140, 40, 0);
+                tank_turn(100, 40, -40);
+                tank_turn(160, 40, 0);
             }
             steering_time(650, 35, 0);
             steering(45, -40, 0, true);
