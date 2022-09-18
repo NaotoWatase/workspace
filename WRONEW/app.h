@@ -59,6 +59,12 @@
 #define HIGH_PRIORITY	9		/* 並行実行されるタスクの優先度 */
 #define MID_PRIORITY	10
 #define LOW_PRIORITY	11
+#define P_GEIN          1
+#define I_GEIN          0.013
+#define D_GEIN          0.5
+
+
+
 
 /*
  *  ターゲットに依存する可能性のある定数の定義
@@ -81,6 +87,8 @@ extern void	task(intptr_t exinf);
 extern void	main_task(intptr_t exinf);
 extern void balance_task(intptr_t exinf);
 extern void idle_task(intptr_t exinf);
+extern void timeout_task(intptr_t exinf);
+extern void music_task(intptr_t exinf);
 //extern void	tex_routine(TEXPTN texptn, intptr_t exinf);
 //#ifdef CPUEXC1
 //extern void	cpuexc_handler(void *p_excinf);
