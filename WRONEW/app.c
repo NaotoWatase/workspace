@@ -12,7 +12,9 @@
 #include "app.h"
 #include "stdlib.h"
 #include <stdio.h>
+#include"math.h"
 
+/* /dev/tty.MindstormsEV3-SerialPor */
 
 #define DEBUG
 
@@ -66,23 +68,25 @@ static void button_clicked_handler(intptr_t button) {
 }
 bool_t birth;
 
-int kakudo_C; 
+int kakudo_C = 0; 
 int power = 50;
-float steer;
-float distance;
-int judgement_check;
-int chemical;
+
+float distance = 0;
+int judgement_check = 0;
+int chemical = 0;
 
 
-int white;
+int white = 0;
 int how_many = 31;
 
 int map [6] = {0,0,0,0,0,0};
-int start;
+int start = 2;
 
-int chemical_type;
+int chemical_type = 0;
 
-int water_count;
+int water_count = 0;
+
+int y = 0;
 
 
 
@@ -103,15 +107,8 @@ typedef enum way{
     LEFT
 } way_t ;
 
-
-
-typedef enum UpDown {
-    up = 1,
-    down = 0
-} arm_t ;
-
 uint8_t obj = 0;
-uint8_t test;
+uint8_t test = 0;
 rgb_raw_t testrgb;
 
 int location[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,0};
@@ -124,7 +121,7 @@ rgb_raw_t rgb_val;//カラーセンサーの値を保存するために必要な
 int red=0;
 int green=0;
 int blue=0;
-int judgement;
+int judgement = 0;
 
 void steering(int power, int cm, int steering) {
     int b_counts;
@@ -143,17 +140,25 @@ void steering(int power, int cm, int steering) {
     ev3_motor_stop(EV3_PORT_C, true);
 }
 
-
+/*
 void newsteering(int power, float cm) {
     int set_power = -power;
     int p;
     int gyro;
+    float steer;
     int left;
     int right;
     int difference;
-    float accele_length = cm / 10 * 1;
-    float maxspeed_length = cm / 10 * 9;
+    float accele_length = cm / 10 * 0;
+    float maxspeed_length = cm / 10 * 10;
     float decele_length = cm;
+
+    int left_diff = 0;
+    int left_last = 0;
+    int right_diff = 0;
+    int right_last = 0;
+    int average = 0;
+
     
     
     ev3_gyro_sensor_reset(EV3_PORT_4);
@@ -176,14 +181,24 @@ void newsteering(int power, float cm) {
     }
     while(true){
         gyro = ev3_gyro_sensor_get_angle(EV3_PORT_4);
+        left_last = left;
         left = ev3_motor_get_counts(EV3_PORT_B);
+        left_diff = left - left_last;
+
+        right_last = right;
         right = ev3_motor_get_counts(EV3_PORT_C);
-        left = abs(left);
-        right = abs(right);
+        right_diff = right - right_last;
+
+        average = (left_diff + right_diff) / 2;
+
         difference = left - right;
-        p = -(difference + gyro);
-        steer = p * 3;
-        ev3_motor_steer(EV3_PORT_B, EV3_PORT_C, power, steer);
+        float diff = sin(gyro) * average;
+        y = y + diff;
+        float coef_diff = 0.0;
+        float coef_gyro = 0;
+        p = -(gyro * 5 + y * coef_gyro);
+        steer = p;
+        ev3_motor_steer(EV3_PORT_B, EV3_PORT_C, set_power, steer);
         if (maxspeed_length * ROBOT1CM <= left) break;
     }
     while(true){
@@ -196,8 +211,6 @@ void newsteering(int power, float cm) {
         p = -(difference + gyro);
         steer = p * 3;
         power = (-set_power / accele_length) * ((left / ROBOT1CM ) - maxspeed_length) + set_power;
-        /*if (power < 20 && power >= 0 && set_power > 0) power = 20;
-        if (power > -20 && power <= 0 && set_power < 0) power = -20;*/
         if (power > -20 && set_power < 0) power = -20;
         if (power < 20 && set_power > 0) power = 20;
         ev3_motor_steer(EV3_PORT_B, EV3_PORT_C, power, steer);
@@ -207,6 +220,86 @@ void newsteering(int power, float cm) {
     tslp_tsk(1000);
     ev3_motor_stop(EV3_PORT_B, true);
     ev3_motor_stop(EV3_PORT_C, true);
+}*/
+
+void newsteering(int power, float cm) {
+    int set_power = -power;
+    int p_difference;
+    int p_gyro;
+    int gyro;
+    float steer;
+    int left;
+    int right;
+    int difference;
+    float accele_length = cm / 10 * 1;
+    float maxspeed_length = cm / 10 * 9;
+    float decele_length = cm;
+    
+    
+    ev3_gyro_sensor_reset(EV3_PORT_4);
+    ev3_gyro_sensor_reset(EV3_PORT_4);
+    ev3_gyro_sensor_reset(EV3_PORT_4);
+    ev3_motor_reset_counts(EV3_PORT_B);
+    ev3_motor_reset_counts(EV3_PORT_B);
+    ev3_motor_reset_counts(EV3_PORT_C);	
+    ev3_motor_reset_counts(EV3_PORT_C);
+    while(true){
+        gyro = ev3_gyro_sensor_get_angle(EV3_PORT_4);
+        left = ev3_motor_get_counts(EV3_PORT_B);
+        right = ev3_motor_get_counts(EV3_PORT_C);
+        /*left = abs(left);
+        right = abs(right);*/
+        difference = left - right;
+        p_difference = difference;
+        p_gyro = -gyro;
+        steer = p_difference * 2 + p_gyro * 5;
+        power = (set_power / accele_length) * (left / ROBOT1CM);
+        if (power > -20 && set_power < 0) power = -20;
+        if (power < 20 && set_power > 0) power = 20;
+        if (set_power > 0) steer = -steer;
+        ev3_motor_steer(EV3_PORT_B, EV3_PORT_C, power, steer);
+        left = abs(left);
+        if (accele_length * ROBOT1CM <= left) break;
+    }
+    while(true){
+        gyro = ev3_gyro_sensor_get_angle(EV3_PORT_4);
+        left = ev3_motor_get_counts(EV3_PORT_B);
+        right = ev3_motor_get_counts(EV3_PORT_C);
+        /*left = abs(left);
+        right = abs(right);*/
+        difference = left - right;
+        p_difference = difference;
+        p_gyro = -gyro;
+        steer = p_difference * 2 + p_gyro * 5;
+        if (set_power > 0) steer = -steer;
+        ev3_motor_steer(EV3_PORT_B, EV3_PORT_C, set_power, steer);
+        left = abs(left);
+        if (maxspeed_length * ROBOT1CM <= left) break;
+    }
+    while(true){
+        gyro = ev3_gyro_sensor_get_angle(EV3_PORT_4);
+        left = ev3_motor_get_counts(EV3_PORT_B);
+        right = ev3_motor_get_counts(EV3_PORT_C);
+        /*left = abs(left);
+        right = abs(right);*/
+        difference = left - right;        
+        p_difference = difference;
+        p_gyro = -gyro;
+        steer = p_difference * 2 + p_gyro * 3;
+        power = (-set_power / accele_length) * ((left / ROBOT1CM ) - maxspeed_length) + set_power;
+        /*if (power < 20 && power >= 0 && set_power > 0) power = 20;
+        if (power > -20 && power <= 0 && set_power < 0) power = -20;*/
+        if (power > -20 && set_power < 0) power = -20;
+        if (power < 20 && set_power > 0) power = 20;
+        if (set_power > 0) steer = -steer;
+        ev3_motor_steer(EV3_PORT_B, EV3_PORT_C, power, steer);
+        left = abs(left);
+        if (decele_length * ROBOT1CM <= left) break;
+    }
+    ev3_motor_stop(EV3_PORT_B, true);
+    ev3_motor_stop(EV3_PORT_C, true);
+    ev3_speaker_play_tone(NOTE_A4, 200);
+    tslp_tsk(1000);
 }
 
 
@@ -252,6 +345,8 @@ void p_turn(int angle, int left_motor, int right_motor){
     int gyro = 0;
     int power;
     ev3_gyro_sensor_reset(EV3_PORT_4);
+    ev3_gyro_sensor_reset(EV3_PORT_4);
+    ev3_gyro_sensor_reset(EV3_PORT_4);
     while (true) {
         gyro = ev3_gyro_sensor_get_angle(EV3_PORT_4);
         gyro = abs(gyro);
@@ -278,23 +373,30 @@ void p_turn(int angle, int left_motor, int right_motor){
         gyro = ev3_gyro_sensor_get_angle(EV3_PORT_4);
         gyro = abs(gyro);
         power = (angle - gyro) * 1;
-        if(power > 65) power = 65;
-        if(power < 6) power = 6;
         if (angle - gyro == 0) turn_check = turn_check + 1;
 
         if (left_motor == 0) {
             power = power * 1.3;
+            if(power > 65) power = 65;
+            if(power < 6 && power > 0) power = 6;
+            if(power > -6 && power < 0) power = -6;
             (void)ev3_motor_set_power(EV3_PORT_C, -power * right_motor); 
         }
         else if (right_motor == 0) {
             power = power * 1.3;
+            if(power > 65) power = 65;
+            if(power < 6 && power > 0) power = 6;
+            if(power > -6 && power < 0) power = -6;
             (void)ev3_motor_set_power(EV3_PORT_B, -power * left_motor);
         } 
         else {
+            if(power > 65) power = 65;
+            if(power < 6 && power > 0) power = 6;
+            if(power > -6 && power < 0) power = -6;
             (void)ev3_motor_set_power(EV3_PORT_B, -power * left_motor);
             (void)ev3_motor_set_power(EV3_PORT_C, -power * right_motor); 
         }
-        if (turn_check > 100) break;
+        if (turn_check > 300) break;
     }
     ev3_motor_stop(EV3_PORT_B, true);
     ev3_motor_stop(EV3_PORT_C, true);
@@ -302,7 +404,11 @@ void p_turn(int angle, int left_motor, int right_motor){
         ev3_speaker_play_tone(NOTE_A4, 100);
         tslp_tsk(1000);
     }
+    ev3_gyro_sensor_reset(EV3_PORT_4);
+    ev3_gyro_sensor_reset(EV3_PORT_4);
     tslp_tsk(500 * MSEC);
+    ev3_gyro_sensor_reset(EV3_PORT_4);
+    ev3_gyro_sensor_reset(EV3_PORT_4);
 }
     
 void tank_turn(float angle, int power_L, int power_R){
@@ -323,6 +429,7 @@ void tank_turn(float angle, int power_L, int power_R){
 
 void linetrace_length(float length, int power){
     ev3_motor_reset_counts(EV3_PORT_C);
+    float steer;
     float p = 0;
     float i = 0;
     float d = 0;
@@ -471,7 +578,9 @@ void sensor_check(uint8_t num) {
     }
 }
 
-
+void check_task(intptr_t unused){
+    fprintf(bt, "\r\ny:%d", y);
+}
 
 void main_task(intptr_t unused){
 
@@ -505,7 +614,7 @@ void main_task(intptr_t unused){
         }
     while ( !ht_nxt_color_sensor_measure_color(EV3_PORT_2, &test) ) {
             ;
-        }
+        }   
     ev3_color_sensor_get_color(EV3_PORT_1);
 
     fprintf(bt, "----GAME_START----\r\n");
@@ -526,28 +635,37 @@ void main_task(intptr_t unused){
    
    
     start = 1;
+    
 
-    newsteering(-60, 90);
+    switch (start){
+    case 1:
+    newsteering(20, 5);
+    newsteering(20, 5);
+    newsteering(20, 5);
+    newsteering(20, 5);
+    newsteering(20, 5);
+    newsteering(-70, 80);
     tslp_tsk(100*MSEC);
-    steering_time(1000, 20, 0);
-    newsteering(-30, 3);
-    tank_turn(90, -30, 30);
-    steering_time(1500, -20, 0);
-    tslp_tsk(100*MSEC);
-    newsteering(30, 6);
-    tslp_tsk(500*MSEC);
+    steering_time(600, 30, 0);
+    steering_color(COLOR_WHITE, -30, 1);
+    steering_color(COLOR_BLACK, -30, 1);
+    tslp_tsk(200*MSEC);
+    p_turn(45, 0, 1);
+    tslp_tsk(200*MSEC);
+    p_turn(45, -1, 1);
+    steering_time(900, -25, 0);
+    tslp_tsk(200*MSEC);
+    newsteering(20, 5);
+    tslp_tsk(900*MSEC);
     p_turn(90, 0, 1);
-    steering_color(COLOR_WHITE, 30, 0);
-    steering_color(COLOR_BLACK, 30, 0);
-    linetrace_length(30, 30);
-    steering_time(500, 30, 0);
-    p_turn(20, 0, 1);
-    p_turn(20, 1, 0);
+    newsteering(40, 9);
+    tslp_tsk(1000*MSEC);
     
     ev3_motor_reset_counts(EV3_PORT_D);
     
     map_check(8, RIGHT);
     chemical_taker(8, RIGHT);
+    tslp_tsk(800*MSEC);
     newsteering(70, 36);
     map_check(9, RIGHT);
     chemical_taker(9, RIGHT);
@@ -659,10 +777,18 @@ void main_task(intptr_t unused){
     
 
     if (location[10] == CHEMICAL){
-        ;
+        newsteering(-30, 4);
+        p_turn(90, 1, -1);
+        chemical_taker(10, LEFT);
+        p_turn(90, -1, 1);
+        steering_time(500, 25, 0);
     }
     if (location[11] == CHEMICAL){
-        ;
+        newsteering(-30, 4);
+        p_turn(90, -1, 1);
+        chemical_taker(11, RIGHT);
+        p_turn(90, 1, -1);
+        steering_time(500, 25, 0);        
     }
     
     newsteering(-30, 14);
@@ -675,10 +801,23 @@ void main_task(intptr_t unused){
     newsteering(50, 24);
     map_check(7, RIGHT);
     chemical_taker(7, RIGHT);
-    p_turn(63, 0, 1);
-    tslp_tsk(200*MSEC);
-    p_turn(63, 1, 0);
-    newsteering(50, 10);
+    if (location[7] == CHEMICAL){
+        newsteering(60, 22);
+        p_turn(90, 1, -1);
+        chemical_taker(7, RIGHT);
+        p_turn(90, -1, 1);
+        tslp_tsk(200*MSEC);
+        p_turn(63, 0, 1);
+        tslp_tsk(200*MSEC);
+        p_turn(63, 1, 0);
+        newsteering(-50, 12);
+    }
+    else{
+        p_turn(63, 0, 1);
+        tslp_tsk(200*MSEC);
+        p_turn(63, 1, 0);
+        newsteering(50, 10);
+    }
     map_check(4, LEFT);
     chemical_taker(4, LEFT);
     water(4);
@@ -713,20 +852,39 @@ void main_task(intptr_t unused){
     white = how_many - (location[0] + location[1] + location[2] + location[3] + location[4] + location[7] + location[8] + location[9] + location[10] + location[11]);
 
     if (white == CHEMICAL){
-        ;
+        newsteering(-40, 6);
+        p_turn(90, 1, -1);
+        newsteering(70, 30);
+        p_turn(90, -1, 1);
+        newsteering(40, 5);
+        map_check(6, LEFT);
+        chemical_taker(6, LEFT);
+        p_turn(180, 1, -1);
+        newsteering(60, 10);
+        map_check(7, RIGHT);
+        chemical_taker(7, RIGHT);
+        newsteering(80, 63);
+        tslp_tsk(200*MSEC);
+        p_turn(90, 1, -1);
     }    
-    if (location[10] == CHEMICAL){
-        ;
+    else if (white == FIRE){
+        location[5] = FIRE;
+        newsteering(-40, 6);
+        p_turn(90, -1, 1);
+        newsteering(-70, 30);
+        water(5);
+        p_turn(90, 1, -1);
+        newsteering(80, 63);
+        tslp_tsk(200*MSEC);
+        p_turn(90, 1, -1);
     }
-    if (location[11] == CHEMICAL){
-        ;
-    }
-
+    else{
     newsteering(80, 63);
     tslp_tsk(200*MSEC);
     p_turn(90, 1, -1);
     steering_time(1500, -30, 0);
     newsteering(70, 40);
+    }
     if(chemical_type == RIGHT){
         p_turn(180, 1, -1);
         ev3_motor_rotate(EV3_PORT_A, 270, 25, true);
@@ -738,6 +896,23 @@ void main_task(intptr_t unused){
         ev3_motor_rotate(EV3_PORT_A, 270, -25, true);
         tslp_tsk(500 * MSEC);
     }
+    
+    if (ev3_motor_get_counts(EV3_PORT_D) > 90) {
+        while(true){
+            ev3_motor_set_power(EV3_PORT_D, 20);
+            if (ev3_motor_get_counts(EV3_PORT_D) < 90)break;
+        }
+        ev3_motor_stop(EV3_PORT_D, true);
+    }
+    if (ev3_motor_get_counts(EV3_PORT_D) < 90) {
+        while(true){
+            ev3_motor_set_power(EV3_PORT_D, -20);
+            if (ev3_motor_get_counts(EV3_PORT_D) > 90)break;
+        }
+        ev3_motor_stop(EV3_PORT_D, true);
+    }
+    ev3_motor_stop(EV3_PORT_D, true);
+    
     newsteering(-70, 50);
     steering_time(500, -30, 0);
     tslp_tsk(200*MSEC);
@@ -760,21 +935,7 @@ void main_task(intptr_t unused){
     tslp_tsk(500*MSEC);
     tank_turn(130, 30, -30);
     steering_time(1500, 25, 0);
-    if (ev3_motor_get_counts(EV3_PORT_D) > 90) {
-        while(true){
-            ev3_motor_set_power(EV3_PORT_D, 20);
-            if (ev3_motor_get_counts(EV3_PORT_D) < 90)break;
-        }
-        ev3_motor_stop(EV3_PORT_D, true);
-    }
-    if (ev3_motor_get_counts(EV3_PORT_D) < 90) {
-        while(true){
-            ev3_motor_set_power(EV3_PORT_D, -20);
-            if (ev3_motor_get_counts(EV3_PORT_D) > 90)break;
-        }
-        ev3_motor_stop(EV3_PORT_D, true);
-    }
-    ev3_motor_stop(EV3_PORT_D, true);
+    
 
     newsteering(-70, 65);
     ev3_motor_rotate(EV3_PORT_D, 90, 30, true);
@@ -851,6 +1012,14 @@ void main_task(intptr_t unused){
     }
     else newsteering(50, 14);
     steering_time(2000, 30, -30);
+    
+    break;
+    
+    case 2:
+        break;
+    }
+
+    
 
 
     
