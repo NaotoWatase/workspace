@@ -340,13 +340,14 @@ void steering_color(colorid_t color_stop, int power, int steering){
 
 
 void p_turn(int angle, int left_motor, int right_motor){
-    angle = angle * 181 / 180;
+    angle = angle * 178 / 180;
     int turn_check = 0;
     int gyro = 0;
     int power;
     ev3_gyro_sensor_reset(EV3_PORT_4);
-    ev3_gyro_sensor_reset(EV3_PORT_4);
-    ev3_gyro_sensor_reset(EV3_PORT_4);
+    gyro = ev3_gyro_sensor_get_angle(EV3_PORT_4);
+    tslp_tsk(500 * MSEC);
+    gyro = ev3_gyro_sensor_get_angle(EV3_PORT_4);
     while (true) {
         gyro = ev3_gyro_sensor_get_angle(EV3_PORT_4);
         gyro = abs(gyro);
@@ -404,11 +405,7 @@ void p_turn(int angle, int left_motor, int right_motor){
         ev3_speaker_play_tone(NOTE_A4, 100);
         tslp_tsk(1000);
     }
-    ev3_gyro_sensor_reset(EV3_PORT_4);
-    ev3_gyro_sensor_reset(EV3_PORT_4);
     tslp_tsk(500 * MSEC);
-    ev3_gyro_sensor_reset(EV3_PORT_4);
-    ev3_gyro_sensor_reset(EV3_PORT_4);
 }
     
 void tank_turn(float angle, int power_L, int power_R){
