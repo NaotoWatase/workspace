@@ -237,12 +237,8 @@ void newsteering(int power, float cm) {
     
     
     ev3_gyro_sensor_reset(EV3_PORT_4);
-    ev3_gyro_sensor_reset(EV3_PORT_4);
-    ev3_gyro_sensor_reset(EV3_PORT_4);
-    ev3_motor_reset_counts(EV3_PORT_B);
     ev3_motor_reset_counts(EV3_PORT_B);
     ev3_motor_reset_counts(EV3_PORT_C);	
-    ev3_motor_reset_counts(EV3_PORT_C);
     while(true){
         gyro = ev3_gyro_sensor_get_angle(EV3_PORT_4);
         left = ev3_motor_get_counts(EV3_PORT_B);
