@@ -536,7 +536,8 @@ void map_check(int num, way_t sensor) {
             location[num] = FIRE;
             break;
         case 0:
-            location[num] = CHEMICAL;
+            if (red > 15 && red > blue && red > green) location[num] = FIRE;
+            else location[num] = CHEMICAL;
             break; 
         default:
             location[num] = NOTHING;
@@ -556,6 +557,18 @@ void chemical_taker(int n, way_t sensor){
         }
         else{
             ev3_motor_rotate(EV3_PORT_A, 280, 20, false);
+            chemical_type = LEFT;
+        }
+    }
+}
+void chemical_took(int n, way_t sensor){
+    if(location[n] == CHEMICAL){
+       if(sensor == RIGHT){
+           ev3_motor_rotate(EV3_PORT_A, 30, -15, false);
+           chemical_type = RIGHT;
+        }
+        else{
+            ev3_motor_rotate(EV3_PORT_A, 30, 15, false);
             chemical_type = LEFT;
         }
     }
@@ -648,11 +661,11 @@ void main_task(intptr_t unused){
     newsteering(-90, 80);
     tslp_tsk(100*MSEC);
     steering_time(600, 30, 0);
-    newsteering(-70, 11);
+    newsteering(-50, 11);
     tslp_tsk(200*MSEC);
-    p_turn(102, 0, 1);
+    p_turn(100, 0, 1);
     tslp_tsk(200*MSEC);
-    p_turn(78, -1, 1);
+    p_turn(80, -1, 1);
     steering_color(COLOR_WHITE, 35, 0);
     steering_color(COLOR_BLACK, 35, 0);
     steering_time(700, 15, 0);
@@ -664,7 +677,7 @@ void main_task(intptr_t unused){
     p_turn(88, 0, 1);
     newsteering(25, 9);
     tslp_tsk(500*MSEC);*/
-    newsteering(20, 4.5);
+    newsteering(20, 4);
     tslp_tsk(500*MSEC);
     
     ev3_motor_reset_counts(EV3_PORT_D);
@@ -672,12 +685,12 @@ void main_task(intptr_t unused){
     map_check(8, RIGHT);
     chemical_taker(8, RIGHT);
     tslp_tsk(600*MSEC);
-    newsteering(80, 36);
+    newsteering(70, 36);
     map_check(9, RIGHT);
     chemical_taker(9, RIGHT);
     water(8);
     water(9);
-    newsteering(80, 48);
+    newsteering(75, 48);
     map_check(10, RIGHT);
     map_check(11, LEFT);
     steering_time(500, 30, 0);
@@ -784,21 +797,23 @@ void main_task(intptr_t unused){
 
     if (location[10] == CHEMICAL){
         ev3_motor_rotate(EV3_PORT_A, 280, -20, false);
-        newsteering(-30, 5);
+        newsteering(-30, 6);
         p_turn(90, 1, -1);
         steering_time(200, 20, 0);
         chemical_taker(10, LEFT);
-        tslp_tsk(700*MSEC);
+        tslp_tsk(1000*MSEC);
         p_turn(90, -1, 1);
-        steering_time(700, 25, 0);
+        chemical_took(10, LEFT);
+        steering_time(800, 25, 0);
     }
     if (location[11] == CHEMICAL){
-        newsteering(-30, 5);
-        p_turn(90, -1, 1);
+        newsteering(-30, 6);
+        p_turn(88, -1, 1);
         chemical_taker(11, RIGHT);
         tslp_tsk(700*MSEC);
-        p_turn(90, 1, -1);
-        steering_time(700, 25, 0);        
+        p_turn(88, 1, -1);
+        chemical_took(11, RIGHT);
+        steering_time(800, 25, 0);        
     }
     
     newsteering(-50, 14);
@@ -808,7 +823,7 @@ void main_task(intptr_t unused){
     steering_time(500, -30, 0);
     water(10);
     water(11);
-    newsteering(70, 24);
+    newsteering(70, 23);
     map_check(7, RIGHT);
     if (location[7] == CHEMICAL){
         ev3_motor_rotate(EV3_PORT_A, 280, 20, false);
@@ -829,7 +844,7 @@ void main_task(intptr_t unused){
         p_turn(58, 0, 1);
         tslp_tsk(300*MSEC);
         p_turn(58, 1, 0);
-        newsteering(50, 12);
+        newsteering(45, 10);
     }
     map_check(4, LEFT);
     chemical_taker(4, LEFT);
@@ -843,11 +858,11 @@ void main_task(intptr_t unused){
     tank_turn(80, 0, -30);
     tslp_tsk(200*MSEC);
     p_turn(50, 1, -1);
-    steering_time(1300, -25, 0);
+    steering_time(1100, -25, 0);
 
     ev3_motor_stop(EV3_PORT_B, true);
     ev3_motor_stop(EV3_PORT_C, true);
-    tslp_tsk(600*MSEC);
+    tslp_tsk(200*MSEC);
     newsteering(60, 21.5);
     map_check(2, LEFT);
     chemical_taker(2, LEFT);
@@ -865,10 +880,11 @@ void main_task(intptr_t unused){
     white = how_many - (location[0] + location[1] + location[2] + location[3] + location[4] + location[7] + location[8] + location[9] + location[10] + location[11]);
 
     if (white == CHEMICAL){
-        newsteering(-40, 6);
+        newsteering(-35, 6);
         tslp_tsk(500*MSEC);
         p_turn(90, 1, -1);
-        newsteering(70, 30);
+        steering_time(800, -30, 0);
+        newsteering(70, 44);
         tslp_tsk(500*MSEC);
         p_turn(90, 1, -1);
         newsteering(40, 5);
@@ -881,12 +897,13 @@ void main_task(intptr_t unused){
         newsteering(80, 63);
         tslp_tsk(200*MSEC);
         p_turn(90, 1, -1);
+        newsteering(-40, 16);
     }    
     else if (white == FIRE){
         location[5] = FIRE;
         newsteering(-30, 6);
         p_turn(90, -1, 1);
-        newsteering(-70, 30);
+        newsteering(-70, 44);
         p_turn(90, 1, -1);
         water(5);
         tslp_tsk(700*MSEC);
@@ -935,9 +952,9 @@ void main_task(intptr_t unused){
     ev3_motor_stop(EV3_PORT_D, true);
     
     if(chemical_type == LEFT)newsteering(-70, 46);
-    if(chemical_type == RIGHT)newsteering(-70, 70);
+    if(chemical_type == RIGHT)newsteering(-70, 66);
 
-    steering_time(900, -30, 0);
+    steering_time(700, -30, 0);
     tslp_tsk(200*MSEC);
 
     steering_time(200, 30, 0);
@@ -967,7 +984,7 @@ void main_task(intptr_t unused){
     tslp_tsk(400*MSEC);
     tank_turn(184, 0, -30);
     tslp_tsk(200*MSEC);
-    newsteering(70, 22);
+    newsteering(70, 23);
     
     
     if (location[0] == PERSON || location[1] == PERSON) map[0] = 1; /*blue*/
@@ -1034,7 +1051,6 @@ void main_task(intptr_t unused){
             ev3_motor_rotate(EV3_PORT_D, 10, -40, true);
         }
     }
-    else newsteering(50, 6.5);
     steering_time(3000, 30, -40);
     
     break;
