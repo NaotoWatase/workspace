@@ -827,32 +827,33 @@ void main_task(intptr_t unused){
    
    
    
-    start = 1;
+    start = 2;
     
 
     switch (start){
-        case 1:
         case 2:
-            newsteering(-60, 100);
-            steering_time(500, -25, 0);
-            tank_turn(90, 0, 30);
-            p_turn(140, 1, -1);
-            steering_time(500, 30, 0);
-            newsteering(-60, 90);
+            newsteering(-60, 80);
+            steering_time(1600, -25, 0);
+            tank_turn(180, 0, 30);
+            tank_turn(180, 30, -30);
+            tank_turn(65, -30, 0);
+            tank_turn(60, 0, -30);
 
 
-
-
-    
-
+            break;
+        default:
+            break;
+    }
+            
     newsteering(-90, 80);
     tslp_tsk(100*MSEC);
-    steering_time(600, 30, 0);
+    steering_time(800, 30, 0);
     newsteering(-50, 11);
-    tslp_tsk(200*MSEC);
-    p_turn(97, 0, 1);
-    tslp_tsk(200*MSEC);
+    tslp_tsk(300*MSEC);
+    p_turn(98, 0, 1);
+    tslp_tsk(300*MSEC);
     p_turn(82, -1, 1);
+    tslp_tsk(200*MSEC);
     steering_color(COLOR_WHITE, 35, 0);
     steering_color(COLOR_BLACK, 35, 0);
     steering_time(700, 15, 0);
@@ -1004,7 +1005,9 @@ void main_task(intptr_t unused){
     }
     
     newsteering(-50, 14.2);
+    tslp_tsk(400*MSEC);
     p_turn(90, 1, -1);
+    tslp_tsk(400*MSEC);
     if(chemical < 1)ev3_motor_rotate(EV3_PORT_A, 280, -20, false);
     newsteering(-50, 10);
     steering_time(500, -30, 0);
@@ -1033,14 +1036,14 @@ void main_task(intptr_t unused){
         tslp_tsk(400*MSEC);
         p_turn(60, 1, 0);
         tslp_tsk(200*MSEC);
-        newsteering(35, 9.7);
+        newsteering(35, 10);
     }
     map_check(4, LEFT);
     chemical_taker(4, LEFT);
     water(4);
     water(7);
     tslp_tsk(200*MSEC);
-    newsteering(70, 39.5);
+    newsteering(70, 39.2);
     map_check(3, LEFT);
     chemical_taker(3, LEFT);
     steering_time(1000, 30, 0);
@@ -1075,7 +1078,7 @@ void main_task(intptr_t unused){
         p_turn(90, 1, -1);
         if(chemical < 1)ev3_motor_rotate(EV3_PORT_A, 280, -20, false);
         steering_time(1200, -30, 0);
-        newsteering(70, 49);
+        newsteering(70, 49.7);
         tslp_tsk(500*MSEC);
         p_turn(89, -1, 1);
         tslp_tsk(200*MSEC);
@@ -1104,12 +1107,33 @@ void main_task(intptr_t unused){
         tslp_tsk(200*MSEC);
         p_turn(90, 1, -1);
     }
-    else{
-    newsteering(80, 66);
-    tslp_tsk(200*MSEC);
-    p_turn(90, 1, -1);
-    steering_time(1500, -30, 0);
-    newsteering(70, 40);
+    else if (white == PERSON || white == NOTHING) {
+        newsteering(80, 66);
+        tslp_tsk(200*MSEC);
+        p_turn(90, 1, -1);
+        steering_time(1500, -30, 0);
+        newsteering(70, 40);
+    }
+    else {
+        newsteering(-35, 6);
+        tslp_tsk(500*MSEC);
+        p_turn(90, 1, -1);
+        if(chemical < 1)ev3_motor_rotate(EV3_PORT_A, 280, -20, false);
+        steering_time(1200, -30, 0);
+        newsteering(70, 49);
+        tslp_tsk(500*MSEC);
+        p_turn(89, -1, 1);
+        tslp_tsk(200*MSEC);
+        newsteering(30, 5);
+        map_check(5, RIGHT);
+        chemical_taker(5, RIGHT);
+        newsteering(-40, 37);
+        map_check(6, RIGHT);
+        chemical_taker(6, RIGHT);
+        newsteering(70, 100);
+        tslp_tsk(200*MSEC);
+        p_turn(90, 1, -1);
+        tslp_tsk(200*MSEC);
     }
     if(chemical_type == RIGHT){
         newsteering(50, 24);
@@ -1173,84 +1197,160 @@ void main_task(intptr_t unused){
     newsteering(-70, 65);
     ev3_motor_rotate(EV3_PORT_D, 90, 30, true);
     tslp_tsk(200*MSEC);
-    tank_turn(185, -30, 0);
-    tslp_tsk(400*MSEC);
-    tank_turn(184, 0, -30);
-    tslp_tsk(200*MSEC);
-    newsteering(70, 23.8);
-    
-    
     if (location[0] == PERSON || location[1] == PERSON) map[0] = 1; /*blue*/
     if (location[2] == PERSON || location[3] == PERSON) map[1] = 1; /*green*/
     if (location[5] == PERSON || location[6] == PERSON) map[2] = 1; /*white*/
     if (location[4] == PERSON || location[7] == PERSON) map[3] = 1; /*yellow*/
     if (location[8] == PERSON || location[9] == PERSON) map[4] = 1; /*brown*/
     if (location[10] == PERSON || location[11] == PERSON) map[5] = 1; /*red*/
-   
-    
-    if (map[4] == 1 || map[5] == 1) {
-        if (map[4] == 1) {
-            ev3_motor_rotate(EV3_PORT_D, 30, 40, true); /*時計回りがプラス*/
-            newsteering(30, 1.5);
-            ev3_motor_rotate(EV3_PORT_D, 40, -10, true);
-            ev3_motor_rotate(EV3_PORT_D, 10, 40, true);
-            newsteering(30, 5);
-        }
-        else newsteering(50, 6.5);
-        if (map[5] == 1) {
-            ev3_motor_rotate(EV3_PORT_D, 30, -40, true); 
-            newsteering(30, 2.6);
-            ev3_motor_rotate(EV3_PORT_D, 40, 25, true);
-            ev3_motor_rotate(EV3_PORT_D, 10, -40, true);
-            newsteering(30, 5.4);
-        }
-        else newsteering(50, 8);
-    }
-    else newsteering(50, 14.5);
 
-    if (map[2] == 1 || map[3] == 1) {
-        if (map[2] == 1) {
-            ev3_motor_rotate(EV3_PORT_D, 30, 40, true); 
-            newsteering(30, 1.5);
-            ev3_motor_rotate(EV3_PORT_D, 40, -10, true);
-            ev3_motor_rotate(EV3_PORT_D, 10, 40, true);
-            newsteering(30, 5);
-        }
-        else newsteering(50, 6.5);
-        if (map[3] == 1) {
-            ev3_motor_rotate(EV3_PORT_D, 30, -40, true); 
-            newsteering(30, 2.6);
-            ev3_motor_rotate(EV3_PORT_D, 40, 25, true);
-            ev3_motor_rotate(EV3_PORT_D, 10, -40, true);
-            newsteering(30, 5.4);
-        }
-        else newsteering(50, 8);
-    }
-    else newsteering(50, 14.5);
+    switch (start) {
+    case 1:
+        tank_turn(185, -30, 0);
+        tslp_tsk(400*MSEC);
+        tank_turn(184, 0, -30);
+        tslp_tsk(200*MSEC);
+        newsteering(70, 23.8);
+        
+        
     
-    if (map[0] == 1 || map[1] == 1) {
-        if (map[0] == 1) {
-            ev3_motor_rotate(EV3_PORT_D, 30, 40, true); 
-            newsteering(30, 1.5);
-            ev3_motor_rotate(EV3_PORT_D, 40, -10, true);
-            ev3_motor_rotate(EV3_PORT_D, 10, 40, true);
-            newsteering(30, 5);
+        
+        if (map[4] == 1 || map[5] == 1) {
+            if (map[4] == 1) {
+                ev3_motor_rotate(EV3_PORT_D, 30, 40, true); /*時計回りがプラス*/
+                newsteering(30, 1.5);
+                ev3_motor_rotate(EV3_PORT_D, 40, -10, true);
+                ev3_motor_rotate(EV3_PORT_D, 10, 40, true);
+                newsteering(30, 5);
+            }
+            else newsteering(50, 6.5);
+            if (map[5] == 1) {
+                ev3_motor_rotate(EV3_PORT_D, 30, -40, true); 
+                newsteering(30, 2.6);
+                ev3_motor_rotate(EV3_PORT_D, 40, 25, true);
+                ev3_motor_rotate(EV3_PORT_D, 10, -40, true);
+                newsteering(30, 5.4);
+            }
+            else newsteering(50, 8);
         }
-        else newsteering(50, 6.5);
-        if (map[1] == 1) {
-            ev3_motor_rotate(EV3_PORT_D, 30, -40, true); 
-            newsteering(30, 2.6);
-            ev3_motor_rotate(EV3_PORT_D, 40, 25, true);
-            ev3_motor_rotate(EV3_PORT_D, 10, -40, true);
+        else newsteering(50, 14.5);
+
+        if (map[2] == 1 || map[3] == 1) {
+            if (map[2] == 1) {
+                ev3_motor_rotate(EV3_PORT_D, 30, 40, true); 
+                newsteering(30, 1.5);
+                ev3_motor_rotate(EV3_PORT_D, 40, -10, true);
+                ev3_motor_rotate(EV3_PORT_D, 10, 40, true);
+                newsteering(30, 5);
+            }
+            else newsteering(50, 6.5);
+            if (map[3] == 1) {
+                ev3_motor_rotate(EV3_PORT_D, 30, -40, true); 
+                newsteering(30, 2.6);
+                ev3_motor_rotate(EV3_PORT_D, 40, 25, true);
+                ev3_motor_rotate(EV3_PORT_D, 10, -40, true);
+                newsteering(30, 5.4);
+            }
+            else newsteering(50, 8);
         }
-    }
-    steering_time(3000, 30, -40);
+        else newsteering(50, 14.5);
+        
+        if (map[0] == 1 || map[1] == 1) {
+            if (map[0] == 1) {
+                ev3_motor_rotate(EV3_PORT_D, 30, 40, true); 
+                newsteering(30, 1.5);
+                ev3_motor_rotate(EV3_PORT_D, 40, -10, true);
+                ev3_motor_rotate(EV3_PORT_D, 10, 40, true);
+                newsteering(30, 5);
+            }
+            else newsteering(50, 6.5);
+            if (map[1] == 1) {
+                ev3_motor_rotate(EV3_PORT_D, 30, -40, true); 
+                newsteering(30, 2.6);
+                ev3_motor_rotate(EV3_PORT_D, 40, 25, true);
+                ev3_motor_rotate(EV3_PORT_D, 10, -40, true);
+            }
+        }
+        steering_time(3000, 30, -40);
+        break;
     
-    break;
+    
+    
+    
+    
+    
     
     case 2:
+        newsteering(70, 36);
+        tslp_tsk(300*MSEC);
+        p_turn(180, 1, 0);
+        tslp_tsk(300*MSEC);
+    
+    
+        if (map[0] == 1 || map[1] == 1) {
+            if (map[1] == 1) {
+                ev3_motor_rotate(EV3_PORT_D, 30, 40, true); /*時計回りがプラス*/
+                newsteering(30, 1.5);
+                ev3_motor_rotate(EV3_PORT_D, 40, -10, true);
+                ev3_motor_rotate(EV3_PORT_D, 10, 40, true);
+                newsteering(30, 5);
+            }
+            else newsteering(50, 6.5);
+            if (map[0] == 1) {
+                ev3_motor_rotate(EV3_PORT_D, 30, -40, true);
+                newsteering(30, 2.6);
+                ev3_motor_rotate(EV3_PORT_D, 40, 10, true);
+                ev3_motor_rotate(EV3_PORT_D, 10, -40, true);
+                newsteering(30, 5.4);
+            }
+            else newsteering(50, 8);
+        }
+        else newsteering(50, 14);
+    
+        if (map[2] == 1 || map[3] == 1) {
+            if (map[3] == 1) {
+                ev3_motor_rotate(EV3_PORT_D, 30, 40, true);
+                newsteering(30, 1.5);
+                ev3_motor_rotate(EV3_PORT_D, 40, -10, true);
+                ev3_motor_rotate(EV3_PORT_D, 10, 40, true);
+                newsteering(30, 5);
+            }
+            else newsteering(50, 6);
+            if (map[2] == 1) {
+                ev3_motor_rotate(EV3_PORT_D, 30, -40, true);
+                newsteering(30, 2.6);
+                ev3_motor_rotate(EV3_PORT_D, 40, 10, true);
+                ev3_motor_rotate(EV3_PORT_D, 10, -40, true);
+                newsteering(30, 5.4);
+            }
+            else newsteering(50, 8);
+        }
+        else newsteering(50, 14);
+    
+        if (map[4] == 1 || map[5] == 1) {
+            if (map[5] == 1) {
+                ev3_motor_rotate(EV3_PORT_D, 30, 40, true);
+                newsteering(30, 1.5);
+                ev3_motor_rotate(EV3_PORT_D, 40, -10, true);
+                ev3_motor_rotate(EV3_PORT_D, 10, 40, true);
+                newsteering(30, 5);
+            }
+            else newsteering(50, 7);
+            if (map[4] == 1) {
+                ev3_motor_rotate(EV3_PORT_D, 30, -40, true);
+                newsteering(30, 2.6);
+                ev3_motor_rotate(EV3_PORT_D, 40, 10, true);
+                ev3_motor_rotate(EV3_PORT_D, 10, -40, true);
+            }
+        }
+    
+        steering_time(3000, 30, 30);
+
         break;
     }
+    
+    
+    
 
     
 
