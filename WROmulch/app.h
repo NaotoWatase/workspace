@@ -88,7 +88,8 @@ extern void	main_task(intptr_t exinf);
 extern void balance_task(intptr_t exinf);
 extern void idle_task(intptr_t exinf);
 extern void check_task(intptr_t exinf);
-extern void location_task(intptr_t exinf);
+extern void location_r_task(intptr_t exinf);
+extern void location_l_task(intptr_t exinf);
 extern void music_task(intptr_t exinf);
 //extern void	tex_routine(TEXPTN texptn, intptr_t exinf);
 //#ifdef CPUEXC1
