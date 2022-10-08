@@ -1076,7 +1076,7 @@ void main_task(intptr_t unused){
         newsteering(-35, 6);
         tslp_tsk(500*MSEC);
         p_turn(90, 1, -1);
-        if(chemical < 1)ev3_motor_rotate(EV3_PORT_A, 280, -20, false);
+        if(chemical < 1)ev3_motor_rotate(EV3_PORT_A, 280, 20, false);
         steering_time(1200, -30, 0);
         newsteering(70, 49.7);
         tslp_tsk(500*MSEC);
@@ -1118,7 +1118,7 @@ void main_task(intptr_t unused){
         newsteering(-35, 6);
         tslp_tsk(500*MSEC);
         p_turn(90, 1, -1);
-        if(chemical < 1)ev3_motor_rotate(EV3_PORT_A, 280, -20, false);
+        if(chemical < 1)ev3_motor_rotate(EV3_PORT_A, 280, 20, false);
         steering_time(1200, -30, 0);
         newsteering(70, 49);
         tslp_tsk(500*MSEC);
