@@ -136,6 +136,9 @@ int blue=0;
 int judgement = 0;
 
 void steering(int power, int cm, int steering) {
+    int cm_1;
+    int cm_2;
+    int cm_3;
     int b_counts;
     int c_counts;
     cm = abs(cm);
@@ -379,7 +382,7 @@ void newsteering(int power, float cm) {
         if (set_power > 0) p_gyro = gyro;
         else p_gyro = -gyro;
         p_diff = -difference;
-        steer = p_diff * 6 + p_gyro * 4;
+        steer = p_diff * 7 + p_gyro * 0;
         power = (set_power / accele_length) * (left / ROBOT1CM);
         if (power > -15 && set_power < 0) power = -15;
         if (power < 15 && set_power > 0) power = 15;
@@ -396,7 +399,7 @@ void newsteering(int power, float cm) {
         if (set_power > 0) p_gyro = gyro;
         else p_gyro = -gyro;
         p_diff = -difference;
-        steer = p_diff * 5 + p_gyro * 4;
+        steer = p_diff * 4 + p_gyro * 0;
         ev3_motor_steer(EV3_PORT_B, EV3_PORT_C, power, steer);
         if (maxspeed_length * ROBOT1CM <= left) break;
     }
@@ -410,7 +413,7 @@ void newsteering(int power, float cm) {
         if (set_power > 0) p_gyro = gyro;
         else p_gyro = -gyro;
         p_diff = -difference;
-        steer = p_diff * 6 + p_gyro * 4;
+        steer = p_diff * 7 + p_gyro * 0;
         power = (-set_power / decele_length) * ((left / ROBOT1CM ) - maxspeed_length) + set_power;
         /*if (power < 20 && power >= 0 && set_power > 0) power = 20;
         if (power > -20 && power <= 0 && set_power < 0) power = -20;*/
@@ -462,12 +465,12 @@ void steering_color(colorid_t color_stop, int power, int steering){
 
 
 void p_turn(int angle, int left_motor, int right_motor){
-    angle = angle * 178 / 180;
+    angle = angle;
     int turn_check = 0;
     int gyro = 0;
     int power;
     float accele_length = angle / 10 * 1;
-    float maxspeed_length = angle / 10 * 2;
+    float maxspeed_length = angle / 10 * 3;
     ev3_gyro_sensor_reset(EV3_PORT_4);
     gyro = ev3_gyro_sensor_get_angle(EV3_PORT_4);
     gyro = ev3_gyro_sensor_get_angle(EV3_PORT_4);
@@ -654,9 +657,8 @@ void map_check(int num, way_t sensor) {
         case 17:
             
             if (judgement > 80 || blue > 40 || green > 40 || red > 40) {
+                if (red - green -blue > 20) location[num] = FIRE;
                 location[num] = PERSON;
-                if (red - green - blue > 20) location[num] = FIRE;
-    
             } 
             else {
                 judgement_check = judgement;
@@ -698,7 +700,6 @@ void chemical_taker(int n, way_t sensor){
         }
     }
 }
-
 void chemical_took(int n, way_t sensor){
     if(location[n] == CHEMICAL){
        if(sensor == RIGHT){
@@ -827,53 +828,11 @@ void main_task(intptr_t unused){
 
     /*スタートの分岐チェック*/
    
-    p_turn(90, 1,0);
-    newsteering(35, 6);
-    ev3_motor_rotate(EV3_PORT_D, 30, 20, false);
-    p_turn(90, 1,-1);
-    steering_time(800, 35, 0);
-    newsteering(-60, 75);
-    ev3_motor_rotate(EV3_PORT_D, 30, -20, true);
-    newsteering(60, 32);
-    tslp_tsk(1000*MSEC);
-    p_turn(90, -1, 1);
-    tslp_tsk(1000*MSEC);
-    newsteering(60, 130);
-    ev3_motor_rotate(EV3_PORT_D, 30, -20, false);
-    steering_time(4000, 35, 0);
-    
-    
-    p_turn(90, 0, -1);
-    tslp_tsk(300*MSEC);
-    p_turn(50, 0, 1);
-    tslp_tsk(500*MSEC);
-    p_turn(50, 1, 0);
-    newsteering(80, 40);
-    steering_time(1500, 30, 0);
-    ev3_motor_rotate(EV3_PORT_A, 280, 20, false);
-    p_turn(90, 0, -1);
-    steering_time(1000, -30, 0);
-    tank_turn(20, 0, 30);
-    newsteering(70, 100);
-    newsteering(-50, 20);
-    p_turn(90, 0, -1);
-    newsteering(70, 130);
-    
-    ev3_motor_rotate(EV3_PORT_A, 280, 20, true);
-
-
-
-
-
-
-
-
+   steering(-50, 30, 50);
    
-    
-    
-    
-    
-    
+    p_turn(98, 0, 1);
+    tslp_tsk(300*MSEC);
+    p_turn(82, -1, 1);
 
     
 
