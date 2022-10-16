@@ -454,7 +454,7 @@ void m_steering(float power, float cm) {
     
 }
 
-void m_trapezoidal(float set_power, float cm) {
+void straight(float set_power, float cm) {
     float lb_power;
     float rc_power;
     float power = 0;
@@ -462,6 +462,7 @@ void m_trapezoidal(float set_power, float cm) {
     float right;
     float maxspeed_length = cm * 15.0 / 20.0;
     float decele_length = cm * 5.0 / 20.0;
+
     float diff = 0.0006;    // 0.0008 
     if (set_power > 0) diff = 0.003;
     if (set_power < 0) diff = -0.003;
