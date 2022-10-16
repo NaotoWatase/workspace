@@ -63,6 +63,26 @@
 #define I_GEIN          0.013
 #define D_GEIN          0.5
 
+#define MSEC (1000)
+#define ROBOT1CM (18.48)
+#define TURN (0.13395)
+
+typedef enum object {  
+    PERSON = 10,
+    CHILD = 3,
+    ADULT = 2,
+    FIRE = 5,
+    CHEMICAL = 1,
+    NOTHING = 0
+} object_t ;
+
+/*mapceck時のセンサーを指定*/
+typedef enum way{
+    RIGHT,
+    LEFT,
+    NONE
+} way_t ;
+
 
 
 
