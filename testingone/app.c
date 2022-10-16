@@ -454,6 +454,7 @@ void m_steering(float power, float cm) {
     
 }
 
+/*直音が担当します*/
 void straight(float set_power, float cm) {
     float lb_power;
     float rc_power;
