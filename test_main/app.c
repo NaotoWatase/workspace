@@ -1100,9 +1100,9 @@ void main_task(intptr_t unused){
     map_check(8, RIGHT);
     straight(11, 80);
     map_check(5, RIGHT);
-    chemical_taker(5, RIGHT);
     map_check(6, LEFT);
-    chemical_taker(6, LEFT);
+    straight(25, 80);
+    turn(90, 50, -50);
 
     if (location[8] == CHEMICAL){
 
@@ -1117,6 +1117,100 @@ void main_task(intptr_t unused){
     water(5);
     water(6);
 
+    /* chemical */
+    straight(80, 80);
+    //関数でいいかも（falseでやりたい）
+    if (ev3_motor_get_counts(EV3_PORT_D) > 90) {
+        while(true){
+            ev3_motor_set_power(EV3_PORT_D, -20);
+            if (ev3_motor_get_counts(EV3_PORT_D) < 90)break;
+        }
+        ev3_motor_stop(EV3_PORT_D, true);
+    }
+    if (ev3_motor_get_counts(EV3_PORT_D) < 90) {
+        while(true){
+            ev3_motor_set_power(EV3_PORT_D, 20);
+            if (ev3_motor_get_counts(EV3_PORT_D) > 90)break;
+        }
+        ev3_motor_stop(EV3_PORT_D, true);
+    }
+    if(chemical_type == RIGHT){
+        turn(90, -50, 50);
+        straight(10, -50);
+        ev3_motor_rotate(EV3_PORT_A, 80, -20, true);//数値＆パワーてきとう
+        straight(60, -80);
+        turn(180, -50, 0);
+    }
+    if(chemical_type == LEFT){
+        turn(90, 50, -50);
+        straight(10, -50);
+        ev3_motor_rotate(EV3_PORT_A, 80, 20, true);
+        straight(70, 80);
+        turn(180, 50, 0);
+    }
     
+
+    /* crossingB */
+    straight(80, -80);
+    steering_time(500, -30, 0);
+    straight(30, 80);
+    turn(90, -50, 50);
+    steering_time(800, 30, 0);
+    straight(30, -80);
+
+    /* marking */
+    if (location[0] == PERSON || location[1] == PERSON) map[0] = 1; //blue
+    if (location[2] == PERSON || location[3] == PERSON) map[1] = 1; //green
+    if (location[5] == PERSON || location[6] == PERSON) map[2] = 1; //white
+    if (location[4] == PERSON || location[7] == PERSON) map[3] = 1; //yellow
+    if (location[8] == PERSON || location[9] == PERSON) map[4] = 1; //brown
+    if (location[10] == PERSON || location[11] == PERSON) map[5] = 1; //red
+    
+    if (map[4] == 1 || map[5] == 1) {
+        if (map[4] == 1 && map[5] == 1) {
+        ev3_motor_rotate(EV3_PORT_D, 120, -50, true);//数値＆パワーてきとう
+        ev3_motor_rotate(EV3_PORT_D, 120, 50, false);
+        }
+        else if (map[5] == 1) {
+        ev3_motor_rotate(EV3_PORT_D, 100, -30, true);
+        ev3_motor_rotate(EV3_PORT_D, 100, 50, false);
+        }
+        else{
+        ev3_motor_rotate(EV3_PORT_D, 120, -50, true);
+        ev3_motor_rotate(EV3_PORT_D, 120, 50, false);
+        }
+        straight(22, 80);
+    }
+    else{
+        ev3_motor_rotate(EV3_PORT_D, 80, -30, true);
+        ev3_motor_rotate(EV3_PORT_D, 10, -20, true);
+        if (map[2] == 1 || map[3] == 1) {
+            straight(11, 50);
+            if (map[2] == 1 && map[3] == 1) {
+                ev3_motor_rotate(EV3_PORT_D, 120, -50, true);
+                ev3_motor_rotate(EV3_PORT_D, 120, 50, false);
+            }
+            else if (map[3] == 1) {
+                ev3_motor_rotate(EV3_PORT_D, 100, -30, true);
+                ev3_motor_rotate(EV3_PORT_D, 100, 50, false);
+            }
+            else{
+                ev3_motor_rotate(EV3_PORT_D, 120, -50, true);
+                ev3_motor_rotate(EV3_PORT_D, 120, 50, false);
+            }
+        }
+        else{
+            straight(24, 50);
+            steering_time(200, -30, 0);
+            ev3_motor_rotate(EV3_PORT_D, 120, -50, true);
+            ev3_motor_rotate(EV3_PORT_D, 120, 50, false);
+            straight(6, 50);
+            ev3_motor_rotate(EV3_PORT_D, 100, -30, true);
+            ev3_motor_rotate(EV3_PORT_D, 100, 50, false);
+            straight(80, 80);
+            
+        }    
+    }
+    ev3_motor_rotate(EV3_PORT_D, 90, -30, false);
 
 }
