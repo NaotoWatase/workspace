@@ -474,7 +474,7 @@ void straight(float set_power, float cm) {
     }
     if (set_power < 0) {
         diff = -0.0008;
-        gein = -3;
+        gein = -0.5;
     }
     //ev3_gyro_sensor_reset(EV3_PORT_4);
     ev3_motor_reset_counts(EV3_PORT_B);
@@ -505,7 +505,7 @@ void straight(float set_power, float cm) {
         if (left >= maxspeed_length * ROBOT1CM) break;
     }
     if (set_power < 0) {
-        gein = -1;
+        gein = -0.5;
     }
     while(true){
         left = ev3_motor_get_counts(EV3_PORT_B);
@@ -529,7 +529,7 @@ void straight(float set_power, float cm) {
         if (maxspeed_length * ROBOT1CM <= left) break;
     }
     if (set_power < 0) {
-        gein = -3;
+        gein = -0.3;
     }
     while(true){
         left = ev3_motor_get_counts(EV3_PORT_B);
@@ -539,8 +539,13 @@ void straight(float set_power, float cm) {
         difference = left - right;
         steer = difference * gein;
         power = (-set_power / decele_length) * ((left / ROBOT1CM ) - maxspeed_length) + set_power;
-        if (power > -20 && set_power < 0) power = -20;
-        if (power < 20 && set_power > 0) power = 20;
+        if (set_power > 0 && power <= 20) {
+            power = 20;
+        }
+        if (set_power < 0 && power >= -20) {
+            power = -20;
+        }
+        //else power = 15;
         if(steering > 0) {
             lb_power = power;
             rc_power = power - (power * steer / 50);
@@ -554,10 +559,11 @@ void straight(float set_power, float cm) {
         (void)ev3_motor_set_power(EV3_PORT_B, lb_power);
         (void)ev3_motor_set_power(EV3_PORT_C, rc_power);
         if (cm * ROBOT1CM <= left) break;
+
     }
     ev3_motor_stop(EV3_PORT_B, true);
     ev3_motor_stop(EV3_PORT_C, true);
-    
+    fprintf(bt, "kaiten:%f",left);
 }
 
 
@@ -1054,17 +1060,19 @@ void main_task(intptr_t unused){
     ev3_motor_reset_counts(EV3_PORT_B);
     ev3_motor_reset_counts(EV3_PORT_C);
     tslp_tsk(1000*MSEC);
-    straight(100, 40);
-    tslp_tsk(1000*MSEC);
-    straight(-100, 40);
-    tslp_tsk(1000*MSEC);
-    straight(100, 40);
-    tslp_tsk(1000*MSEC);
-    straight(-100, 40);
-    tslp_tsk(1000*MSEC);
-    straight(100, 40);
-    tslp_tsk(1000*MSEC);
-    straight(-100, 40);
+    straight(-80, 40);
+    tslp_tsk(10000*MSEC);
+    straight(-80, 40);
+    straight(80, 40);
+    straight(-80, 40);
+    straight(80, 40);
+    straight(-80, 40);
+    straight(80, 40);
+    straight(-80, 40);
+    straight(80, 40);
+    straight(-80, 40);
+    straight(80, 40);
+    straight(-80, 40);
     //ev3_motor_reset_counts(EV3_PORT_D);
     //ev3_motor_rotate(EV3_PORT_A, 3600, -100, false);
     //ev3_motor_rotate(EV3_PORT_B, 2800, -100, false);
