@@ -16,7 +16,7 @@
 #include"math.h"
 
 /* /dev/tty.MindstormsEV3-SerialPor */
-/* comment added here */
+
 #define DEBUG
 
 #ifdef DEBUG
@@ -454,79 +454,116 @@ void m_steering(float power, float cm) {
     
 }
 
+/*直音が担当します*/
 void straight(float set_power, float cm) {
     float lb_power;
     float rc_power;
     float power = 0;
     float left;
     float right;
-    float maxspeed_length = cm * 15.0 / 20.0;
-    float decele_length = cm * 5.0 / 20.0;
+    float difference;
+    float gein = -0.5;
+    float steer;
+    float maxspeed_length = cm * 10.0 / 20.0;
+    float decele_length = cm * 10.0 / 20.0;
 
     float diff = 0.0006;    // 0.0008 
-    if (set_power > 0) diff = 0.003;
-    if (set_power < 0) diff = -0.003;
+    if (set_power > 0) {
+        diff = 0.0025;
+        gein = -6;
+    }
+    if (set_power < 0) {
+        diff = -0.0008;
+        gein = -0.5;
+    }
     //ev3_gyro_sensor_reset(EV3_PORT_4);
     ev3_motor_reset_counts(EV3_PORT_B);
     ev3_motor_reset_counts(EV3_PORT_C);	
     power = diff;
     while(true){
-        //gyro = ev3_gyro_sensor_get_angle(EV3_PORT_4);
         left = ev3_motor_get_counts(EV3_PORT_B);
         right = ev3_motor_get_counts(EV3_PORT_C);
         left = abs(left);
         right = abs(right);
-        //if (set_power > 0) p_gyro = gyro;
-        //else p_gyro = -gyro;
-//        if (power > -10 && set_power < 0) power = -10;
-//        if (power < 10 && set_power > 0) power = 10;
-//        power = (set_power / accele_length) * (left / ROBOT1CM);
+        difference = left - right;
+        steer = difference * gein;
         power += diff; 
-        lb_power = -power;
-        rc_power = power;
-        ev3_motor_set_power(EV3_PORT_B, lb_power);
-        ev3_motor_set_power(EV3_PORT_C, rc_power);
+        if(steering > 0) {
+            lb_power = power;
+            rc_power = power - (power * steer / 50);
+            lb_power = -lb_power;
+        }
+        else {
+            lb_power = power + (power * steer / 50);
+            rc_power = power;
+            lb_power = -lb_power;
+        }
+        (void)ev3_motor_set_power(EV3_PORT_B, lb_power);
+        (void)ev3_motor_set_power(EV3_PORT_C, rc_power);
         if (power >= set_power && set_power > 0) break;
         if (power <= set_power && set_power < 0) break;
         if (left >= maxspeed_length * ROBOT1CM) break;
-//        if (accele_length * ROBOT1CM <= left) break;
+    }
+    if (set_power < 0) {
+        gein = -0.5;
     }
     while(true){
-        //gyro = ev3_gyro_sensor_get_angle(EV3_PORT_4);
         left = ev3_motor_get_counts(EV3_PORT_B);
         right = ev3_motor_get_counts(EV3_PORT_C);
         left = abs(left);
         right = abs(right);
-        //if (set_power > 0) p_gyro = gyro;
-        //else p_gyro = -gyro;
-        lb_power = -set_power;
-        rc_power = set_power;
-        ev3_motor_set_power(EV3_PORT_B, lb_power);
-        ev3_motor_set_power(EV3_PORT_C, rc_power);
+        difference = left - right;
+        steer = difference * gein;
+        if(steering > 0) {
+            lb_power = power;
+            rc_power = power - (power * steer / 50);
+            lb_power = -lb_power;
+        }
+        else {
+            lb_power = power + (power * steer / 50);
+            rc_power = power;
+            lb_power = -lb_power;
+        }
+        (void)ev3_motor_set_power(EV3_PORT_B, lb_power);
+        (void)ev3_motor_set_power(EV3_PORT_C, rc_power);
         if (maxspeed_length * ROBOT1CM <= left) break;
     }
+    if (set_power < 0) {
+        gein = -0.3;
+    }
     while(true){
-        //gyro = ev3_gyro_sensor_get_angle(EV3_PORT_4);
         left = ev3_motor_get_counts(EV3_PORT_B);
         right = ev3_motor_get_counts(EV3_PORT_C);
         left = abs(left);
         right = abs(right);
-        //if (set_power > 0) p_gyro = gyro;
-        //else p_gyro = -gyro;
+        difference = left - right;
+        steer = difference * gein;
         power = (-set_power / decele_length) * ((left / ROBOT1CM ) - maxspeed_length) + set_power;
-        /*if (power < 20 && power >= 0 && set_power > 0) power = 20;
-        if (power > -20 && power <= 0 && set_power < 0) power = -20;*/
-        if (power > -10 && set_power < 0) power = -10;
-        if (power < 10 && set_power > 0) power = 10;
-        lb_power = -power;
-        rc_power = power;
-        ev3_motor_set_power(EV3_PORT_B, lb_power);
-        ev3_motor_set_power(EV3_PORT_C, rc_power);
+        if (set_power > 0 && power <= 20) {
+            power = 20;
+        }
+        if (set_power < 0 && power >= -20) {
+            power = -20;
+        }
+        //else power = 15;
+        if(steering > 0) {
+            lb_power = power;
+            rc_power = power - (power * steer / 50);
+            lb_power = -lb_power;
+        }
+        else {
+            lb_power = power + (power * steer / 50);
+            rc_power = power;
+            lb_power = -lb_power;
+        }
+        (void)ev3_motor_set_power(EV3_PORT_B, lb_power);
+        (void)ev3_motor_set_power(EV3_PORT_C, rc_power);
         if (cm * ROBOT1CM <= left) break;
+
     }
     ev3_motor_stop(EV3_PORT_B, true);
     ev3_motor_stop(EV3_PORT_C, true);
-    
+    fprintf(bt, "kaiten:%f",left);
 }
 
 
@@ -599,8 +636,6 @@ void steering_color(colorid_t color_stop, int power, int steering){
     (void)ev3_motor_stop(EV3_PORT_C, true);    
 }
 
-void turn(int angle, int left_motor, int right_motor){
-}
 
 
 void p_turn(int angle, int left_motor, int right_motor){
@@ -1025,17 +1060,19 @@ void main_task(intptr_t unused){
     ev3_motor_reset_counts(EV3_PORT_B);
     ev3_motor_reset_counts(EV3_PORT_C);
     tslp_tsk(1000*MSEC);
-    straight(100, 40);
+    straight(80, 40);
     tslp_tsk(1000*MSEC);
-    straight(-100, 40);
-    tslp_tsk(1000*MSEC);
-    straight(100, 40);
-    tslp_tsk(1000*MSEC);
-    straight(-100, 40);
-    tslp_tsk(1000*MSEC);
-    straight(100, 40);
-    tslp_tsk(1000*MSEC);
-    straight(-100, 40);
+    straight(-80, 40);
+    straight(80, 40);
+    straight(-80, 40);
+    straight(80, 40);
+    straight(-80, 40);
+    straight(80, 40);
+    straight(-80, 40);
+    straight(80, 40);
+    straight(-80, 40);
+    straight(80, 40);
+    straight(-80, 40);
     //ev3_motor_reset_counts(EV3_PORT_D);
     //ev3_motor_rotate(EV3_PORT_A, 3600, -100, false);
     //ev3_motor_rotate(EV3_PORT_B, 2800, -100, false);
