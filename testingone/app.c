@@ -531,6 +531,7 @@ void straight(float set_power, float cm) {
     if (set_power < 0) {
         gein = -0.3;
     }
+    set_power = power;
     while(true){
         left = ev3_motor_get_counts(EV3_PORT_B);
         right = ev3_motor_get_counts(EV3_PORT_C);
@@ -563,7 +564,6 @@ void straight(float set_power, float cm) {
     }
     ev3_motor_stop(EV3_PORT_B, true);
     ev3_motor_stop(EV3_PORT_C, true);
-    fprintf(bt, "kaiten:%f",left);
 }
 
 
