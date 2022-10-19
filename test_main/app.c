@@ -84,6 +84,7 @@ int water_count = 0;
 int y = 0;
 
 
+int marking_count = 0;
 
 
 
@@ -1166,51 +1167,75 @@ void main_task(intptr_t unused){
     if (location[8] == PERSON || location[9] == PERSON) map[4] = 1; //brown
     if (location[10] == PERSON || location[11] == PERSON) map[5] = 1; //red
     
-    if (map[4] == 1 || map[5] == 1) {
-        if (map[4] == 1 && map[5] == 1) {
+    if (map[4]) {
         ev3_motor_rotate(EV3_PORT_D, 120, -50, true);//数値＆パワーてきとう
         ev3_motor_rotate(EV3_PORT_D, 120, 50, false);
-        }
-        else if (map[5] == 1) {
-        ev3_motor_rotate(EV3_PORT_D, 100, -30, true);
-        ev3_motor_rotate(EV3_PORT_D, 100, 50, false);
-        }
-        else{
-        ev3_motor_rotate(EV3_PORT_D, 120, -50, true);
-        ev3_motor_rotate(EV3_PORT_D, 120, 50, false);
-        }
-        straight(22, 80);
+        straight(22, -50);
+        marking_count = 1;
     }
     else{
-        ev3_motor_rotate(EV3_PORT_D, 80, -30, true);
+        ev3_motor_rotate(EV3_PORT_D, 80, -50, true);
         ev3_motor_rotate(EV3_PORT_D, 10, -20, true);
-        if (map[2] == 1 || map[3] == 1) {
-            straight(11, 50);
-            if (map[2] == 1 && map[3] == 1) {
-                ev3_motor_rotate(EV3_PORT_D, 120, -50, true);
-                ev3_motor_rotate(EV3_PORT_D, 120, 50, false);
-            }
-            else if (map[3] == 1) {
-                ev3_motor_rotate(EV3_PORT_D, 100, -30, true);
-                ev3_motor_rotate(EV3_PORT_D, 100, 50, false);
-            }
-            else{
-                ev3_motor_rotate(EV3_PORT_D, 120, -50, true);
-                ev3_motor_rotate(EV3_PORT_D, 120, 50, false);
-            }
+        straight(11, -50);
+        if (map[2]) {
+            ev3_motor_rotate(EV3_PORT_D, 50, 50, false);
+            ev3_motor_rotate(EV3_PORT_D, 80, -50, true);
+            ev3_motor_rotate(EV3_PORT_D, 80, 50, false);
+            straight(11, -50);
+            marking_count = 1;
         }
         else{
-            straight(24, 50);
-            steering_time(200, -30, 0);
-            ev3_motor_rotate(EV3_PORT_D, 120, -50, true);
-            ev3_motor_rotate(EV3_PORT_D, 120, 50, false);
-            straight(6, 50);
-            ev3_motor_rotate(EV3_PORT_D, 100, -30, true);
-            ev3_motor_rotate(EV3_PORT_D, 100, 50, false);
-            straight(80, 80);
-            
-        }    
+            if (map[0]) {
+                straight(13, -50);
+                steering_time(200, -30, 0);
+                ev3_motor_rotate(EV3_PORT_D, 80, -50, true);
+                ev3_motor_rotate(EV3_PORT_D, 80, 50, false);
+                marking_count = 1;
+            }
+            else{
+                straight(13, -50);
+                steering_time(200, 30, 0);
+                if (map[1] && marking_count == 0) {
+                    ev3_motor_rotate(EV3_PORT_D, 60, -30, true);
+                    ev3_motor_rotate(EV3_PORT_D, 60, 50, false);
+                    straight(4, -50);
+                }
+                else if (map[3] && marking_count == 0) {
+                    straight(11, 50);
+                    ev3_motor_rotate(EV3_PORT_D, 60, -30, true);
+                    ev3_motor_rotate(EV3_PORT_D, 60, 50, false);
+                    straight(15, -50);
+                }
+                ev3_motor_rotate(EV3_PORT_D, 40, -30, true);
+                ev3_motor_rotate(EV3_PORT_D, 10, -10, false);
+            }
+        }
     }
-    ev3_motor_rotate(EV3_PORT_D, 90, -30, false);
+    if (map[0] && marking_count == 1) {
+        ev3_motor_rotate(EV3_PORT_D, 80, -50, true);
+        ev3_motor_rotate(EV3_PORT_D, 80, 50, false);
+    }
+    if (map[1]) {
+        ev3_motor_rotate(EV3_PORT_D, 60, -30, true);
+        ev3_motor_rotate(EV3_PORT_D, 60, 50, false);
+    }
+    if (map[2] && marking == 1) {
+        ev3_motor_rotate(EV3_PORT_D, 80, -50, true);
+        ev3_motor_rotate(EV3_PORT_D, 80, 50, false);
+    }
+    if (map[3]) {
+        ev3_motor_rotate(EV3_PORT_D, 60, -30, true);
+        ev3_motor_rotate(EV3_PORT_D, 60, 50, false);
+    }
+    if (map[5]) {
+        ev3_motor_rotate(EV3_PORT_D, 60, -30, true);
+        ev3_motor_rotate(EV3_PORT_D, 60, 50, false);
+    }
+
+  
+    ev3_motor_rotate(EV3_PORT_D, 50, -30, false);
+    straight(20, 80);
+    turn(90, 0, 50);
+    steering_time(1000, 30, -10)
 
 }
