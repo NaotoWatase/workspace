@@ -313,11 +313,79 @@ void calculate(int map, int place_saves) {
     fprintf(bt, "LOCATION = %d\r\nCOLOR = %d  RGB:%d,%d,%d = JUDGE:%d\r\nRESULT = %d\r\n-----------------\r\n", map, obj, red, green, blue, judgement, location[map]);
 }
 
+void turn(float angle, float L_power, float R_power) {
+    float L_sign = L_power / abs(L_power);
+    float R_sign = R_power / abs(R_power);
+    float changing_L = 0;
+    float changing_R = 0;
+    float changing_power = 0;
+    float set_power;
+    float left;
+    float right;
+    float average;
+    ev3_motor_reset_counts(EV3_PORT_B);
+    ev3_motor_reset_counts(EV3_PORT_C);
+    if (L_power == 0) {
+        (void)ev3_motor_set_power(EV3_PORT_B, -L_power);
+        (void)ev3_motor_rotate(EV3_PORT_B, angle*TURN*ROBOT1CM, (int16_t)-L_power, true);
+    } 
+    if (L_power == 0) {
+        (void)ev3_motor_set_power(EV3_PORT_B, R_power);
+        (void)ev3_motor_rotate(EV3_PORT_C, angle*TURN*ROBOT1CM, (int16_t)R_power, true);
+    }
+    if (L_power != 0 && L_power != 0) {
+        set_power = abs(L_power);
+        while (true){
+            left = ev3_motor_get_counts(EV3_PORT_B);
+            right = ev3_motor_get_counts(EV3_PORT_C);
+            left = abs(left);
+            right = abs(right);
+            average = (left + right) / 2.0; 
+            if (average < angle*TURN*ROBOT1CM / 2 || set_power > changing_power) {
+                changing_power = (set_power / (angle*TURN*ROBOT1CM / 2)) * average;
+                if (changing_power < 15) changing_power = 15;
+                changing_L = changing_power * L_sign;
+                changing_R = changing_power * R_sign;
+            }
+            (void)ev3_motor_set_power(EV3_PORT_B, -changing_L);
+            (void)ev3_motor_set_power(EV3_PORT_C, changing_R);
+            if (angle * TURN * ROBOT1CM < average) break;
+        }
+        ev3_motor_stop(EV3_PORT_B, true);
+        ev3_motor_stop(EV3_PORT_C, true);
+    }
+}
 
-
+void turn_easy(float angle, float L_power, float R_power) {
+    float L_sign = L_power / abs(L_power);
+    float R_sign = R_power / abs(R_power);
+    float changing_L = 0;
+    float changing_R = 0;
+    float changing_power = 0;
+    float set_power;
+    float left;
+    float right;
+    float average;
+    ev3_motor_reset_counts(EV3_PORT_B);
+    ev3_motor_reset_counts(EV3_PORT_C);
+    if (L_power == 0) {
+        (void)ev3_motor_set_power(EV3_PORT_B, -L_power);
+        (void)ev3_motor_rotate(EV3_PORT_B, angle*TURN*ROBOT1CM, (int16_t)-L_power, true);
+    } 
+    if (L_power == 0) {
+        (void)ev3_motor_set_power(EV3_PORT_B, R_power);
+        (void)ev3_motor_rotate(EV3_PORT_C, angle*TURN*ROBOT1CM, (int16_t)R_power, true);
+    }
+    if (L_power != 0 && L_power != 0) {
+        (void)ev3_motor_rotate(EV3_PORT_B, angle*TURN*ROBOT1CM, (int16_t)-L_power, false);
+        (void)ev3_motor_rotate(EV3_PORT_C, angle*TURN*ROBOT1CM, (int16_t)R_power, true);
+        ev3_motor_stop(EV3_PORT_B, true);
+        ev3_motor_stop(EV3_PORT_C, true);
+    }
+}
 
 /*直音が担当します*/
-void straight(float set_power, float cm) {
+void straight(float cm, float set_power) {
     float lb_power;
     float rc_power;
     float power = 0;
@@ -888,8 +956,30 @@ void main_task(intptr_t unused){
 
     /*スタートの分岐チェック*/
 
-    
-
+    tslp_tsk(1000*MSEC);
+    turn_easy(180, 30, -30);
+    tslp_tsk(1000*MSEC);
+    turn_easy(180, 30, -30);
+    tslp_tsk(1000*MSEC);
+    turn_easy(180, 30, -30);
+    tslp_tsk(1000*MSEC);
+    turn_easy(180, 30, -30);
+    tslp_tsk(1000*MSEC);
+    turn_easy(180, 30, -30);
+    tslp_tsk(1000*MSEC);
+    turn_easy(180, 30, -30);
+    tslp_tsk(1000*MSEC);
+    turn_easy(180, 30, -30);
+    tslp_tsk(1000*MSEC);
+    turn_easy(180, 30, -30);
+    tslp_tsk(1000*MSEC);
+    turn_easy(180, 30, -30);
+    tslp_tsk(1000*MSEC);
+    turn_easy(180, 30, -30);
+    tslp_tsk(1000*MSEC);
+    turn_easy(180, 30, -30);
+    tslp_tsk(1000*MSEC);
+    turn_easy(180, 30, -30);
     
 
 
