@@ -196,7 +196,6 @@ void newsteering(int power, float cm) {
 }*/
 
 
-
 void calculate(int map, int place_saves) {
     savedate_color[place_saves] = obj;
     savedate_red[place_saves] = red;
@@ -429,15 +428,12 @@ void straight(float cm, float set_power) {
     ev3_motor_stop(EV3_PORT_C, true);
 }
 
-
-
 void water(int n) {
     if (location[n] == FIRE) {
         ev3_motor_rotate(EV3_PORT_D, 80 + water_count, 20, false);
         water_count = water_count + 20;
     }
 }
-
 
 void steering_time(int time_stop_4d, int power, int steering){
     if(steering > 0) {
@@ -452,7 +448,6 @@ void steering_time(int time_stop_4d, int power, int steering){
     ev3_motor_stop(EV3_PORT_B, true);
     ev3_motor_stop(EV3_PORT_C, true);
 }
-
 
 void steering_color(colorid_t color_stop, int power, int steering){
     colorid_t color;
@@ -470,8 +465,6 @@ void steering_color(colorid_t color_stop, int power, int steering){
     (void)ev3_motor_stop(EV3_PORT_B, true);
     (void)ev3_motor_stop(EV3_PORT_C, true);    
 }
-
-
 
 void p_turn(int angle, int left_motor, int right_motor){
     angle = angle * 178 / 180;
@@ -574,7 +567,6 @@ void tank_turn(float angle, int power_L, int power_R){
     }
 }
 
-
 void linetrace_length(float length, int power){
     ev3_motor_reset_counts(EV3_PORT_C);
     ev3_motor_reset_counts(EV3_PORT_B);
@@ -614,7 +606,6 @@ void linetrace_length(float length, int power){
     (void)ev3_motor_stop(EV3_PORT_B, true);
     (void)ev3_motor_stop(EV3_PORT_C, true);
 }
-
 
 void map_check(int num, way_t sensor) {
     /*ev3_speaker_play_tone(NOTE_A5, 100);
@@ -781,6 +772,7 @@ void chemical_taker(int n, way_t sensor){
         }
     }
 }
+
 void chemical_took(int n, way_t sensor){
     if(location[n] == CHEMICAL){
        if(sensor == RIGHT){
@@ -794,9 +786,6 @@ void chemical_took(int n, way_t sensor){
     }
 }
 
-
-
-
 void sensor_check(uint8_t num) {
     int ct = 0;
     while (ct < num) {
@@ -809,7 +798,6 @@ void sensor_check(uint8_t num) {
 void check_task(intptr_t unused){
     fprintf(bt, "\r\ny:%d", y);
 }
-
 
 void main_task(intptr_t unused){
 
