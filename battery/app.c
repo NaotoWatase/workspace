@@ -4,26 +4,37 @@
 static int32_t fontw, fonth;
 
 static uint_t cyc1_count = 0;
-static int isRun = false;
-static long time = 0;
+static int isRun = false;               // 測定中はtrue
+static long time = 0;                   // 測定時間(sec)
 
-FILE *file;//ファイルポインタを宣言
-const char* fname = "/battery_result.txt";
+#define TERMINATE_VOLTAGE (8200)        // 測定を終わる電圧
+
+FILE *file;                             // 結果を出力するファイルのポインタ
+const char* fname = "/battery_result.txt";  //ファイル名
+
+void start_test() {
+    if (isRun) return;
+    time = 0;               // initialize timer
+    ev3_motor_set_power(EV3_PORT_B, 50);       // モーターをまわす
+    ev3_motor_set_power(EV3_PORT_C, 50);
+    isRun = true;
+}
+
+void end_test() {
+    if (!isRun) return;
+    fclose(file);//ファイルを閉じる
+    ev3_motor_stop(EV3_PORT_B, true);       // とめる
+    ev3_motor_stop(EV3_PORT_C, true);
+    isRun = false;
+}
 
 static void button_clicked_handler(intptr_t button) {
     switch(button) {
     case ENTER_BUTTON:
         if (isRun) {
-            fclose(file);//ファイルを閉じる
-            ev3_motor_stop(EV3_PORT_B, true);       // とめる
-            ev3_motor_stop(EV3_PORT_C, true);
-            isRun = false;
-            break;
+            end_test();
         } else {
-            time = 0;               // initialize timer
-            ev3_motor_set_power(EV3_PORT_B, 50);       // モーターをまわす
-            ev3_motor_set_power(EV3_PORT_C, 50);
-            isRun = true;
+            start_test();
         }
  
 #if !defined(BUILD_MODULE)
@@ -49,8 +60,12 @@ void cyc1_task(intptr_t unused) {
     ev3_lcd_fill_rect(0, fonth * 1, EV3_LCD_WIDTH, fonth, EV3_LCD_WHITE);   // LCDにカラー値を表示
     char buf[100];
     int v = ev3_battery_voltage_mV();                           // batteryの電圧を読む
-    sprintf(buf, "%ld:%ld, %d mV", time/60, time%60, v);        // mVでLCDに表示
+    sprintf(buf, "%02ld:%02ld, %d mV", time/60, time%60, v);        // mVでLCDに表示
     ev3_lcd_draw_string(buf, 0, fonth * 2);                     // 2行目に出力
+
+    if (v < TERMINATE_VOLTAGE) {                                // 電圧が下がったら測定を終了
+        end_test();
+    }
 
     time++;     // increment timer 
 }
@@ -63,7 +78,7 @@ void cyc1_task(intptr_t unused) {
 void main_task(intptr_t unused) {
 
     ev3_speaker_set_volume(50);//音量50に設定
-    
+
     /* Register button handlers */
     ev3_button_set_on_clicked(ENTER_BUTTON, &button_clicked_handler, ENTER_BUTTON);
 
