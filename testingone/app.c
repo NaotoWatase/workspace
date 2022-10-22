@@ -347,9 +347,15 @@ void turn(float angle, float L_power, float R_power) {
             left = abs(left);
             right = abs(right);
             average = (left + right) / 2.0; 
-            if (average < angle*TURN*ROBOT1CM / 2 || set_power > changing_power) {
-                changing_power = (set_power / (angle*TURN*ROBOT1CM / 2)) * average;
-                if (changing_power < 15) changing_power = 15;
+            if (average < angle*TURN*ROBOT1CM * 1 / 4) {
+                changing_power = (set_power / (angle*TURN*ROBOT1CM / 4)) * average;
+                if (changing_power < 8) changing_power = 8;
+                changing_L = changing_power * L_sign;
+                changing_R = changing_power * R_sign;
+            }
+            if (average > angle*TURN*ROBOT1CM * 3 / 4) {
+                changing_power = (-set_power / (angle*TURN*ROBOT1CM * 1 / 4)) * (average - (angle*TURN*ROBOT1CM * 3 / 4)) + set_power;
+                if (changing_power < 8) changing_power = 8;
                 changing_L = changing_power * L_sign;
                 changing_R = changing_power * R_sign;
             }
@@ -1070,6 +1076,21 @@ void main_task(intptr_t unused){
 
     /*スタートの分岐チェック*/
 
+
+    tslp_tsk(400*MSEC);
+    turn(180, 40, -40);
+    turn(180, 40, -40);
+    turn(180, 40, -40);
+    turn(180, 40, -40);
+    turn(180, 40, -40);
+    turn(180, 40, -40);
+    turn(180, 40, -40);
+    turn(180, 40, -40);
+    turn(180, 40, -40);
+    turn(180, 40, -40);
+    turn(180, 40, -40);
+    turn(180, 40, -40);
+    tslp_tsk(1000*MSEC);
 
     straight(100, -100);
     turn_easy(90, 25, -25);
