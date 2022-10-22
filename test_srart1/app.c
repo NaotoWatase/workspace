@@ -596,6 +596,7 @@ void steering_color(colorid_t color_stop, int power, int steering){
 }
 
 void turn(int angle, int left_motor, int right_motor){
+    
 }
 
 void waltrace_length(int length, int power, int wall_length){

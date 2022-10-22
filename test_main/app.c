@@ -596,6 +596,7 @@ void steering_color(colorid_t color_stop, int power, int steering){
 }
 
 void turn(int angle, int left_motor, int right_motor){
+
 }
 
 void waltrace_length(int length, int power, int wall_length){
@@ -1033,15 +1034,21 @@ void main_task(intptr_t unused){
     chemical_taker(2, RIGHT);
     straight(37.8, 80);
     map_check(3, RIGHT);
-    chemical_taker(3, RIGHT);
-
-    if (location[3] == CHEMICAL){
-
-    }
 
     steering_time(200, 30, 0);
+    if (location[3] == CHEMICAL){
+        straight(8, -50);
+        turn(90, 50, -50);
+        straight(5, 50);
+        chemical_taker(3, LEFT);
+        straight(10, -50);
+        turn(180, 50, -50);
+        steering_time(1000, -30, 0);
+    }
+    else{
     turn(180, -50, 0);
     steering_time(800, -30, 0);
+    }
     water(2);
     water(3);
 
