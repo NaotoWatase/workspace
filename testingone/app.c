@@ -46,8 +46,14 @@ static const motor_port_t   PortMotorWater   = EV3_PORT_D;
 static const motor_port_t   PortMotorLeft   = EV3_PORT_B;
 static const motor_port_t   PortMotorRight  = EV3_PORT_C;
 static const motor_port_t   PortMotorArm  = EV3_PORT_A;*/
+static const sensor_port_t  PortUltrasonic = EV3_PORT_4;
+static const sensor_port_t  PortSensorColor2 = EV3_PORT_2;
+static const sensor_port_t  PortSensorColor3 = EV3_PORT_3;
+static const sensor_port_t  PortSensorColor1 = EV3_PORT_1;
 static const motor_port_t   PortMotorLeft   = EV3_PORT_B;
 static const motor_port_t   PortMotorRight  = EV3_PORT_C;
+static const motor_port_t   PortMotorArm1   = EV3_PORT_A;
+static const motor_port_t   PortMotorArm2  = EV3_PORT_D;
 
 
 
@@ -507,13 +513,12 @@ void water(int n) {
 
 
 void steering_time(int time_stop_4d, int power, int steering){
-    power = -power;
     if(steering > 0) {
-    (void)ev3_motor_set_power(EV3_PORT_B, power);
+    (void)ev3_motor_set_power(EV3_PORT_B, -power);
     (void)ev3_motor_set_power(EV3_PORT_C, power+(power*steering/50));
     }
     else {
-    (void)ev3_motor_set_power(EV3_PORT_B, power-(power*steering/50));
+    (void)ev3_motor_set_power(EV3_PORT_B, -(power-(power*steering/50)));
     (void)ev3_motor_set_power(EV3_PORT_C, power);
     }
     tslp_tsk(time_stop_4d * MSEC);
@@ -524,14 +529,13 @@ void steering_time(int time_stop_4d, int power, int steering){
 
 void steering_color(colorid_t color_stop, int power, int steering){
     colorid_t color;
-    power = -power;
     if(steering > 0) {
-    (void)ev3_motor_set_power(EV3_PORT_B, power);
-    (void)ev3_motor_set_power(EV3_PORT_C, power+(power*steering/50));
+        (void)ev3_motor_set_power(EV3_PORT_B, -power);
+        (void)ev3_motor_set_power(EV3_PORT_C, power+(power*steering/50));
     }
     else {
-    (void)ev3_motor_set_power(EV3_PORT_B, power-(power*steering/50));
-    (void)ev3_motor_set_power(EV3_PORT_C, power);
+        (void)ev3_motor_set_power(EV3_PORT_B, -(power-(power*steering/50)));
+        (void)ev3_motor_set_power(EV3_PORT_C, power);
     }
     while (color_stop != color) {
         color = ev3_color_sensor_get_color(EV3_PORT_1);
@@ -649,31 +653,34 @@ void linetrace_length(float length, int power){
     ev3_motor_reset_counts(EV3_PORT_B);
     int kakudo_C; 
     int kakudo_B; 
+    float average;
     float steer;
     float p = 0;
     float i = 0;
     float d = 0;
     float d2 = 0;
     int reflect;
-    power = -power;
     while (true) {
         kakudo_C = ev3_motor_get_counts(EV3_PORT_C);
         kakudo_B = ev3_motor_get_counts(EV3_PORT_B);
+        kakudo_B = abs(kakudo_B);
+        kakudo_C = abs(kakudo_C);
+        average = (kakudo_B + kakudo_C) / 2;
         reflect = ev3_color_sensor_get_reflect(EV3_PORT_1);
         
         p = reflect - 35;
         i = (reflect + i);
         d = (reflect - d2); 
         d2 = reflect;
-        steer =  -p * P_GEIN + i * 0 + d * 0; 
-        if (length * ROBOT1CM < -(kakudo_C + kakudo_B) / 2) break;
+        steer =  p * -1 + i * 0 + d * 0; 
+        if (length * ROBOT1CM < average) break;
         if(steer > 0) {
-        (void)ev3_motor_set_power(EV3_PORT_B, power);
-        (void)ev3_motor_set_power(EV3_PORT_C, power+(power*steer/50));
+            (void)ev3_motor_set_power(EV3_PORT_B, -power);
+            (void)ev3_motor_set_power(EV3_PORT_C, power+(power*steer/50));
         }
         else {
-        (void)ev3_motor_set_power(EV3_PORT_B, power-(power*steer/50));
-        (void)ev3_motor_set_power(EV3_PORT_C, power);
+            (void)ev3_motor_set_power(EV3_PORT_B, -(power-(power*steer/50)));
+            (void)ev3_motor_set_power(EV3_PORT_C, power);
         }
 
     }
@@ -932,6 +939,13 @@ void main_task(intptr_t unused){
     /* Configure motors */
     ev3_motor_config(PortMotorLeft, MEDIUM_MOTOR);
     ev3_motor_config(PortMotorRight, MEDIUM_MOTOR);
+    ev3_motor_config(PortMotorArm1, MEDIUM_MOTOR);
+    ev3_motor_config(PortMotorArm2, MEDIUM_MOTOR);
+    ev3_sensor_config(PortUltrasonic, ULTRASONIC_SENSOR);
+    ev3_sensor_config(PortSensorColor2, HT_NXT_COLOR_SENSOR);
+    ev3_sensor_config(PortSensorColor3, HT_NXT_COLOR_SENSOR);
+    ev3_sensor_config(PortSensorColor1, COLOR_SENSOR);
+
 
 
 
@@ -956,31 +970,99 @@ void main_task(intptr_t unused){
 
     /*スタートの分岐チェック*/
 
-    tslp_tsk(1000*MSEC);
-    turn_easy(180, 30, -30);
-    tslp_tsk(1000*MSEC);
-    turn_easy(180, 30, -30);
-    tslp_tsk(1000*MSEC);
-    turn_easy(180, 30, -30);
-    tslp_tsk(1000*MSEC);
-    turn_easy(180, 30, -30);
-    tslp_tsk(1000*MSEC);
-    turn_easy(180, 30, -30);
-    tslp_tsk(1000*MSEC);
-    turn_easy(180, 30, -30);
-    tslp_tsk(1000*MSEC);
-    turn_easy(180, 30, -30);
-    tslp_tsk(1000*MSEC);
-    turn_easy(180, 30, -30);
-    tslp_tsk(1000*MSEC);
-    turn_easy(180, 30, -30);
-    tslp_tsk(1000*MSEC);
-    turn_easy(180, 30, -30);
-    tslp_tsk(1000*MSEC);
-    turn_easy(180, 30, -30);
-    tslp_tsk(1000*MSEC);
-    turn_easy(180, 30, -30);
-    
+
+    straight(100, -100);
+    turn_easy(90, 25, -25);
+    steering_time(1000, -30, 0);
+    tslp_tsk(300*MSEC);
+    straight(6, 80);
+    tslp_tsk(300*MSEC);
+    //waltrace_length(12, 30, 10);
+    turn_easy(90, 25, -25);
+    tslp_tsk(4000*MSEC);
+    steering_color(COLOR_WHITE, 30, 0);
+    steering_color(COLOR_BLACK, 24, 0);
+    linetrace_length(26, 8);
+    tslp_tsk(4000*MSEC);
+
+    /* blue */
+    straight(4.1, 20);
+    tslp_tsk(4000*MSEC);
+
+    //map_check(0, RIGHT);
+    //chemical_taker(0, RIGHT);
+    straight(36.8, 80);
+    tslp_tsk(4000*MSEC);
+
+    //map_check(1, RIGHT);
+    //chemical_taker(1, RIGHT);
+    //water(0);
+    //water(1);
+
+    /* green */
+    straight(10.2, 80);
+    tslp_tsk(4000*MSEC);
+    //map_check(2, RIGHT);
+    //chemical_taker(2, RIGHT);
+    straight(37.8, 80);
+    tslp_tsk(4000*MSEC);
+    //map_check(3, RIGHT);
+    //chemical_taker(3, RIGHT);
+
+    if (location[3] == CHEMICAL){
+
+    }
+
+    steering_time(200, 30, 0);
+    tslp_tsk(4000*MSEC);
+    turn_easy(180, -50, 0);
+    tslp_tsk(4000*MSEC);
+    steering_time(800, -30, 0);
+    tslp_tsk(4000*MSEC);
+    //water(2);
+    //water(3);
+
+    /* yellow */
+    straight(23, 80);
+    //map_check(4, RIGHT);
+    //chemical_taker(4, RIGHT);
+    straight(26.5, 80);
+    //map_check(7, LEFT);
+    //chemical_taker(7, LEFT);
+    //water(4);
+    //water(7);
+
+    /* red */
+    straight(10.5, 80);
+    //map_check(10, RIGHT);
+    //chemical_taker(10, RIGHT);
+    straight(27, 80);
+    //map_check(11, RIGHT);
+    //chemical_taker(11, RIGHT);
+    steering_time(200, 30, 0);
+    turn_easy(180, -50, 0);
+    steering_time(800, -30, 0);
+    //water(10);
+    //water(11);
+
+    /* brown */
+    straight(35, 80);
+    //map_check(9, LEFT);
+    //chemical_taker(9, LEFT);
+    straight(18, 80);
+    turn_easy(90, -50, 50);
+    steering_time(800, -30, 0);
+    //water(8);
+    //water(9);
+
+    /* white */
+    straight(14, 80);
+    //map_check(8, RIGHT);
+    straight(11, 80);
+    //map_check(5, RIGHT);
+    //map_check(6, LEFT);
+    straight(25, 80);
+    turn_easy(90, 50, -50);
 
 
     

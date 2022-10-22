@@ -59,7 +59,7 @@
 #define HIGH_PRIORITY	9		/* 並行実行されるタスクの優先度 */
 #define MID_PRIORITY	10
 #define LOW_PRIORITY	11
-#define P_GEIN          4
+#define P_GEIN          -1
 #define I_GEIN          0.013
 #define D_GEIN          0.5
 
