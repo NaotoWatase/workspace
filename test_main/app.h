@@ -64,8 +64,8 @@
 #define D_GEIN          0.5
 
 #define MSEC (1000)
-#define ROBOT1CM (18.48)
-#define TURN (0.13395)
+#define ROBOT1CM (13.02)
+#define TURN (0.139)
 
 typedef enum object {  
     PERSON = 10,
