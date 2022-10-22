@@ -961,42 +961,10 @@ void main_task(intptr_t unused){
 
 
     /*スタートの分岐チェック*/
-    int A;
-    int B;
-    int C;
-    int D;
-
-    ev3_motor_reset_counts(EV3_PORT_A);
-    ev3_motor_reset_counts(EV3_PORT_B);
-    ev3_motor_reset_counts(EV3_PORT_C);
-    ev3_motor_reset_counts(EV3_PORT_D);
-    ev3_motor_rotate(EV3_PORT_A, 3600, 60, false);
-    ev3_motor_rotate(EV3_PORT_B, 3600, 60, false);
-    ev3_motor_rotate(EV3_PORT_C, 3600, 60, false);
-    ev3_motor_rotate(EV3_PORT_D, 3600, 60, false);
-    tslp_tsk(20000*MSEC);
-    ev3_motor_stop(EV3_PORT_A,true);
-    ev3_motor_stop(EV3_PORT_B,true);
-    ev3_motor_stop(EV3_PORT_C,true);
-    ev3_motor_stop(EV3_PORT_D,true);
-    A = ev3_motor_get_counts(EV3_PORT_A);
-    B = ev3_motor_get_counts(EV3_PORT_B);
-    C = ev3_motor_get_counts(EV3_PORT_C);
-    D = ev3_motor_get_counts(EV3_PORT_D);
-    ev3_motor_stop(EV3_PORT_A,true);
-    ev3_motor_stop(EV3_PORT_B,true);
-    ev3_motor_stop(EV3_PORT_C,true);
-    ev3_motor_stop(EV3_PORT_D,true);
-    fprintf(bt, "A:%d\r\nB:%d\r\nC:%d\r\nD:%d\r\n------------\r\n", A, B, C, D);
-    while (true) {
-    }
-    
-    
-   
 
    
    
-    start = 2;
+    start = 1;
     
 
     switch (start){
