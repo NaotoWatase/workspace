@@ -1050,7 +1050,7 @@ void main_task(intptr_t unused){
     straight(6, 50);
     tslp_tsk(300*MSEC);
     //waltrace_length(12, 30, 10);
-    turn(87, 20, -20);
+    turn(90, 20, -20);
     steering_color(COLOR_WHITE, 30, 0);
     steering_color(COLOR_BLACK, 24, 0);
     linetrace_length(26, 10);
