@@ -1048,7 +1048,7 @@ void obj_measure(int num, way_t sensor) {
 
     v = max / 255 * 100;
 
-    fprintf(bt, "LOCATION = %d\r\nCOLOR = %d\r\nRGB:%f,%f,%f = JUDGE:%f\r\nHSV:%f%f%f = MAX:%f MIN:%f\r\nRESULT = %d\r\n-----------------\r\n", num, obj, red, green, blue, judgement, h, s, v, max, min, location[num]);
+    fprintf(bt, "LOCATION = %d\r\nCOLOR = %d\r\nRGB:%f,%f,%f = JUDGE:%f\r\nHSV:%f,%f,%f = MAX:%f MIN:%f\r\nDISTANCE:%F\r\nRESULT = %d\r\n-----------------\r\n", num, obj, red, green, blue, judgement, h, s, v, max, min, obj_distance, location[num]);
 }
 
 void obj_know(int num){
@@ -1337,7 +1337,7 @@ void main_task(intptr_t unused){
     steering_time(200, 30, 0);
     ev3_speaker_play_tone(NOTE_A5, 200);
     tslp_tsk(400*MSEC);
-    straight(4, -30);
+    straight(4.7, -30);
     turn(90, -20, 20);
     ev3_speaker_play_tone(NOTE_A5, 200);
     tslp_tsk(400*MSEC);
@@ -1376,7 +1376,7 @@ void main_task(intptr_t unused){
     obj_check(7, RIGHT);
     straight(10, 80);
     obj_check(6, RIGHT);
-    straight(38, 80);
+    straight(37, 80);
     obj_check(5, RIGHT);
     if (location[8] == CHEMICAL){
 
