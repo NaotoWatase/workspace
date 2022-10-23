@@ -12,6 +12,7 @@
 #include "app.h"
 #include "motor.h"
 #include "stdlib.h"
+#include "wave.h"
 #include <stdio.h>
 #include"math.h"
 
@@ -1136,12 +1137,13 @@ void obj_know(int num){
 }
 
 void sensor_check(uint8_t num) {
-    int ct = 0;
+    /*int ct = 0;
     while (ct < num) {
         ev3_speaker_play_tone(NOTE_C5, 100);
         tslp_tsk(500*1000);
         ct = ct + 1;
-    }
+    }*/
+    play_wave(num);
 }
 
 void check_task(intptr_t unused){
@@ -1196,6 +1198,8 @@ void main_task(intptr_t unused){
 
     bt = ev3_serial_open_file(EV3_SERIAL_BT);
     assert(bt != NULL);
+
+    init_wave();
 
     
     /* Register button handlers */
