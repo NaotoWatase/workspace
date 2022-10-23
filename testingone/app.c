@@ -1278,20 +1278,20 @@ void main_task(intptr_t unused){
    
     /* blue */
     straight(8, 20);
-    //map_check(0, RIGHT);
+    obj_check(0, RIGHT);
     //chemical_taker(0, RIGHT);
     straight(38, 80);
-    //map_check(1, RIGHT);
+    obj_check(1, RIGHT);
     //chemical_taker(1, RIGHT);
     //water(0);
     //water(1);
 
     /* green */
     straight(10, 80);
-    //map_check(2, RIGHT);
+    obj_check(2, RIGHT);
     //chemical_taker(2, RIGHT);
     straight(41, 80);
-    //map_check(3, RIGHT);
+    obj_check(3, RIGHT);
 
     steering_time(200, 30, 0);
     if (location[3] == CHEMICAL){
@@ -1319,16 +1319,16 @@ void main_task(intptr_t unused){
 
     /* yellow */
     straight(25, 80);
-    //map_check(4, RIGHT);
+    obj_check(4, RIGHT);
     //chemical_taker(4, RIGHT);
     //water(4);
 
     /* red */
     straight(37.5, 80);
-    //map_check(11, RIGHT);
+    obj_check(10, RIGHT);
     //chemical_taker(11, RIGHT);
     straight(27, 80);
-    //map_check(11, RIGHT);
+    obj_check(11, RIGHT);
     //chemical_taker(11, RIGHT);
     steering_time(200, 30, 0);
     ev3_speaker_play_tone(NOTE_A5, 200);
@@ -1346,9 +1346,10 @@ void main_task(intptr_t unused){
 
     /* brown */
     straight(34, 80);
-    //map_check(9, LEFT);
+    obj_check(9, LEFT);
     //chemical_taker(9, LEFT);
     straight(37, 80);
+    obj_check(8, LEFT);
     tslp_tsk(300*MSEC);
     straight(10, -50);
     turn(90, -25, 25);
@@ -1356,10 +1357,8 @@ void main_task(intptr_t unused){
     straight(3, -28);
     steering_time(1000, -30, 0);
     tslp_tsk(200*MSEC);
-
     /* white */
     straight(11, 80);
-    //map_check(8, RIGHT);
     //water(8);
     //water(9);
     straight(11, 60);
@@ -1370,8 +1369,11 @@ void main_task(intptr_t unused){
     turn(90, 20, -20);
     tslp_tsk(400*MSEC);
     straight(40, -50);
+    obj_check(7, RIGHT);
     straight(10, 80);
+    obj_check(6, RIGHT);
     straight(38, 80);
+    obj_check(5, RIGHT);
     if (location[8] == CHEMICAL){
 
     }
@@ -1426,7 +1428,7 @@ void main_task(intptr_t unused){
     /* crossingB */
     tslp_tsk(200*MSEC);
     straight_custom(90, 1, 0, -100);
-    steering_time(2000, -30, -20);
+    steering_time(2000, -30, -10);
     straight(25, 80);
     turn(90, -25, 25);
     steering_time(800, 30, 0);
