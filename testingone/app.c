@@ -12,7 +12,8 @@
 #include "app.h"
 #include "stdlib.h"
 #include <stdio.h>
-#include"math.h"
+#include "math.h"
+#include "wave.h"
 
 /* /dev/tty.MindstormsEV3-SerialPor */
 
@@ -71,6 +72,8 @@ static void button_clicked_handler(intptr_t button) {
 bool_t birth;
 
 
+static int32_t fontw, fonth;
+
 int power = 50;
 
 float distance = 0;
@@ -90,6 +93,7 @@ int water_count = 0;
 
 int y = 0;
 
+bool_t isArmUp = false;
 
 
 
@@ -135,6 +139,17 @@ int green=0;
 int blue=0;
 int judgement = 0;
 
+
+void beep() {
+    ev3_speaker_play_tone(NOTE_C5, 10);
+}
+
+void draw_str(char* str, int line) {
+    ev3_lcd_fill_rect(0, fonth * line, EV3_LCD_WIDTH, fonth, EV3_LCD_WHITE);
+    ev3_lcd_draw_string(str, 0, fonth * line);                     // line 行目に出力
+}
+
+#if 1
 void steering(int power, int cm, int steering) {
     int b_counts;
     int c_counts;
@@ -151,6 +166,265 @@ void steering(int power, int cm, int steering) {
     ev3_motor_stop(EV3_PORT_B, true);
     ev3_motor_stop(EV3_PORT_C, true);
 }
+#endif
+
+/*
+    distance move forward with steering.
+    台形制御あり
+    arg:
+        power : maximum motor power
+        cm : distance in centimeter
+        steering : steering 
+    retuen:
+        none
+
+*/
+
+
+#if 1
+float min_power = 15.0;
+float thres_distance = 0.5;
+float steer_adjust = -0.07;    //   8.2-8.3Vの間で調整  0.0　-　-0.6: 左に寄る、-0.7 - -1.0　右に寄る。
+
+/* 直進　三角加速/減速　*/
+void forward(int power, int cm) {
+    int b_counts;
+    int c_counts;
+    float target_count = (float)abs(cm) * ROBOT1CM;
+    int target_power = abs(power);
+    int dir = 0;
+
+    if (power >= 0) dir = -1;
+    else            dir = 1;
+    ev3_motor_reset_counts(EV3_PORT_B);
+    ev3_motor_reset_counts(EV3_PORT_C);
+
+    float p; // current power
+    int pwr;
+
+    while (1) {
+        b_counts = abs(ev3_motor_get_counts(EV3_PORT_B));
+        c_counts = abs(ev3_motor_get_counts(EV3_PORT_C));
+
+        char buf[100];
+        sprintf(buf, "B: %d", b_counts);
+        draw_str(buf, 1);
+        sprintf(buf, "C: %d", c_counts);
+        draw_str(buf, 2);
+
+        int dCount = b_counts - c_counts;
+        int steer = (int)floor((float)dCount * steer_adjust + 0.5); 
+
+        float count = (float)(b_counts + c_counts) / 2.0;
+        if (count < target_count/2.0) {
+            p = target_power * count * 2.0 / target_count;
+            if (p < min_power) p = min_power;
+        } else {
+            p = target_power * 2.0 - (target_power * count * 2.0 / target_count);
+            if (p > 0 && p < min_power) p = min_power;
+            if (p < 0 && p > -min_power) p = -min_power;
+        } 
+        if (abs(count - target_count) < thres_distance) break;
+        pwr = (int)floor(p+0.5);
+        ev3_motor_steer(EV3_PORT_B, EV3_PORT_C, pwr * dir, steer);
+    }
+    ev3_motor_stop(EV3_PORT_B, true);
+    ev3_motor_stop(EV3_PORT_C, true);
+}
+
+#endif
+
+// float min_power = 15.0;
+float thres_turn = 0.1;
+float turn_adjust = -0.0;
+
+void my_turn(int power, int angle) {
+    int b_counts;
+    int c_counts;
+    float target_count = (abs)((float)angle*TURN*ROBOT1CM);
+    int target_power = power;
+
+    int dir = 0;                            //  方向
+    if (angle >= 0)    dir = 1;
+    else                dir = -1;
+
+    ev3_motor_reset_counts(EV3_PORT_B);
+    ev3_motor_reset_counts(EV3_PORT_C);
+
+    float p; // current power
+    int pwrL, pwrR;
+
+    while (1) {
+        b_counts = abs(ev3_motor_get_counts(EV3_PORT_B));
+        c_counts = abs(ev3_motor_get_counts(EV3_PORT_C));
+
+        char buf[100];
+        sprintf(buf, "B: %d", b_counts);
+        draw_str(buf, 1);
+        sprintf(buf, "C: %d", c_counts);
+        draw_str(buf, 2);
+
+        int dCount = b_counts + c_counts;
+        int dTurn = (int)floor((float)dCount * turn_adjust + 0.5); 
+
+        float count = (float)(abs(b_counts) + abs(c_counts)) / 2.0;
+        if (count < target_count/2.0) {
+            p = target_power * count * 2.0 / target_count;
+            if (p < min_power) p = min_power;
+        } else {
+            p = target_power * 2.0 - (target_power * count * 2.0 / target_count);
+            if (p > 0 && p < min_power) p = min_power;
+            if (p < 0 && p > -min_power) p = -min_power;
+        } 
+        if (abs(count - target_count) < thres_turn) break;
+        if (p > 0) {
+            pwrL = (int)floor(p+0.5);
+            pwrR = (int)floor(p+dTurn+0.5);
+        } else {
+            pwrL = pwrR = -(int)floor(abs(p)+0.5);
+        }
+//        ev3_motor_rotate(EV3_PORT_B, angle*TURN*ROBOT1CM, +pwr, true);
+//        ev3_motor_rotate(EV3_PORT_C, angle*TURN*ROBOT1CM, -pwr, true);
+        ev3_motor_set_power(EV3_PORT_B, pwrL * dir);
+        ev3_motor_set_power(EV3_PORT_C, -pwrR * dir);
+    }
+    ev3_motor_stop(EV3_PORT_B, true);
+    ev3_motor_stop(EV3_PORT_C, true);
+}
+
+
+void test_square(void) {
+
+    forward(90, 50);
+    tslp_tsk(1200*MSEC);
+
+    my_turn(70, 90);
+    tslp_tsk(1200*MSEC);
+
+    forward(90, 50);
+    tslp_tsk(1200*MSEC);
+
+    my_turn(70, 90);
+    tslp_tsk(1200*MSEC);
+
+    forward(90, 50);
+    tslp_tsk(1200*MSEC);
+
+    my_turn(70, 90);
+    tslp_tsk(1200*MSEC);
+
+    forward(90, 50);
+    tslp_tsk(1200*MSEC);
+
+    my_turn(70, 90);
+    tslp_tsk(1200*MSEC);
+
+}
+
+
+void test_forward(void) {
+
+    forward(90, 50);
+    tslp_tsk(1200*MSEC);
+
+    forward(90, 50);
+    tslp_tsk(1200*MSEC);
+
+    forward(90, 50);
+    tslp_tsk(1200*MSEC);
+
+    forward(90, 50);
+    tslp_tsk(1200*MSEC);
+
+}
+
+void test_turn(void) {
+
+    my_turn(35, 90);                // power が小さいほど正確な気がする。 
+    tslp_tsk(500*MSEC);
+
+    my_turn(35, 90);
+    tslp_tsk(500*MSEC);
+
+    my_turn(35, 90);
+    tslp_tsk(500*MSEC);
+
+    my_turn(35, 90);
+    tslp_tsk(500*MSEC);
+
+    my_turn(35, 90);
+    tslp_tsk(500*MSEC);
+
+}
+
+
+void test_backward(void) {
+
+    forward(-90, 50);
+    tslp_tsk(500*MSEC);
+
+    forward(-90, 50);
+    tslp_tsk(500*MSEC);
+
+    forward(-90, 50);
+    tslp_tsk(500*MSEC);
+
+    forward(-90, 50);
+    tslp_tsk(500*MSEC);
+
+}
+
+
+
+#if 0
+float start_power = 15.0;
+float end_power = 30.0;
+float dPower = 0.5;
+
+void steering(int power, int cm, int steering) {
+    int b_counts;
+    int c_counts;
+    float target_count = (float)abs(cm) * ROBOT1CM;
+    float half_count = target_count / 2.0;
+    int target_power = power;
+
+    ev3_motor_reset_counts(EV3_PORT_B);
+    ev3_motor_reset_counts(EV3_PORT_C);
+
+    float p = start_power;    // current power in calicuration
+    int pwr;    // current power to be set
+    float last_count = 0;
+
+    ev3_motor_steer(EV3_PORT_B, EV3_PORT_C, -(int)p, 3);
+    while (1) {
+        b_counts = abs(ev3_motor_get_counts(EV3_PORT_B));
+        c_counts = abs(ev3_motor_get_counts(EV3_PORT_C));
+        float count = (float)(b_counts + c_counts) / 2.0;
+        if (count < last_count+5) continue;                // 以下は、5度おきに処理する。
+        last_count = count;
+        if (count < half_count) {
+            p += dPower;
+        } else {
+            p -= dPower;
+            if (p < end_power) p = end_power; 
+        } 
+        if (count >= target_count) break;
+        pwr = (int)floor(p);
+        if (pwr > target_power) pwr = target_power;
+        ev3_motor_steer(EV3_PORT_B, EV3_PORT_C, -pwr, steering);
+    }
+
+    ev3_motor_stop(EV3_PORT_B, true);
+    ev3_motor_stop(EV3_PORT_C, true);
+}
+
+
+#endif
+
+
+
+
+
 
 /*
 void newsteering(int power, float cm) {
@@ -719,6 +993,7 @@ void map_check(int num, way_t sensor) {
         case 13:
         case 16:
             location[num] = PERSON;
+            play_wave(WAVE_Ao);
             break;
         case 1:
         case 12:
@@ -727,12 +1002,15 @@ void map_check(int num, way_t sensor) {
             
             if (judgement > 80 || blue > 40 || green > 40 || red > 40) {
                 location[num] = PERSON;
-                if (red - green - blue > 20) location[num] = FIRE;
+                if (red - green - blue > 20) { location[num] = FIRE;  play_wave(WAVE_Aka); }
+                else { play_wave(WAVE_Ao); }
+
     
             } 
             else {
                 judgement_check = judgement;
                 location[num] = NOTHING;
+                play_wave(WAVE_Nashi);
             }
             break;
         case 5:
@@ -743,13 +1021,16 @@ void map_check(int num, way_t sensor) {
         case 10:
         case 15:
             location[num] = FIRE;
+            play_wave(WAVE_Aka);
             break;
         case 0:
             if (red > 15 && red > blue && red > green) location[num] = FIRE;
             else location[num] = CHEMICAL;
+            play_wave(WAVE_Kuro);
             break; 
         default:
             location[num] = NOTHING;
+            play_wave(WAVE_Nashi);
             break;
     } 
     fprintf(bt, "LOCATION = %d\r\nCOLOR = %d  RGB:%d,%d,%d = JUDGE:%d\r\nRESULT = %d\r\n-----------------\r\n", num, obj, red, green, blue, judgement, location[num]);
@@ -821,15 +1102,33 @@ void hsv(int num, way_t sensor) {
     tslp_tsk(400*MSEC);*/
 }
 
+
+void arm_up(void) {
+    if (isArmUp) return;                            // 既にup状態だったら何もしない
+    ev3_motor_rotate(EV3_PORT_A, 200, 15, false);
+    isArmUp = true;
+}
+
+
+
+
+void arm_down(void) {
+    if (!isArmUp) return;                            // 既にdown状態だったら何もしない
+    ev3_motor_rotate(EV3_PORT_A, 200, -15, false);
+    isArmUp = false;
+}
+
+
+
 void chemical_taker(int n, way_t sensor){
     if(location[n] == CHEMICAL){
         chemical = chemical + 1;
        if(sensor == RIGHT){
-           ev3_motor_rotate(EV3_PORT_A, 280, -15, false);
+            arm_up();
            chemical_type = RIGHT;
         }
         else{
-            ev3_motor_rotate(EV3_PORT_A, 280, 15, false);
+            arm_up();
             chemical_type = LEFT;
         }
     }
@@ -912,14 +1211,21 @@ void location_l_task(intptr_t unused){
     task_counts = task_counts + 1;
 }
 
+
 void main_task(intptr_t unused){
 
     bt = ev3_serial_open_file(EV3_SERIAL_BT);
     assert(bt != NULL);
 
-    
+    ev3_lcd_set_font(EV3_FONT_MEDIUM);
+    ev3_font_get_size(EV3_FONT_MEDIUM, &fontw, &fonth);
+
+    ev3_speaker_set_volume(10);
+    beep();
     /* Register button handlers */
     ev3_button_set_on_clicked(BACK_BUTTON, &button_clicked_handler, BACK_BUTTON);
+
+    init_wave();
 
     /* Configure motors */
     ev3_motor_config(PortMotorLeft, LARGE_MOTOR);
@@ -947,9 +1253,44 @@ void main_task(intptr_t unused){
         }   
     ev3_color_sensor_get_color(EV3_PORT_1);
 
+    draw_str("SELECT PROGRAM", 1);
+    draw_str("ENTER : MISSION", 2);
+    draw_str("LEFT : 90deg. TURN TEST", 3);
     fprintf(bt, "----GAME_START----\r\n");
 
-    while(ev3_button_is_pressed(ENTER_BUTTON) == false) {}
+    while (1) {
+        while (ev3_button_is_pressed(ENTER_BUTTON) == false) {}
+        beep();
+        tslp_tsk(500*MSEC);
+
+    // 最初のオブジェクトの横に進む
+    forward(60, 4.1);
+    tslp_tsk(500*MSEC);
+    
+    ev3_motor_reset_counts(EV3_PORT_D);
+
+    /* brown zone */    
+    map_check(8, RIGHT);
+    chemical_taker(8, RIGHT);
+    tslp_tsk(600*MSEC);         // takerが動いている間待つこと
+    forward(70, 36.7);
+    map_check(9, RIGHT);
+    chemical_taker(9, RIGHT);
+    water(8);
+    water(9);
+    tslp_tsk(600*MSEC);         // takerが動いている間待つこと
+
+    forward(70, 38);
+
+
+    while (ev3_button_is_pressed(ENTER_BUTTON) == false) {}
+
+    arm_down();
+
+    tslp_tsk(1500*MSEC);         // takerが動いている間待つこと
+
+    }
+
 
     /*ここからコーディング */
 
@@ -963,7 +1304,6 @@ void main_task(intptr_t unused){
     /*スタートの分岐チェック*/
 
    
-   
     start = 1;
     
 
@@ -975,182 +1315,81 @@ void main_task(intptr_t unused){
             tank_turn(180, 30, -30);
             tank_turn(60, -30, 0);
             tank_turn(58, 0, -30);
-            steering(-90, 60, 4);
+            forward(-90, 60);
 
 
             break;
         default:
-            newsteering(-90, 80);
+            newsteering(-90, 80);       // 障害物を超える
             break;
     }
             
-    tslp_tsk(100*MSEC);
+    tslp_tsk(100*MSEC);                 // この辺の　tslpを変えると、p_turnが回りすぎる
     newsteering(-50, 11);
     tslp_tsk(300*MSEC);
+    // 90度回して壁にあてる
     p_turn(90, 0, 1);
-    steering_time(800, -40, 0);
-    p_turn(92, -1, 1);
-    tslp_tsk(200*MSEC);
+
+    steering_time(800, -40, 0);         // 壁にあてる
+
+    forward(90, 13);                    // 工場を向かせる
+    tslp_tsk(500*MSEC);
+    my_turn(35, 90);
+    tslp_tsk(500*MSEC);
+
+    // 白のゾーンまで進む
     steering_color(COLOR_WHITE, 35, 0);
     steering_color(COLOR_BLACK, 35, 0);
     steering_time(700, 15, 0);
+
+    // ライントレース
     linetrace_length(24, 9);
-    /*steering_time(900, -25, 0);
-    tslp_tsk(200*MSEC);
-    newsteering(20, 4.3);
-    tslp_tsk(500*MSEC);
-    p_turn(88, 0, 1);
-    newsteering(25, 9);
-    tslp_tsk(500*MSEC);*/
-    newsteering(20, 4.1);
+    // 最初のオブジェクトの横に進む
+    forward(60, 4.1);
     tslp_tsk(500*MSEC);
     
     ev3_motor_reset_counts(EV3_PORT_D);
-    
+
+    /* brown zone */    
     map_check(8, RIGHT);
     chemical_taker(8, RIGHT);
-    tslp_tsk(600*MSEC);
-    newsteering(70, 36.7);
+    tslp_tsk(600*MSEC);         // takerが動いている間待つこと
+    forward(70, 36.7);
     map_check(9, RIGHT);
     chemical_taker(9, RIGHT);
     water(8);
     water(9);
-    newsteering(75, 48);
+
+    /* red zone */    
+    forward(70, 48);
     map_check(10, RIGHT);
     map_check(11, LEFT);
-    steering_time(500, 30, 0);
-    
-
-    /*int cm = 84;
-    int set_power = -power;
-    int p;
-    int gyro;
-    int left;
-    int right;
-    int difference;
-    float accele_length = cm / 10 * 1;
-    float maxspeed_length = cm / 10 * 9;
-    float decele_length = cm;
-    int count1 = 0;
-    int count2 = 0; 
-    
-    ev3_gyro_sensor_reset(EV3_PORT_4);
-    ev3_motor_reset_counts(EV3_PORT_B);
-    ev3_motor_reset_counts(EV3_PORT_C);	
-    while(true){
-        gyro = ev3_gyro_sensor_get_angle(EV3_PORT_4);
-        left = ev3_motor_get_counts(EV3_PORT_B);
-        right = ev3_motor_get_counts(EV3_PORT_C);
-        left = abs(left);
-        right = abs(right);
-        difference = left - right;
-        p = -(difference + gyro);
-        steer = p * 3;
-        power = (set_power / accele_length) * (left / ROBOT1CM);
-        if (power > -20 && set_power < 0) power = -20;
-        if (power < 20 && set_power > 0) power = 20;
-        ev3_motor_steer(EV3_PORT_B, EV3_PORT_C, power, steer);
-        if (accele_length * ROBOT1CM <= left) break;
-    }
-    while(true){
-        gyro = ev3_gyro_sensor_get_angle(EV3_PORT_4);
-        left = ev3_motor_get_counts(EV3_PORT_B);
-        right = ev3_motor_get_counts(EV3_PORT_C);
-        left = abs(left);
-        right = abs(right);
-        difference = left - right;
-        p = -(difference + gyro);
-        steer = p * 3;
-        ev3_motor_steer(EV3_PORT_B, EV3_PORT_C, power, steer);
-        if (37 * ROBOT1CM <= left && count1 == 0){
-            count1 = count1 + 1; 
-            map_check(9, RIGHT);
-            chemical_taker(9, RIGHT);
-            water(9);
-            water(8);
-        }
-        if (maxspeed_length * ROBOT1CM <= left) break;
-    }
-    while(true){
-        gyro = ev3_gyro_sensor_get_angle(EV3_PORT_4);
-        left = ev3_motor_get_counts(EV3_PORT_B);
-        right = ev3_motor_get_counts(EV3_PORT_C);
-        left = abs(left);
-        right = abs(right);
-        difference = left - right;
-        p = -(difference + gyro);
-        steer = p * 3;
-        power = (-set_power / accele_length) * ((left / ROBOT1CM ) - maxspeed_length) + set_power;
-
-        if (power > -20 && set_power < 0) power = -20;
-        if (power < 20 && set_power > 0) power = 20;
-        ev3_motor_steer(EV3_PORT_B, EV3_PORT_C, power, steer);
-        
-        if (decele_length * ROBOT1CM <= left) break;
-    }
-
-    ev3_motor_stop(EV3_PORT_B, true);
-    ev3_motor_stop(EV3_PORT_C, true);
-
-    tslp_tsk(1000*MSEC);
-    map_check(10, RIGHT);
-    tslp_tsk(1000*MSEC);
-    map_check(11, LEFT);
-
-    tslp_tsk(500*MSEC);
-    ev3_speaker_play_tone(NOTE_A6, 200);
-    tslp_tsk(500*MSEC);
-    sensor_check(location[8]);
-    tslp_tsk(500*MSEC);
-    ev3_speaker_play_tone(NOTE_A6, 200);
-    tslp_tsk(500*MSEC);
-    sensor_check(location[9]);
-    tslp_tsk(500*MSEC);
-    ev3_speaker_play_tone(NOTE_A6, 200);
-    tslp_tsk(500*MSEC);
-    sensor_check(location[10]);
-    tslp_tsk(500*MSEC);
-    ev3_speaker_play_tone(NOTE_A6, 200);
-    tslp_tsk(500*MSEC);
-    sensor_check(location[11]);
-    tslp_tsk(500*MSEC);
-    ev3_speaker_play_tone(NOTE_A6, 200);
-    tslp_tsk(500*MSEC);
-    sensor_check(judgement_check);*/
-
-    
+    steering_time(500, 40, 0);  // 壁にあてる
+    forward(-45, 6.0);
 
     if (location[10] == CHEMICAL){
-        ev3_motor_rotate(EV3_PORT_A, 280, -20, false);
-        newsteering(-30, 6);
-        p_turn(90, 1, -1);
-        steering_time(200, 20, 0);
+        my_turn(45, -90);
         chemical_taker(10, LEFT);
         tslp_tsk(1000*MSEC);
-        p_turn(90, -1, 1);
         chemical_took(10, LEFT);
-        steering_time(800, 25, 0);
-    }
-    if (location[11] == CHEMICAL){
-        newsteering(-30, 6);
-        p_turn(88, -1, 1);
+    } else if (location[11] == CHEMICAL){
+        my_turn(45, 90);
         chemical_taker(11, RIGHT);
         tslp_tsk(1000*MSEC);
-        p_turn(88, 1, -1);
         chemical_took(11, RIGHT);
         steering_time(800, 25, 0);        
+        forward(-45, 4.5);
+        my_turn(45, 180);
+    } else {
+        my_turn(45, -90);
     }
-    
-    newsteering(-50, 13.8);
-    tslp_tsk(400*MSEC);
-    p_turn(90, 1, -1);
-    tslp_tsk(400*MSEC);
-    if(chemical < 1)ev3_motor_rotate(EV3_PORT_A, 280, -20, false);
-    newsteering(-50, 10);
-    steering_time(500, -30, 0);
+
     water(10);
     water(11);
-    newsteering(70, 23);
+    beep();
+    forward(45, 38);
+
+    /* yellow zone */
     map_check(7, RIGHT);
     if (location[7] == CHEMICAL){
         ev3_motor_rotate(EV3_PORT_A, 280, 20, false);
