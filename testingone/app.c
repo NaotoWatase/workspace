@@ -77,6 +77,8 @@ bool_t birth;
 
 int power = 50;
 
+int timing_chemical = 0;
+
 int judgement_check = 0;
 int chemical = 0;
 int marking_count = 0;
@@ -273,6 +275,7 @@ void straight(float cm, float set_power) {
     if (set_power > 70) { 
         set_power = 70;
     }
+    int mode = 1;
     float lb_power;
     float rc_power;
     float power = 0;
@@ -283,6 +286,8 @@ void straight(float cm, float set_power) {
     float steer;
     float maxspeed_length = cm * 10.0 / 20.0;
     float decele_length = cm * 10.0 / 20.0;
+
+    int count_chemical = 0;
     
 
     float diff = 0.0006;    // 0.0008 
@@ -293,7 +298,10 @@ void straight(float cm, float set_power) {
     }
     if (set_power < 0) {
         diff = -0.0008;
-        gein = -0.5;
+        gein = -4;
+    }
+    if (mode = 0) {
+        gein = -0.4;
     }
     //ev3_gyro_sensor_reset(EV3_PORT_4);
     ev3_motor_reset_counts(EV3_PORT_B);
@@ -306,6 +314,9 @@ void straight(float cm, float set_power) {
         right = abs(right);
         difference = left - right;
         steer = difference * gein;
+        //power = (set_power / maxspeed_length) * (left / ROBOT1CM);
+        //if (set_power < 0 && power >= -8) power = -8;
+        //if (set_power > 0 && power <= 8) power = 8;
         power += diff; 
         if(steering > 0) {
             lb_power = power;
@@ -322,12 +333,19 @@ void straight(float cm, float set_power) {
         if (power >= set_power && set_power > 0) break;
         if (power <= set_power && set_power < 0) break;
         if (left >= maxspeed_length * ROBOT1CM) break;
+        if (timing_chemical == 1 && (left / ROBOT1CM > 1.4) && count_chemical == 0) {
+            count_chemical = 1;
+            ev3_motor_rotate(EV3_PORT_A, 190, 30, false);
+        }
     }
     if (set_power < 0) {
         gein = -0.5;
     }
     if (set_power > 0) {
         gein = -1;
+    }
+    if (mode = 0) {
+        gein = 0;
     }
     while(true){
         left = ev3_motor_get_counts(EV3_PORT_B);
@@ -349,6 +367,10 @@ void straight(float cm, float set_power) {
         (void)ev3_motor_set_power(EV3_PORT_B, lb_power);
         (void)ev3_motor_set_power(EV3_PORT_C, rc_power);
         if (maxspeed_length * ROBOT1CM <= left) break;
+        if (timing_chemical == 1 && (left / ROBOT1CM > 1.4) && count_chemical == 0) {
+            count_chemical = 1;
+            ev3_motor_rotate(EV3_PORT_A, 190, 30, false);
+        }
     }
     if (set_power < 0) {
         gein = -0.3;
@@ -356,6 +378,9 @@ void straight(float cm, float set_power) {
     if (set_power > 0) {
         diff = 0.0013;
         gein = -3;
+    }
+    if (mode = 0) {
+        gein = -0.1;
     }
     set_power = power;
     while(true){
@@ -386,6 +411,10 @@ void straight(float cm, float set_power) {
         (void)ev3_motor_set_power(EV3_PORT_B, lb_power);
         (void)ev3_motor_set_power(EV3_PORT_C, rc_power);
         if (cm * ROBOT1CM <= left) break;
+        if (timing_chemical == 1 && (left / ROBOT1CM > 1.4) && count_chemical == 0) {
+            count_chemical = 1;
+            ev3_motor_rotate(EV3_PORT_A, 190, 30, false);
+        }
 
     }
     ev3_motor_stop(EV3_PORT_B, true);
@@ -517,7 +546,7 @@ void straight_custom(float cm, float ac, float dc, float set_power) {
 
 void water(int n) {
     if (location[n] == FIRE) {
-        ev3_motor_rotate(EV3_PORT_D, 80 + water_count, 20, false);
+        ev3_motor_rotate(EV3_PORT_D, 80 + water_count, 20, true);
         water_count = water_count + 20;
     }
 }
@@ -953,14 +982,14 @@ void walltrace_length(float cm, float power, float distance) {
 }
 
 void chemical_taker(int n, way_t sensor){
+    timing_chemical = 0;
     if(location[n] == CHEMICAL){
+        timing_chemical = 1;
         chemical = chemical + 1;
        if(sensor == RIGHT){
-           ev3_motor_rotate(EV3_PORT_A, 280, -15, false);
            chemical_type = RIGHT;
         }
         else{
-            ev3_motor_rotate(EV3_PORT_A, 280, 15, false);
             chemical_type = LEFT;
         }
     }
@@ -982,7 +1011,7 @@ void chemical_took(int n, way_t sensor){
 void obj_check(int num, way_t sensor){
     obj_measure(num, sensor);
     obj_know(num);
-    //stopping();
+    tslp_tsk(600*MSEC);
 }
 
 void obj_measure(int num, way_t sensor) {
@@ -1076,9 +1105,10 @@ void obj_know(int num){
             case 12:
             case 14:
             case 17:
-                if (judgement > 80 || blue > 40 || green > 40 || red > 40 || (h > 10 && h < 50)) {
+                if (judgement > 100 || blue > 40 || green > 40 || red > 40 || (red - green - blue > 12)) {
                     location[num] = PERSON;
                     if ((red - green - blue > 20) || (h > 10 && h < 50)) location[num] = FIRE;    
+                    if (s > 30) location[num] = PERSON;
                 } 
                 else {
                     judgement_check = judgement;
@@ -1296,28 +1326,28 @@ void main_task(intptr_t unused){
     */
    
     /* blue */
-    straight(8, 20);
+    straight(10.2, 20);
     obj_check(0, RIGHT);
-    //chemical_taker(0, RIGHT);
+    chemical_taker(0, RIGHT);
     straight(37, 80);
     obj_check(1, RIGHT);
-    //chemical_taker(1, RIGHT);
-    //water(0);
-    //water(1);
+    chemical_taker(1, RIGHT);
+    water(0);
+    water(1);
 
     /* green */
     straight(9, 80);
     obj_check(2, RIGHT);
-    //chemical_taker(2, RIGHT);
-    straight(35, 80);
+    chemical_taker(2, RIGHT);
+    straight(36, 80);
     obj_check(3, RIGHT);
 
-    steering_time(200, 30, 0);
+    steering_time(400, 20, 0);
     if (location[3] == CHEMICAL){
         straight(8, -50);
         turn(90, 50, -50);
         straight(5, 50);
-        //chemical_taker(3, LEFT);
+        chemical_taker(3, LEFT);
         straight(10, -50);
         turn(180, 50, -50);
         steering_time(1000, -30, 0);
@@ -1334,23 +1364,23 @@ void main_task(intptr_t unused){
         ev3_speaker_play_tone(NOTE_A5, 200);
         tslp_tsk(200*MSEC);
     }
-    //water(2);
-    //water(3);
+    water(2);
+    water(3);
 
     /* yellow */
     straight(25, 80);
     obj_check(4, RIGHT);
-    //chemical_taker(4, RIGHT);
-    //water(4);
+    chemical_taker(4, RIGHT);
 
     /* red */
     straight(37.5, 80);
+    water(4);
     obj_check(10, RIGHT);
-    //chemical_taker(11, RIGHT);
+    chemical_taker(10, RIGHT);
     straight(27, 80);
     obj_check(11, RIGHT);
-    //chemical_taker(11, RIGHT);
-    steering_time(200, 30, 0);
+    chemical_taker(11, RIGHT);
+    steering_time(400, 20, 0);
     ev3_speaker_play_tone(NOTE_A5, 200);
     tslp_tsk(400*MSEC);
     straight(4.7, -30);
@@ -1361,15 +1391,16 @@ void main_task(intptr_t unused){
     steering_time(800, -30, 0);
     ev3_speaker_play_tone(NOTE_A5, 200);
     tslp_tsk(400*MSEC);
-    //water(10);
-    //water(11);
+    water(10);
+    water(11);
 
     /* brown */
     straight(34, 80);
     obj_check(9, LEFT);
-    //chemical_taker(9, LEFT);
+    chemical_taker(9, LEFT);
     straight(37, 80);
     obj_check(8, LEFT);
+    chemical_taker(8, RIGHT);
     tslp_tsk(300*MSEC);
     straight(10, -50);
     turn(90, -25, 25);
@@ -1377,25 +1408,29 @@ void main_task(intptr_t unused){
     straight(3, -28);
     steering_time(1000, -30, 0);
     tslp_tsk(400*MSEC);
+
     /* white */
-    straight(11, 80);
-    //water(8);
-    //water(9);
-    straight(11, 60);
+    straight(14, 20);
+    tslp_tsk(400*MSEC);
+    water(8);
+    water(9);
     //map_check(5, RIGHT);
     //map_check(6, LEFT);
-    straight(27, 80);
+    straight(35, 80);
     tslp_tsk(400*MSEC);
-    turn(90, 20, -20);
+    turn(91, 20, -20);
     tslp_tsk(400*MSEC);
-    straight(40, -50);
+    straight(38, -50);
     obj_check(7, RIGHT);
+    chemical_taker(7, RIGHT);
     tslp_tsk(300*MSEC);
-    straight(10, 80);
+    straight(8.5, 80);
     obj_check(6, RIGHT);
+    chemical_taker(6, RIGHT);
     tslp_tsk(300*MSEC);
     straight(37, 80);
     obj_check(5, RIGHT);
+    chemical_taker(5, RIGHT);
     if (location[8] == CHEMICAL){
 
     }
@@ -1431,7 +1466,7 @@ void main_task(intptr_t unused){
         turn(90, -25, 25);
         tslp_tsk(300*MSEC);
         straight(10, -50);
-        //ev3_motor_rotate(EV3_PORT_A, 80, -20, true);//数値＆パワーてきとう
+        ev3_motor_rotate(EV3_PORT_A, 180, -10, true);//数値＆パワーてきとう
         straight(60, -80);
         tslp_tsk(1000*MSEC);
         turn(180, 0, 25);
@@ -1441,7 +1476,7 @@ void main_task(intptr_t unused){
         turn(90, 25, -25);
         tslp_tsk(300*MSEC);
         straight(10, -50);
-        //ev3_motor_rotate(EV3_PORT_A, 80, 20, true);
+        ev3_motor_rotate(EV3_PORT_A, 180, -10, true);
         straight(70, 80);
         turn(180, 25, 0);
     }
