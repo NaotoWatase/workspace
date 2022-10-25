@@ -983,12 +983,14 @@ void main_task(intptr_t unused){
     //water(10);
     //water(11);
 
-    /* brown */
+   /* brown */
     straight(34, 80);
     //map_check(9, LEFT);
     //chemical_taker(9, LEFT);
-    straight(23, 80);
-    tslp_tsk(300*MSEC);
+    straight(35, 80);
+    //map_check(8, LEFT);
+    //chemical_taker(8, LEFT);
+    straight(10, -50);
     turn(90, -25, 25);
     tslp_tsk(300*MSEC);
     straight(3, -28);
@@ -996,8 +998,7 @@ void main_task(intptr_t unused){
     tslp_tsk(100*MSEC);
 
     /* white */
-    straight(8, 80);
-    //map_check(8, RIGHT);
+    straight(21, 80);
     //water(8);
     //water(9);
     straight(11, 60);
