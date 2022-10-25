@@ -144,10 +144,29 @@ void beep() {
     ev3_speaker_play_tone(NOTE_C5, 10);
 }
 
-void draw_str(char* str, int line) {
+int volt() {
+    return ev3_battery_voltage_mV();
+}
+
+void print_str(char* str, int line) {
     ev3_lcd_fill_rect(0, fonth * line, EV3_LCD_WIDTH, fonth, EV3_LCD_WHITE);
     ev3_lcd_draw_string(str, 0, fonth * line);                     // line 行目に出力
 }
+
+void print_map() {
+    char buf[100];
+    sprintf(buf, "%02d %02d %02d %02d %02d", location[0], location[1], location[2], location[3], location[4], location[5] );
+    print_str(buf, 1);
+    sprintf(buf, "%02d %02d %02d %02d %02d", location[6], location[7], location[8], location[9], location[10], location[11] );
+    print_str(buf, 2);
+}
+
+
+void halt(void) {
+    while (ev3_button_is_pressed(ENTER_BUTTON) == false) {}
+}
+
+
 
 #if 1
 void steering(int power, int cm, int steering) {
@@ -206,12 +225,6 @@ void forward(int power, int cm) {
         b_counts = abs(ev3_motor_get_counts(EV3_PORT_B));
         c_counts = abs(ev3_motor_get_counts(EV3_PORT_C));
 
-        char buf[100];
-        sprintf(buf, "B: %d", b_counts);
-        draw_str(buf, 1);
-        sprintf(buf, "C: %d", c_counts);
-        draw_str(buf, 2);
-
         int dCount = b_counts - c_counts;
         int steer = (int)floor((float)dCount * steer_adjust + 0.5); 
 
@@ -227,9 +240,19 @@ void forward(int power, int cm) {
         if (abs(count - target_count) < thres_distance) break;
         pwr = (int)floor(p+0.5);
         ev3_motor_steer(EV3_PORT_B, EV3_PORT_C, pwr * dir, steer);
+
     }
     ev3_motor_stop(EV3_PORT_B, true);
     ev3_motor_stop(EV3_PORT_C, true);
+
+    char buf[100];
+    sprintf(buf, "B: %d", b_counts);
+    print_str(buf, 1);
+    sprintf(buf, "C: %d", c_counts);
+    print_str(buf, 2);
+    sprintf(buf, "battery: %d mV", volt());
+    print_str(buf, 3);
+
 }
 
 #endif
@@ -260,9 +283,9 @@ void my_turn(int power, int angle) {
 
         char buf[100];
         sprintf(buf, "B: %d", b_counts);
-        draw_str(buf, 1);
+        print_str(buf, 1);
         sprintf(buf, "C: %d", c_counts);
-        draw_str(buf, 2);
+        print_str(buf, 2);
 
         int dCount = b_counts + c_counts;
         int dTurn = (int)floor((float)dCount * turn_adjust + 0.5); 
@@ -351,10 +374,6 @@ void test_turn(void) {
 
     my_turn(35, 90);
     tslp_tsk(500*MSEC);
-
-    my_turn(35, 90);
-    tslp_tsk(500*MSEC);
-
 }
 
 
@@ -1024,9 +1043,14 @@ void map_check(int num, way_t sensor) {
             play_wave(WAVE_Aka);
             break;
         case 0:
-            if (red > 15 && red > blue && red > green) location[num] = FIRE;
-            else location[num] = CHEMICAL;
-            play_wave(WAVE_Kuro);
+            if (red > 15 && red > blue && red > green) {
+                location[num] = FIRE;
+                play_wave(WAVE_Aka);
+            }
+            else {
+                location[num] = CHEMICAL;
+                play_wave(WAVE_Kuro);
+            }
             break; 
         default:
             location[num] = NOTHING;
@@ -1118,21 +1142,15 @@ void arm_down(void) {
     isArmUp = false;
 }
 
-
-
 void chemical_taker(int n, way_t sensor){
-    if(location[n] == CHEMICAL){
+    if(location[n] == CHEMICAL) {
+        if (isArmUp) return;            // もうarmがあがっていたら、帰る。左右どちらかの情報を上書きしない。
         chemical = chemical + 1;
-       if(sensor == RIGHT){
-            arm_up();
-           chemical_type = RIGHT;
-        }
-        else{
-            arm_up();
-            chemical_type = LEFT;
-        }
+        arm_up();
+        chemical_type = sensor;
     }
 }
+
 void chemical_took(int n, way_t sensor){
     if(location[n] == CHEMICAL){
        if(sensor == RIGHT){
@@ -1148,7 +1166,7 @@ void chemical_took(int n, way_t sensor){
 
 void water(int n) {
     if (location[n] == FIRE) {
-        ev3_motor_rotate(EV3_PORT_D, 80 + water_count, 20, false);
+        ev3_motor_rotate(EV3_PORT_D, 80 + water_count, 25, false);
         water_count = water_count + 20;
     }
 }
@@ -1212,6 +1230,114 @@ void location_l_task(intptr_t unused){
 }
 
 
+void aproach_to_brown(void) {
+    steering_color(COLOR_WHITE, 35, 0);     // 白ゾーンまで進む
+    steering_color(COLOR_BLACK, 35, 0);     // 黒線を見つけるまえすすむ
+    forward(60, 2.0);
+
+    // ライントレース
+    beep();
+    linetrace_length(28.5, 9);
+    // 最初のオブジェクトの横に進む
+    forward(60, 4.1);           // location 8まで進む
+    tslp_tsk(500*MSEC);
+    
+    ev3_motor_reset_counts(EV3_PORT_D);
+}
+
+void brown_zone(void) {
+
+    /* brown zone */    
+    map_check(8, RIGHT);
+    chemical_taker(8, RIGHT);
+    tslp_tsk(600*MSEC);         // takerが動いている間待つこと
+    forward(90, 36.7);
+    map_check(9, RIGHT);
+    chemical_taker(9, RIGHT);
+    water(8);
+    water(9);
+    tslp_tsk(600*MSEC);         // takerが動いている間待つこと
+    forward(90, 49);            // loocation 10,11まで進む
+}
+
+void red_zone(void) {
+    /* red zone */    
+    map_check(10, RIGHT);
+    tslp_tsk(600*MSEC);         // wave再生のあいだ待つ
+    map_check(11, LEFT);
+    steering_time(500, 40, 0);  // 壁にあてて
+    forward(-45, 6.0);          // 　バックする
+
+    if (location[10] == CHEMICAL){
+        my_turn(45, -90);
+        chemical_taker(10, LEFT);
+        tslp_tsk(500*MSEC);
+        steering_time(1200, -25, 0);    // 壁にあてて 
+        forward(90, 12.5);
+    } else if (location[11] == CHEMICAL){
+        my_turn(45, 90);
+        chemical_taker(11, RIGHT);
+        tslp_tsk(1000*MSEC);
+        steering_time(800, 25, 0);    // 壁にあてて 
+        forward(-60, 4.5);              // ばっくして
+        my_turn(45, 180);               // 180度旋回してむきをかえる
+    } else {
+        my_turn(45, -90);
+        steering_time(1200, -25, 0);    // 壁にあてて 
+        forward(90, 12.5);
+    }
+    // この時点で、location 10の位置に止まっている。
+    water(10);
+    water(11);
+    forward(90, 38);            // location 4まで進む
+}
+
+
+void yellow_zone(void) {
+    // ここでは、location 7はチェックしない
+    my_turn(45, -90);
+    steering_time(1100, -30, 0);
+    forward(70, 12.5);
+    my_turn(45, 90);
+
+    map_check(4, LEFT);         // 
+    chemical_taker(4, LEFT);
+    water(4);
+    tslp_tsk(500*MSEC);
+    forward(70, 39.2);      // localtion 3 まで進む
+    steering_time(500, 30, 0);  // 正確を期すため、一度壁に当てて戻る
+    forward(-70, 4.5);
+    tslp_tsk(500*MSEC);
+}
+
+void green_zone(void) {
+    /* green zone */
+    map_check(3, LEFT);
+    chemical_taker(3, LEFT);
+    tslp_tsk(600*MSEC);
+    my_turn(45, -90);               //
+    steering_time(800, -30, 0);     // 壁にあてて
+    forward(90, 21.5);              // location 2 まで進む
+    map_check(2, LEFT);
+    chemical_taker(2, LEFT);
+    tslp_tsk(600*MSEC);
+    water(2);
+    water(3);
+    forward(90, 11);      // location 1に進む
+}
+
+void blue_zone(void) {
+    map_check(1, LEFT);
+    chemical_taker(1, LEFT);
+    tslp_tsk(600*MSEC);
+    forward(90, 36.8);
+    map_check(0, LEFT);
+    chemical_taker(0, LEFT);
+    tslp_tsk(600*MSEC);
+}
+
+
+
 void main_task(intptr_t unused){
 
     bt = ev3_serial_open_file(EV3_SERIAL_BT);
@@ -1253,46 +1379,46 @@ void main_task(intptr_t unused){
         }   
     ev3_color_sensor_get_color(EV3_PORT_1);
 
-    draw_str("SELECT PROGRAM", 1);
-    draw_str("ENTER : MISSION", 2);
-    draw_str("LEFT : 90deg. TURN TEST", 3);
+    print_str("SELECT PROGRAM", 1);
+    print_str("ENTER : MISSION", 2);
+    print_str("LEFT : 90deg. TURN TEST", 3);
     fprintf(bt, "----GAME_START----\r\n");
 
-    while (1) {
-        while (ev3_button_is_pressed(ENTER_BUTTON) == false) {}
-        beep();
-        tslp_tsk(500*MSEC);
-
-    // 最初のオブジェクトの横に進む
-    forward(60, 4.1);
+    halt();
+    beep();
     tslp_tsk(500*MSEC);
+
+/*
+    red_zone();
+    yellow_zone();
+    green_zone();
+    blue_zone();
+    water(0);
+    water(1);
+    tslp_tsk(1000*MSEC);
+
+    halt();
+*/
     
-    ev3_motor_reset_counts(EV3_PORT_D);
-
-    /* brown zone */    
-    map_check(8, RIGHT);
-    chemical_taker(8, RIGHT);
-    tslp_tsk(600*MSEC);         // takerが動いている間待つこと
-    forward(70, 36.7);
-    map_check(9, RIGHT);
-    chemical_taker(9, RIGHT);
-    water(8);
-    water(9);
-    tslp_tsk(600*MSEC);         // takerが動いている間待つこと
-
-    forward(70, 38);
-
-
-    while (ev3_button_is_pressed(ENTER_BUTTON) == false) {}
-
-    arm_down();
-
-    tslp_tsk(1500*MSEC);         // takerが動いている間待つこと
-
-    }
-
-
     /*ここからコーディング */
+/*
+    aproach_to_brown();
+
+    brown_zone();
+    halt();
+
+    red_zone();
+    halt();
+
+    yellow_zone();
+    halt();
+
+    green_zone();
+    halt();
+
+    blue_zone();
+    halt();
+*/
 
     /*sensor
     0 = Black, 1 = Purple, 2 =PuBl, 3 = Brue, 4 = Green, 5 = GrYe,
@@ -1306,7 +1432,7 @@ void main_task(intptr_t unused){
    
     start = 1;
     
-
+    
     switch (start){
         case 2:
             newsteering(-60, 80);
@@ -1323,128 +1449,27 @@ void main_task(intptr_t unused){
             newsteering(-90, 80);       // 障害物を超える
             break;
     }
-            
+    
     tslp_tsk(100*MSEC);                 // この辺の　tslpを変えると、p_turnが回りすぎる
-    newsteering(-50, 11);
+    forward(-50, 11);                   // バックのまま、もう少し進む
     tslp_tsk(300*MSEC);
     // 90度回して壁にあてる
     p_turn(90, 0, 1);
-
     steering_time(800, -40, 0);         // 壁にあてる
 
-    forward(90, 13);                    // 工場を向かせる
+    forward(90, 13);                    // 壁から離れて
     tslp_tsk(500*MSEC);
-    my_turn(35, 90);
+    my_turn(35, 90);                    // 工場を向く
     tslp_tsk(500*MSEC);
 
-    // 白のゾーンまで進む
-    steering_color(COLOR_WHITE, 35, 0);
-    steering_color(COLOR_BLACK, 35, 0);
-    steering_time(700, 15, 0);
-
-    // ライントレース
-    linetrace_length(24, 9);
-    // 最初のオブジェクトの横に進む
-    forward(60, 4.1);
-    tslp_tsk(500*MSEC);
+    aproach_to_brown();
     
-    ev3_motor_reset_counts(EV3_PORT_D);
-
-    /* brown zone */    
-    map_check(8, RIGHT);
-    chemical_taker(8, RIGHT);
-    tslp_tsk(600*MSEC);         // takerが動いている間待つこと
-    forward(70, 36.7);
-    map_check(9, RIGHT);
-    chemical_taker(9, RIGHT);
-    water(8);
-    water(9);
-
-    /* red zone */    
-    forward(70, 48);
-    map_check(10, RIGHT);
-    map_check(11, LEFT);
-    steering_time(500, 40, 0);  // 壁にあてる
-    forward(-45, 6.0);
-
-    if (location[10] == CHEMICAL){
-        my_turn(45, -90);
-        chemical_taker(10, LEFT);
-        tslp_tsk(1000*MSEC);
-        chemical_took(10, LEFT);
-    } else if (location[11] == CHEMICAL){
-        my_turn(45, 90);
-        chemical_taker(11, RIGHT);
-        tslp_tsk(1000*MSEC);
-        chemical_took(11, RIGHT);
-        steering_time(800, 25, 0);        
-        forward(-45, 4.5);
-        my_turn(45, 180);
-    } else {
-        my_turn(45, -90);
-    }
-
-    water(10);
-    water(11);
-    beep();
-    forward(45, 38);
-
-    /* yellow zone */
-    map_check(7, RIGHT);
-    if (location[7] == CHEMICAL){
-        ev3_motor_rotate(EV3_PORT_A, 280, 20, false);
-        newsteering(80, 26);
-        tslp_tsk(400*MSEC);
-        p_turn(90, 1, -1);
-        steering_time(200, 25, 0);
-        chemical_taker(7, RIGHT);
-        tslp_tsk(1000*MSEC);
-        p_turn(90, -1, 1);
-        newsteering(-50, 14);
-        tslp_tsk(200*MSEC);
-        p_turn(60, 0, 1);
-        tslp_tsk(400*MSEC);
-        p_turn(59, 1, 0);
-        tslp_tsk(200*MSEC);
-    }
-    else{
-        p_turn(60, 0, 1);
-        tslp_tsk(400*MSEC);
-        p_turn(59, 1, 0);
-        tslp_tsk(200*MSEC);
-        newsteering(35, 10);
-    }
-    map_check(4, LEFT);
-    chemical_taker(4, LEFT);
-    water(4);
-    water(7);
-    tslp_tsk(200*MSEC);
-    newsteering(70, 39.2);
-    map_check(3, LEFT);
-    chemical_taker(3, LEFT);
-    steering_time(1000, 30, 0);
-    tslp_tsk(200*MSEC);
-    tank_turn(76, 0, -30);
-    tslp_tsk(200*MSEC);
-    p_turn(52, 1, -1);
-    steering_time(1100, -25, 0);
-
-    ev3_motor_stop(EV3_PORT_B, true);
-    ev3_motor_stop(EV3_PORT_C, true);
-    tslp_tsk(200*MSEC);
-    newsteering(60, 21.5);
-    map_check(2, LEFT);
-    chemical_taker(2, LEFT);
-    water(2);
-    water(3);
-    newsteering(50, 10.2);
-    map_check(1, LEFT);
-    chemical_taker(1, LEFT);
-    newsteering(65, 36.8);
-    map_check(0, LEFT);
-    chemical_taker(0, LEFT);
-    water(0);
-    water(1);
+    brown_zone();
+    red_zone();
+    yellow_zone();
+    green_zone();
+    blue_zone();
+    halt();
 
     white = how_many - (location[0] + location[1] + location[2] + location[3] + location[4] + location[7] + location[8] + location[9] + location[10] + location[11]);
 
@@ -1452,9 +1477,11 @@ void main_task(intptr_t unused){
         newsteering(-35, 6);
         tslp_tsk(500*MSEC);
         p_turn(90, 1, -1);
-        if(chemical < 1)ev3_motor_rotate(EV3_PORT_A, 280, 20, false);
         steering_time(1200, -30, 0);
-        newsteering(70, 49.7);
+        forward(70, 5.0);
+        water(0);
+        water(1);
+        newsteering(70, 44.7);
         tslp_tsk(500*MSEC);
         p_turn(90, -1, 1);
         tslp_tsk(200*MSEC);
@@ -1473,6 +1500,8 @@ void main_task(intptr_t unused){
     else if (white == FIRE){
         location[5] = FIRE;
         newsteering(-30, 6);
+        water(0);
+        water(1);
         p_turn(90, -1, 1);
         steering_time(700, 30, 0);
         newsteering(-70, 38);
@@ -1486,6 +1515,8 @@ void main_task(intptr_t unused){
         newsteering(-30, 8);
     }
     else if (white == PERSON || white == NOTHING) {
+        water(0);
+        water(1);
         newsteering(80, 68);
         tslp_tsk(200*MSEC);
         p_turn(90, 1, -1);
@@ -1498,7 +1529,10 @@ void main_task(intptr_t unused){
         p_turn(90, 1, -1);
         if(chemical < 1)ev3_motor_rotate(EV3_PORT_A, 280, 20, false);
         steering_time(1200, -30, 0);
-        newsteering(70, 49.7);
+        forward(70, 5.0);
+        water(0);
+        water(1);
+        newsteering(70, 44.7);
         tslp_tsk(500*MSEC);
         p_turn(89, -1, 1);
         tslp_tsk(200*MSEC);
@@ -1514,21 +1548,18 @@ void main_task(intptr_t unused){
         tslp_tsk(200*MSEC);
         newsteering(-30, 8);
     }
+        halt();
     if(chemical_type == RIGHT){
         newsteering(50, 24);
         p_turn(180, 1, -1);
-        ev3_motor_rotate(EV3_PORT_A, 80, 20, true);
-        ev3_motor_rotate(EV3_PORT_A, 185, 12, true);
-        ev3_motor_rotate(EV3_PORT_A, 30, 15, false);
-        tslp_tsk(500 * MSEC);
-        p_turn(180, -1, 1);
-        
+        beep();
+        arm_down();
+        tslp_tsk(1000 * MSEC);
+        p_turn(180, -1, 1);        
     }
     else{
-        ev3_motor_rotate(EV3_PORT_A, 80, -20, true);
-        ev3_motor_rotate(EV3_PORT_A, 185, -12, true);
-        ev3_motor_rotate(EV3_PORT_A, 30, -15, false);
-        tslp_tsk(500 * MSEC);
+        arm_down();
+        tslp_tsk(1000 * MSEC);
     }
     
     if (ev3_motor_get_counts(EV3_PORT_D) > 90) {

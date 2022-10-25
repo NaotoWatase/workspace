@@ -60,10 +60,6 @@ void init_wave() {
 
 int play_wave(wave_t wave) 
 {
-    ev3_speaker_play_tone(NOTE_C6, 10);
-
-    return 1;
-
     if (wave < 0 || wave >= NUM_WAVE) return 0;
     ev3_speaker_set_volume(10);                                 // 音量10に設定  ** 必須、このレベルでないと音が歪む 
     ev3_speaker_play_file(&memfile[wave], SOUND_MANUAL_STOP);   // 音声を再生
