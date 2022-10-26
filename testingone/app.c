@@ -1336,6 +1336,10 @@ void blue_zone(void) {
     tslp_tsk(600*MSEC);
 }
 
+int guess_white(void) {
+    return how_many - (location[0] + location[1] + location[2] + location[3] + location[4] + location[7] + location[8] + location[9] + location[10] + location[11]);
+}
+
 
 
 void main_task(intptr_t unused){
@@ -1464,24 +1468,26 @@ void main_task(intptr_t unused){
 
     aproach_to_brown();
     
+    /* 　ここから工場内　*/
+
     brown_zone();
     red_zone();
     yellow_zone();
     green_zone();
     blue_zone();
-    halt();
 
-    white = how_many - (location[0] + location[1] + location[2] + location[3] + location[4] + location[7] + location[8] + location[9] + location[10] + location[11]);
-
+    // 以下の数式により、white zoneのオブジェクトが類推される。
+    white = guess_white();
+    
     if (white == CHEMICAL){
-        newsteering(-35, 6);
+        newsteering(-35, 6);            // すこしバックして
         tslp_tsk(500*MSEC);
-        p_turn(90, 1, -1);
+        p_turn(90, 1, -1);              // 壁に当ててwhite zoneに向かう
         steering_time(1200, -30, 0);
         forward(70, 5.0);
-        water(0);
+        water(0);                       // 途中、waterを落とす
         water(1);
-        newsteering(70, 44.7);
+        newsteering(70, 44.7);          // white zoneに入る
         tslp_tsk(500*MSEC);
         p_turn(90, -1, 1);
         tslp_tsk(200*MSEC);
@@ -1491,7 +1497,7 @@ void main_task(intptr_t unused){
         newsteering(60, 37);
         map_check(5, RIGHT);
         chemical_taker(5, RIGHT);
-        newsteering(70, 65);
+        newsteering(70, 69);
         tslp_tsk(200*MSEC);
         p_turn(90, 1, -1);
         tslp_tsk(200*MSEC);
@@ -1509,7 +1515,7 @@ void main_task(intptr_t unused){
         p_turn(90, 1, -1);
         water(5);
         tslp_tsk(700*MSEC);
-        newsteering(80, 72);
+        newsteering(80, 76);
         tslp_tsk(200*MSEC);
         p_turn(90, 1, -1);
         newsteering(-30, 8);
