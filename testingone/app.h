@@ -65,7 +65,7 @@
 
 #define MSEC (1000)
 #define ROBOT1CM (13.02)
-#define TURN (0.14)
+#define TURN (0.141)
 
 typedef enum object {  
     PERSON = 10,
