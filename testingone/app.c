@@ -155,9 +155,9 @@ void print_str(char* str, int line) {
 
 void print_map() {
     char buf[100];
-    sprintf(buf, "%02d %02d %02d %02d %02d", location[0], location[1], location[2], location[3], location[4], location[5] );
+    sprintf(buf, "%02d %02d %02d %02d %02d %02d", location[0], location[1], location[2], location[3], location[4], location[5] );
     print_str(buf, 1);
-    sprintf(buf, "%02d %02d %02d %02d %02d", location[6], location[7], location[8], location[9], location[10], location[11] );
+    sprintf(buf, "%02d %02d %02d %02d %02d %02d", location[6], location[7], location[8], location[9], location[10], location[11] );
     print_str(buf, 2);
 }
 
@@ -1342,6 +1342,70 @@ int guess_white(void) {
 
 
 
+void clap_marker(int left, int right) {
+    if (right == 1) {
+        ev3_motor_rotate(EV3_PORT_D, 50, 40, true); /*時計回りがプラス*/
+        tslp_tsk(300*MSEC);
+        forward(45, 3.2);
+        ev3_motor_rotate(EV3_PORT_D, 70, -25, true);
+        tslp_tsk(300*MSEC);
+        ev3_motor_rotate(EV3_PORT_D, 20, 40, true);
+        tslp_tsk(300*MSEC);
+        forward(45, 3.0);
+    }
+    else forward(45, 7.4);
+    if (left == 1) {
+        ev3_motor_rotate(EV3_PORT_D, 50, -40, true); 
+        tslp_tsk(300*MSEC);
+        forward(45, 3.2);
+        ev3_motor_rotate(EV3_PORT_D, 70, 30, true);
+        tslp_tsk(300*MSEC);
+        ev3_motor_rotate(EV3_PORT_D, 20, -40, true);
+        tslp_tsk(300*MSEC);
+        forward(45, 3.0);
+    }
+    else forward(45, 8.7);
+}
+
+
+void marker_goal_1(void) {
+#if 0
+    map[0] = 1; /*blue*/
+    map[1] = 0; /*green*/
+    map[2] = 1; /*white*/
+    map[3] = 0; /*yellow*/
+    map[4] = 0; /*brown*/
+    map[5] = 0; /*red*/
+#endif
+
+    tank_turn(185, -30, 0);             // start/goal 2 を向いて、brownに入る
+    tslp_tsk(400*MSEC);
+    tank_turn(184, 0, -30);
+    tslp_tsk(200*MSEC);
+    newsteering(70, 25.0);
+
+    if (map[4] == 1 || map[5] == 1) {
+        clap_marker(map[5], map[4]);
+    }
+    else newsteering(50, 14.3);
+
+    if (map[2] == 1 || map[3] == 1) {
+        clap_marker(map[3], map[2]);
+    }
+    else newsteering(50, 14.3);
+
+    if (map[0] == 1 || map[1] == 1) {
+        clap_marker(map[1], map[0]);
+    }
+    else newsteering(50, 14.3);
+
+    steering_time(1500, 30, -40);       // ゴールエリアに入り込む
+
+}
+
+
+
+
 void main_task(intptr_t unused){
 
     bt = ev3_serial_open_file(EV3_SERIAL_BT);
@@ -1402,8 +1466,12 @@ void main_task(intptr_t unused){
     tslp_tsk(1000*MSEC);
 
     halt();
+    while (1) {
+    marker_goal_1();
+    halt();
+    }
 */
-    
+
     /*ここからコーディング */
 /*
     aproach_to_brown();
@@ -1508,6 +1576,7 @@ void main_task(intptr_t unused){
         newsteering(-30, 6);
         water(0);
         water(1);
+        tslp_tsk(700*MSEC);
         p_turn(90, -1, 1);
         steering_time(700, 30, 0);
         newsteering(-70, 38);
@@ -1554,11 +1623,11 @@ void main_task(intptr_t unused){
         tslp_tsk(200*MSEC);
         newsteering(-30, 8);
     }
-        halt();
+
+    // ケミカルを置く
     if(chemical_type == RIGHT){
         newsteering(50, 24);
         p_turn(180, 1, -1);
-        beep();
         arm_down();
         tslp_tsk(1000 * MSEC);
         p_turn(180, -1, 1);        
@@ -1568,6 +1637,7 @@ void main_task(intptr_t unused){
         tslp_tsk(1000 * MSEC);
     }
     
+    // マーカアームを右に水平にセットする
     if (ev3_motor_get_counts(EV3_PORT_D) > 90) {
         while(true){
             ev3_motor_set_power(EV3_PORT_D, -20);
@@ -1584,34 +1654,27 @@ void main_task(intptr_t unused){
     }
     ev3_motor_stop(EV3_PORT_D, true);
     
-    if(chemical_type == LEFT)newsteering(-70, 46);
+    if(chemical_type == LEFT)newsteering(-70, 46);      // 保管庫の前からバックで壁の直前まで行く
     if(chemical_type == RIGHT)newsteering(-70, 62);
 
-    steering_time(700, -30, 0);
+    steering_time(700, -30, 0);                         // 壁に押し付ける
     tslp_tsk(200*MSEC);
 
-    steering_time(200, 30, 0);
-    tank_turn(80, 30, 0);
+    steering_time(200, 30, 0);          // 壁から離れて
+    tank_turn(80, 30, 0);               // 壁に寄せながら、おしりをゴールにむける
     tslp_tsk(200*MSEC);
     tank_turn(98, 0, -30);
-    steering(-65, 80, 0);
-    steering_time(2000, -30, 0);
+    steering(-80, 80, 0);               // バックで障害物を超える
+    steering_time(2000, -30, 0);        // ゴールの壁に押し付ける
     
-
-
-
-    
-
-
-    newsteering(50, 17);
-    tank_turn(140, 0, 45);
+    newsteering(50, 17);                // 前に進んで
+    tank_turn(140, 0, 45);              // 一旦マーカーの方を向いて
     tslp_tsk(200*MSEC);
-    tank_turn(160, 45, -45);
+    tank_turn(160, 45, -45);            // 旋回して壁に頭をつける
     steering_time(1000, 25, 0);
     
-
-    newsteering(-70, 65);
-    ev3_motor_rotate(EV3_PORT_D, 90, 30, true);
+    newsteering(-70, 65);               // バックして一気にマーカーを収納する。
+    ev3_motor_rotate(EV3_PORT_D, 90, 30, true); // 
     tslp_tsk(200*MSEC);
     if (location[0] == PERSON || location[1] == PERSON) map[0] = 1; /*blue*/
     if (location[2] == PERSON || location[3] == PERSON) map[1] = 1; /*green*/
@@ -1619,84 +1682,14 @@ void main_task(intptr_t unused){
     if (location[4] == PERSON || location[7] == PERSON) map[3] = 1; /*yellow*/
     if (location[8] == PERSON || location[9] == PERSON) map[4] = 1; /*brown*/
     if (location[10] == PERSON || location[11] == PERSON) map[5] = 1; /*red*/
+    print_map();
 
     switch (start) {
     case 1:
-        tank_turn(185, -30, 0);
-        tslp_tsk(400*MSEC);
-        tank_turn(184, 0, -30);
-        tslp_tsk(200*MSEC);
-        newsteering(70, 23.8);
-        
-        
-    
-        
-        if (map[4] == 1 || map[5] == 1) {
-            if (map[4] == 1) {
-                ev3_motor_rotate(EV3_PORT_D, 30, 40, true); /*時計回りがプラス*/
-                newsteering(30, 1.7);
-                ev3_motor_rotate(EV3_PORT_D, 40, -10, true);
-                ev3_motor_rotate(EV3_PORT_D, 10, 40, true);
-                newsteering(30, 4.8);
-            }
-            else newsteering(50, 6.5);
-            if (map[5] == 1) {
-                ev3_motor_rotate(EV3_PORT_D, 30, -40, true); 
-                newsteering(30, 2.6);
-                ev3_motor_rotate(EV3_PORT_D, 40, 25, true);
-                ev3_motor_rotate(EV3_PORT_D, 10, -40, true);
-                newsteering(30, 5.4);
-            }
-            else newsteering(50, 8);
-        }
-        else newsteering(50, 14.5);
-
-        if (map[2] == 1 || map[3] == 1) {
-            if (map[2] == 1) {
-                ev3_motor_rotate(EV3_PORT_D, 30, 40, true); 
-                newsteering(30, 1.7);
-                ev3_motor_rotate(EV3_PORT_D, 40, -10, true);
-                ev3_motor_rotate(EV3_PORT_D, 10, 40, true);
-                newsteering(30, 4.8);
-            }
-            else newsteering(50, 6.5);
-            if (map[3] == 1) {
-                ev3_motor_rotate(EV3_PORT_D, 30, -40, true); 
-                newsteering(30, 2.6);
-                ev3_motor_rotate(EV3_PORT_D, 40, 25, true);
-                ev3_motor_rotate(EV3_PORT_D, 10, -40, true);
-                newsteering(30, 5.4);
-            }
-            else newsteering(50, 8);
-        }
-        else newsteering(50, 14.5);
-        
-        if (map[0] == 1 || map[1] == 1) {
-            if (map[0] == 1) {
-                ev3_motor_rotate(EV3_PORT_D, 30, 40, true); 
-                newsteering(30, 1.7);
-                ev3_motor_rotate(EV3_PORT_D, 40, -10, true);
-                ev3_motor_rotate(EV3_PORT_D, 10, 40, true);
-                newsteering(30, 4.8);
-            }
-            else newsteering(50, 6.5);
-            if (map[1] == 1) {
-                ev3_motor_rotate(EV3_PORT_D, 30, -40, true); 
-                newsteering(30, 2.6);
-                ev3_motor_rotate(EV3_PORT_D, 40, 25, true);
-                ev3_motor_rotate(EV3_PORT_D, 10, -40, true);
-            }
-        }
-        steering_time(3000, 30, -40);
+        marker_goal_1();
         break;
     
-    
-    
-    
-    
-    
-    
-    case 2:
+        case 2:
         newsteering(70, 36);
         tslp_tsk(300*MSEC);
         p_turn(180, 1, 0);
