@@ -1330,7 +1330,7 @@ void blue_zone(void) {
     map_check(1, LEFT);
     chemical_taker(1, LEFT);
     tslp_tsk(600*MSEC);
-    forward(90, 36.8);
+    forward(90, 37.8);
     map_check(0, LEFT);
     chemical_taker(0, LEFT);
     tslp_tsk(600*MSEC);
@@ -1602,7 +1602,7 @@ void main_task(intptr_t unused){
         newsteering(-35, 6);
         tslp_tsk(500*MSEC);
         p_turn(90, 1, -1);
-        if(chemical < 1)ev3_motor_rotate(EV3_PORT_A, 280, 20, false);
+//        if(chemical < 1)ev3_motor_rotate(EV3_PORT_A, 280, 20, false);    armUp() では不要
         steering_time(1200, -30, 0);
         forward(70, 5.0);
         water(0);
