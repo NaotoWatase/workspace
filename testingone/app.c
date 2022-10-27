@@ -1012,7 +1012,7 @@ void map_check(int num, way_t sensor) {
         case 13:
         case 16:
             location[num] = PERSON;
-            play_wave(WAVE_Ao);
+            play_wave(WAVE_Shiro);
             break;
         case 1:
         case 12:
@@ -1022,7 +1022,7 @@ void map_check(int num, way_t sensor) {
             if (judgement > 80 || blue > 40 || green > 40 || red > 40) {
                 location[num] = PERSON;
                 if (red - green - blue > 20) { location[num] = FIRE;  play_wave(WAVE_Aka); }
-                else { play_wave(WAVE_Ao); }
+                else { play_wave(WAVE_Shiro); }
 
     
             } 
@@ -1590,6 +1590,8 @@ void main_task(intptr_t unused){
         newsteering(-30, 8);
     }
     else if (white == PERSON || white == NOTHING) {
+        if (white == PERSON) location[5] = PERSON;
+        else location[5] = NOTHING;
         water(0);
         water(1);
         newsteering(80, 68);
@@ -1627,10 +1629,10 @@ void main_task(intptr_t unused){
     // ケミカルを置く
     if(chemical_type == RIGHT){
         newsteering(50, 24);
-        p_turn(180, 1, -1);
+        my_turn(45, -180);
         arm_down();
         tslp_tsk(1000 * MSEC);
-        p_turn(180, -1, 1);        
+        my_turn(45, 180);    
     }
     else{
         arm_down();
