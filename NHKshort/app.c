@@ -1257,7 +1257,8 @@ void brown_zone(void) {
     water(8);
     water(9);
     tslp_tsk(600*MSEC);         // takerが動いている間待つこと
-    forward(90, 49);            // loocation 10,11まで進む
+    forward(90, 35);
+    arm_down();            // loocation 10,11まで進む
 }
 
 void red_zone(void) {
@@ -1266,7 +1267,7 @@ void red_zone(void) {
     tslp_tsk(600*MSEC);         // wave再生のあいだ待つ
     map_check(11, LEFT);
     steering_time(500, 40, 0);  // 壁にあてて
-    forward(-45, 8.0);          // 　バックする
+    forward(-45, 6.0);          // 　バックする
 
     if (location[10] == CHEMICAL){
         my_turn(45, -90);
@@ -1296,7 +1297,7 @@ void red_zone(void) {
 void yellow_zone(void) {
     // ここでは、location 7はチェックしない
     my_turn(45, -90);
-    steering_time(1200, -30, 0);
+    steering_time(1100, -30, 0);
     forward(70, 12.5);
     my_turn(45, 90);
 
@@ -1539,6 +1540,12 @@ void main_task(intptr_t unused){
     /* 　ここから工場内　*/
 
     brown_zone();
+
+    while (true) {
+
+    }
+    
+
     red_zone();
     yellow_zone();
     green_zone();

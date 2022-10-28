@@ -82,7 +82,7 @@ int chemical = 0;
 
 
 int white = 0;
-int how_many = 31;
+int how_many = 11;//31
 
 int map [6] = {0,0,0,0,0,0};
 int start = 2;
@@ -1167,7 +1167,7 @@ void chemical_took(int n, way_t sensor){
 void water(int n) {
     if (location[n] == FIRE) {
         ev3_motor_rotate(EV3_PORT_D, 80 + water_count, 25, false);
-        water_count = water_count + 20;
+        water_count = water_count + 30;
     }
 }
 
@@ -1317,7 +1317,7 @@ void green_zone(void) {
     tslp_tsk(600*MSEC);
     my_turn(45, -90);               //
     steering_time(800, -30, 0);     // 壁にあてて
-    forward(90, 21.5);              // location 2 まで進む
+    forward(90, 22);              // location 2 まで進む
     map_check(2, LEFT);
     chemical_taker(2, LEFT);
     tslp_tsk(600*MSEC);
@@ -1504,34 +1504,6 @@ void main_task(intptr_t unused){
    
     start = 1;
     
-    
-    switch (start){
-        case 2:
-            newsteering(-60, 80);
-            steering_time(1600, -25, 0);
-            tank_turn(180, 0, 30);
-            tank_turn(180, 30, -30);
-            tank_turn(60, -30, 0);
-            tank_turn(58, 0, -30);
-            forward(-90, 60);
-
-
-            break;
-        default:
-            newsteering(-90, 80);       // 障害物を超える
-            break;
-    }
-    
-    tslp_tsk(100*MSEC);                 // この辺の　tslpを変えると、p_turnが回りすぎる
-    forward(-50, 11);                   // バックのまま、もう少し進む
-    tslp_tsk(300*MSEC);
-    // 90度回して壁にあてる
-    p_turn(90, 0, 1);
-    steering_time(800, -40, 0);         // 壁にあてる
-
-    forward(90, 13);                    // 壁から離れて
-    tslp_tsk(500*MSEC);
-    my_turn(35, 90);                    // 工場を向く
     tslp_tsk(500*MSEC);
 
     aproach_to_brown();
