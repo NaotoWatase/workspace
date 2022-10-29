@@ -1403,9 +1403,6 @@ void marker_goal_1(void) {
 
 }
 
-
-
-
 void main_task(intptr_t unused){
 
     bt = ev3_serial_open_file(EV3_SERIAL_BT);
