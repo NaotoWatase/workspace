@@ -40,13 +40,20 @@ void water(int n);
 void straight(float cm, float set_power, bool_t savedata);
 void steering_time(int time_stop_4d, int power, int steering);
 void turn(float angle, float L_power, float R_power);
+void walltrace_length(float cm, float power, float distance);
+void linetrace_length(float length, int power);
+void steering_color(colorid_t color_stop, int power, int steering);
 
+
+void start_nagano();
 void blue_nagano();
 void green_nagano();
 void yellow_nagano();
 void red_nagano();
 void brown_nagano();
 void white_nagano();
+void chemical_nagano();
+void marking_nagano();
 /**
  * Define the connection ports of the sensors and motors.
  * By default, this application uses the following ports:
@@ -234,6 +241,23 @@ void newsteering(int power, float cm) {
     ev3_motor_stop(EV3_PORT_C, true);
 }*/
 
+void start_nagano() {
+    tslp_tsk(400*MSEC);
+    straight(80, -100, false);
+    turn(90, 20, -20);
+    steering_time(1000, -30, 0);
+    tslp_tsk(300*MSEC);
+    straight(9.5, 50, false);
+    tslp_tsk(300*MSEC);
+    //waltrace_length(12, 30, 10);
+    turn(90, 20, -20);
+    steering_color(COLOR_WHITE, 30, 0);
+    steering_color(COLOR_BLACK, 24, 0);
+    linetrace_length(27.5, 6);
+    tslp_tsk(500*MSEC);
+    straight(9.2, 20, true);
+}
+
 void blue_nagano() {
     obj_check(0, RIGHT);
     chemical_taker(0, RIGHT);
@@ -279,6 +303,98 @@ void green_nagano() {
     straight(25, 80, false);
 }
 
+void yellow_nagano() {
+    obj_check(4, RIGHT);
+    chemical_taker(4, RIGHT);
+
+    /* red */
+    straight(37.5, 80, false);
+    water(4);
+}
+
+void red_nagano(){
+    obj_check(10, RIGHT);
+    chemical_taker(10, RIGHT);
+    straight(27, 80, true);
+    obj_check(11, RIGHT);
+    chemical_taker(11, RIGHT);
+    steering_time(1100, 10, 0);
+    tslp_tsk(600*MSEC);
+    straight(5.6, -10, false);
+    tslp_tsk(700*MSEC);
+    turn(90, -10, 10);
+    tslp_tsk(700*MSEC);
+    water(10);
+    water(11);
+
+    /* brown */
+    walltrace_length(19.5, 30, 9.5);
+}
+
+void brown_nagano(){
+    obj_check(9, LEFT);
+    chemical_taker(9, LEFT);
+    straight(37, 80, false);
+    obj_check(8, LEFT);
+    chemical_taker(8, RIGHT);
+    tslp_tsk(300*MSEC);
+    straight(10, -50, false);
+    tslp_tsk(200*MSEC);
+    turn(90, -15, 15);
+    tslp_tsk(300*MSEC);
+    straight(3, -28, false);
+    steering_time(1000, -30, 0);
+    tslp_tsk(400*MSEC);
+
+    /* white */
+    straight(14, 20, false);
+    tslp_tsk(400*MSEC);
+    water(8);
+    water(9);
+    //map_check(5, RIGHT);
+    //map_check(6, LEFT);
+    straight(37, 80, false);
+    tslp_tsk(600*MSEC);
+    turn(90, 10, -10);
+    tslp_tsk(400*MSEC);
+    straight(39, -10, false);
+}
+
+void test_turn() { 
+    turn(90, -20, 20);
+    straight(15, 80, false);
+    turn(90, -20, 20);
+    straight(15, 80, false);
+    turn(90, -20, 20);
+    straight(15, 80, false);
+    turn(90, -20, 20);
+    straight(15, 80, false);
+    turn(90, -20, 20);
+    straight(15, 80, false);
+    turn(90, -20, 20);
+    straight(15, 80, false);
+    turn(90, -20, 20);
+    straight(15, 80, false);
+    turn(90, -20, 20);
+    straight(15, 80, false);
+    turn(90, -20, 20);
+    straight(15, 80, false);
+    turn(90, -20, 20);
+    straight(15, 80, false);
+    turn(90, -20, 20);
+    straight(15, 80, false);
+    turn(90, -20, 20);
+    straight(15, 80, false);
+    turn(90, -20, 20);
+    straight(15, 80, false);
+    turn(90, -20, 20);
+    straight(15, 80, false);
+    turn(90, -20, 20);
+    straight(15, 80, false);
+    turn(90, -20, 20);
+
+} 
+
 void arm_up() {
     if (arm_type == false) ev3_motor_rotate(EV3_PORT_A, 190, 30, false);
     arm_type = true;
@@ -291,7 +407,8 @@ void arm_down() {
 }
 
 void stopping(){
-    while(ev3_button_is_pressed(ENTER_BUTTON) == false) {}    
+    //while(ev3_button_is_pressed(ENTER_BUTTON) == false) {}    
+    tslp_tsk(3000*MSEC);
 }
 
 void turn(float angle, float L_power, float R_power) {
@@ -321,13 +438,13 @@ void turn(float angle, float L_power, float R_power) {
             right = abs(right);
             average = (left + right) / 2.0; 
             if (average < angle*TURN*ROBOT1CM * 1 / 4) {
-                changing_power = (set_power / (angle*TURN*ROBOT1CM / 4)) * average;
-                if (changing_power < 8) changing_power = 8;
+                changing_power = (set_power / (angle*TURN*ROBOT1CM * 1 / 4)) * average;
+                if (changing_power < 3) changing_power = 3;
                 changing_L = changing_power * L_sign;
                 changing_R = changing_power * R_sign;
             }
-            if (average > angle*TURN*ROBOT1CM * 3 / 4) {
-                changing_power = (-set_power / (angle*TURN*ROBOT1CM * 1 / 4)) * (average - (angle*TURN*ROBOT1CM * 3 / 4)) + set_power;
+            if (average >= angle*TURN*ROBOT1CM * 1 / 4) {
+                changing_power = (-set_power / (angle*TURN*ROBOT1CM * 1 / 4)) * (average - (angle*TURN*ROBOT1CM * 1 / 4)) + set_power;
                 if (changing_power < 8) changing_power = 8;
                 changing_L = changing_power * L_sign;
                 changing_R = changing_power * R_sign;
@@ -339,6 +456,7 @@ void turn(float angle, float L_power, float R_power) {
         ev3_motor_stop(EV3_PORT_B, true);
         ev3_motor_stop(EV3_PORT_C, true);
     }
+    tslp_tsk(100);
 }
 
 
@@ -350,7 +468,6 @@ void straight(float cm, float set_power, bool_t savedata) {
     if (set_power > 70) { 
         set_power = 70;
     }
-    int mode = 1;
     float lb_power;
     float rc_power;
     float power = 0;
@@ -380,9 +497,7 @@ void straight(float cm, float set_power, bool_t savedata) {
         //gein = -4;
 
     }
-    if (mode = 0) {
-        gein = -0.4;
-    }
+
     //ev3_gyro_sensor_reset(EV3_PORT_4);
     if (savedata == false) {
         ev3_motor_reset_counts(EV3_PORT_B);
@@ -438,7 +553,7 @@ void straight(float cm, float set_power, bool_t savedata) {
         //gein = -1;
         gein = 0;
     }
-    if (mode = 0) {
+    if (MODE == 0) {
         gein = 0;
     }
     while(true){
@@ -475,7 +590,7 @@ void straight(float cm, float set_power, bool_t savedata) {
         //gein = -3;
         gein = -2;
     }
-    if (mode = 0) {
+    if (MODE == 0) {
         gein = -0.1;
     }
     set_power = power;
@@ -1382,24 +1497,7 @@ void main_task(intptr_t unused){
 
 
     /*スタートの分岐チェック*/
-    tslp_tsk(400*MSEC);
-
-
-
-
-    straight(80, -100, false);
-    turn(90, 20, -20);
-    steering_time(1000, -30, 0);
-    tslp_tsk(300*MSEC);
-    straight(9.5, 50, false);
-    tslp_tsk(300*MSEC);
-    //waltrace_length(12, 30, 10);
-    turn(90, 20, -20);
-    steering_color(COLOR_WHITE, 30, 0);
-    steering_color(COLOR_BLACK, 24, 0);
-    linetrace_length(26.5, 6);
-    tslp_tsk(500*MSEC);
-    straight(10.2, 20, true);
+    
 
     /*straight(100, -100);
     tslp_tsk(1000*MSEC);
@@ -1429,57 +1527,23 @@ void main_task(intptr_t unused){
     */
    
     /* blue */
+    tslp_tsk(600*MSEC);
+
+    
+
+    start_nagano();
+    stopping();
     blue_nagano();
+    stopping();
     green_nagano();
-    obj_check(4, RIGHT);
-    chemical_taker(4, RIGHT);
-
-    /* red */
-    straight(37.5, 80, false);
-    water(4);
-    obj_check(10, RIGHT);
-    chemical_taker(10, RIGHT);
-    straight(27, 80, true);
-    obj_check(11, RIGHT);
-    chemical_taker(11, RIGHT);
-    steering_time(1100, 10, 0);
-    tslp_tsk(600*MSEC);
-    straight(5.6, -20, false);
-    tslp_tsk(700*MSEC);
-    turn(90, -10, 10);
-    tslp_tsk(700*MSEC);
-    water(10);
-    water(11);
-
-    /* brown */
-    walltrace_length(21.8, 30, 7);
-    straight(21.8, 80, false);
-    obj_check(9, LEFT);
-    chemical_taker(9, LEFT);
-    straight(37, 80, false);
-    obj_check(8, LEFT);
-    chemical_taker(8, RIGHT);
-    tslp_tsk(300*MSEC);
-    straight(10, -50, false);
-    tslp_tsk(200*MSEC);
-    turn(90, -15, 15);
-    tslp_tsk(300*MSEC);
-    straight(3, -28, false);
-    steering_time(1000, -30, 0);
-    tslp_tsk(400*MSEC);
-
-    /* white */
-    straight(14, 20, false);
-    tslp_tsk(400*MSEC);
-    water(8);
-    water(9);
-    //map_check(5, RIGHT);
-    //map_check(6, LEFT);
-    straight(37, 80, false);
-    tslp_tsk(600*MSEC);
-    turn(90, 10, -10);
-    tslp_tsk(400*MSEC);
-    straight(39, -10, false);
+    stopping();
+    yellow_nagano();
+    stopping();
+    red_nagano();  
+    stopping();
+    brown_nagano();
+    stopping();
+    
     obj_check(7, RIGHT);
     chemical_taker(7, RIGHT);
     tslp_tsk(300*MSEC);
