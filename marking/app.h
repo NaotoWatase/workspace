@@ -83,8 +83,14 @@ typedef enum way{
     NONE
 } way_t ;
 
-
-
+typedef enum map{
+    RED,
+    BROWN,
+    YELLOW,
+    WHITE,
+    GREEN,
+    BLUE
+} map_t ;
 
 /*
  *  ターゲットに依存する可能性のある定数の定義

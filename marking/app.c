@@ -72,7 +72,7 @@ int chemical = 0;
 int white = 0;
 int how_many = 31;
 
-int map [6] = {0,0,0,0,0,0};
+map_t map [6] = {0,0,0,0,0,0};
 int start = 2;
 
 int chemical_type = 0;
@@ -838,6 +838,30 @@ void check_task(intptr_t unused){
     fprintf(bt, "\r\ny:%d", y);
 }
 
+void marking_overall(int degree, int power){    
+    //　＋以外の角度は存在しない!
+    int num;
+        while(true){
+            num = ev3_motor_get_counts(EV3_PORT_D);
+            ev3_motor_set_power(EV3_PORT_D, power);
+            if (power > 0 && num >= degree)break;
+            if (power < 0 && num <= degree)break;
+        }
+        ev3_motor_stop(EV3_PORT_D, true);
+}
+
+void marking_long(){
+    marking_overall(230, 40);
+    tslp_tsk(200*MSEC);
+    marking_overall(120, -40);
+}
+
+void marking_short(){
+    marking_overall(220, 15);
+    tslp_tsk(200*MSEC);
+    marking_overall(120, -40);
+}
+
 void main_task(intptr_t unused){
 
     bt = ev3_serial_open_file(EV3_SERIAL_BT);
@@ -874,108 +898,101 @@ void main_task(intptr_t unused){
     tslp_tsk(300*MSEC);
 
 
-    //関数でいいかも（falseでやりたい）
-    /*if (ev3_motor_get_counts(EV3_PORT_D) > 90) {
-        while(true){
-            ev3_motor_set_power(EV3_PORT_D, -20);
-            if (ev3_motor_get_counts(EV3_PORT_D) < 90)break;
-        }
-        ev3_motor_stop(EV3_PORT_D, true);
-    }
-    if (ev3_motor_get_counts(EV3_PORT_D) < 90) {
-        while(true){
-            ev3_motor_set_power(EV3_PORT_D, 20);
-            if (ev3_motor_get_counts(EV3_PORT_D) > 90)break;
-        }
-        ev3_motor_stop(EV3_PORT_D, true);
-    }*/
-    
-
-    straight(30, 80);
-    turn(90, -25, 25);
-    steering_time(800, 30, 0);
-    straight(30, -80);
 
     /* marking */
-    if (location[0] == PERSON || location[1] == PERSON) map[0] = 1; //blue
-    if (location[2] == PERSON || location[3] == PERSON) map[1] = 1; //green
-    if (location[5] == PERSON || location[6] == PERSON) map[2] = 1; //white
-    if (location[4] == PERSON || location[7] == PERSON) map[3] = 1; //yellow
-    if (location[8] == PERSON || location[9] == PERSON) map[4] = 1; //brown
-    if (location[10] == PERSON || location[11] == PERSON) map[5] = 1; //red
-
-    map[0] = 1;
-    map[5] = 1;
-    
-    if (map[4]) {
-        ev3_motor_rotate(EV3_PORT_D, 120, -50, true);//数値＆パワーてきとう
-        ev3_motor_rotate(EV3_PORT_D, 120, 50, false);
-        straight(22, -50);
+    if (location[8] == PERSON || location[9] == PERSON) {
+        map[BROWN] = 1;
         marking_count = 1;
     }
-    else{
-        ev3_motor_rotate(EV3_PORT_D, 80, -50, true);
-        ev3_motor_rotate(EV3_PORT_D, 10, -20, true);
-        straight(11, -50);
-        if (map[2]) {
-            ev3_motor_rotate(EV3_PORT_D, 50, 50, false);
-            ev3_motor_rotate(EV3_PORT_D, 80, -50, true);
-            ev3_motor_rotate(EV3_PORT_D, 80, 50, false);
-            straight(11, -50);
+    if (location[10] == PERSON || location[11] == PERSON) {
+        if(marking_count == 1) map[RED] = 2;
+        else {
+            map[RED] = 1;
             marking_count = 1;
+        }   
+    }
+    if (location[5] == PERSON || location[6] == PERSON) {
+        if(marking_count == 1) map[WHITE] = 2;
+        else {
+            map[WHITE] = 1;
+            marking_count = 1;
+        }   
+    }  
+    if (location[4] == PERSON || location[7] == PERSON) {
+        if(marking_count == 1) map[YELLOW] = 2;
+        else {
+            map[YELLOW] = 1;
+            marking_count = 1;
+        }   
+    } 
+    if (location[0] == PERSON || location[1] == PERSON) {
+        if(marking_count == 1) map[BLUE] = 2;
+        else {
+            map[BLUE] = 1;
+            marking_count = 1;
+        }   
+    }  
+    if (location[2] == PERSON || location[3] == PERSON) {
+        if(marking_count == 1) map[GREEN] = 2;
+        else {
+            map[GREEN] = 1;
+            marking_count = 1;
+        }   
+    }
+    
+    
+    map[BROWN] = 1;
+    map[RED] = 2;
+
+
+    ev3_motor_reset_counts(EV3_PORT_D);
+    steering_time(500, 15, 0);
+    straight(11, -50);
+    turn(90, -25, 25);
+    steering_time(500, 15, 0);
+    straight(23, -80);
+    //get the first block
+    marking_overall(140, 30);
+    marking_overall(160, 10);
+    //往路
+    if (map[BROWN] == 1) marking_long();
+    if (map[RED] == 1) marking_short();
+    if(map[YELLOW] == 1 || map[WHITE] == 1){
+        straight(14.5, -50);
+        if (map[WHITE] == 1) marking_long();
+        if (map[YELLOW] == 1) marking_short();
+        straight(14.5, -50);
+    }
+    else{
+        if(map[BLUE] == 1){
+            straight(14, -50);
+            turn(30, -20, 0);
+            marking_overall(230, 80);
+            tslp_tsk(200*MSEC);
+            marking_overall(120, -40);
+            turn(30, 20, 0);
+            straight(15, -50);
         }
-        else{
-            if (map[0]) {
-                straight(13, -50);
-                steering_time(200, -30, 0);
-                ev3_motor_rotate(EV3_PORT_D, 80, -50, true);
-                ev3_motor_rotate(EV3_PORT_D, 80, 50, false);
-                marking_count = 1;
-            }
-            else{
-                straight(13, -50);
-                steering_time(200, 30, 0);
-                if (map[1] && marking_count == 0) {
-                    ev3_motor_rotate(EV3_PORT_D, 60, -30, true);
-                    ev3_motor_rotate(EV3_PORT_D, 60, 50, false);
-                    straight(4, -50);
-                }
-                else if (map[3] && marking_count == 0) {
-                    straight(11, 50);
-                    ev3_motor_rotate(EV3_PORT_D, 60, -30, true);
-                    ev3_motor_rotate(EV3_PORT_D, 60, 50, false);
-                    straight(15, -50);
-                }
-                ev3_motor_rotate(EV3_PORT_D, 40, -30, true);
-                ev3_motor_rotate(EV3_PORT_D, 10, -10, false);
-            }
-        }
+        else straight(29, -80);
     }
-    if (map[0] && marking_count == 1) {
-        ev3_motor_rotate(EV3_PORT_D, 80, -50, true);
-        ev3_motor_rotate(EV3_PORT_D, 80, 50, false);
+    marking_overall(160, 10);
+    //復路
+    if (map[GREEN] == 2) marking_short();
+    if (map[BLUE] == 2) marking_long();
+    if(map[YELLOW] == 2 || map[WHITE] == 2){
+        straight(14.5, 50);
+        if (map[YELLOW] == 2) marking_short();
+        if (map[WHITE] == 2) marking_long();
+        straight(14.5, 50);
     }
-    if (map[1]) {
-        ev3_motor_rotate(EV3_PORT_D, 60, -30, true);
-        ev3_motor_rotate(EV3_PORT_D, 60, 50, false);
-    }
-    if (map[2] && marking_count == 1) {
-        ev3_motor_rotate(EV3_PORT_D, 80, -50, true);
-        ev3_motor_rotate(EV3_PORT_D, 80, 50, false);
-    }
-    if (map[3]) {
-        ev3_motor_rotate(EV3_PORT_D, 60, -30, true);
-        ev3_motor_rotate(EV3_PORT_D, 60, 50, false);
-    }
-    if (map[5]) {
-        ev3_motor_rotate(EV3_PORT_D, 60, -30, true);
-        ev3_motor_rotate(EV3_PORT_D, 60, 50, false);
+    else{
+        straight(29, 80);
+        if(map[RED] == 2) marking_short();
     }
 
-  
-    ev3_motor_rotate(EV3_PORT_D, 50, -30, false);
-    straight(20, 80);
-    turn(90, 0, 25);
-    steering_time(1000, 30, -10);
+    marking_overall(180, 30);
+    straight(13, 80);
+    turn(185, 25, 0);
+    steering_time(1000, -30, 5);
 
 }
