@@ -991,8 +991,8 @@ void main_task(intptr_t unused){
     }
 
     marking_overall(180, 30);
-    straight(13, 80);
-    turn(185, 25, 0);
+    straight(11, 80);
+    turn(190, 25, 0);
     steering_time(1000, -30, 5);
 
 }
