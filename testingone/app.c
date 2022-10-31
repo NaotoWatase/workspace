@@ -427,7 +427,7 @@ void arm_down() {
 
 void stopping(){
     while(ev3_button_is_pressed(ENTER_BUTTON) == false) {}    
-    tslp_tsk(1000*MSEC);
+    tslp_tsk(2000*MSEC);
 }
 
 void turn(float angle, float L_power, float R_power) {
@@ -476,6 +476,79 @@ void turn(float angle, float L_power, float R_power) {
         ev3_motor_stop(EV3_PORT_C, true);
     }
     tslp_tsk(100);
+}
+
+void last(float cm, float set_power_sign, bool_t savedata) {
+    int sign = set_power_sign / abs(set_power_sign);
+    float set_power = abs(set_power_sign);
+    float lb_power;
+    float rc_power;
+    float gein = -6;
+    if (set_power < 30) gein = -0.7;
+    if (cm < 8) {
+        gein = -0.7;
+        set_power = 30;
+    }
+    float changing_power = 0;
+    float left;
+    float right;
+    float average;
+    float steer;
+    float diff;
+    float power = 0;
+
+    float minus = 0;
+
+
+    if (savedata == false) {
+        ev3_motor_reset_counts(EV3_PORT_B);
+        ev3_motor_reset_counts(EV3_PORT_C);	
+    }
+    if (savedata == true) {
+        if (left_data - right_data >= 0) minus = right_data - left_data;
+        if (left_data - right_data < 0) minus = right_data - left_data;
+        ev3_motor_reset_counts(EV3_PORT_B);
+        ev3_motor_reset_counts(EV3_PORT_C);	
+    }
+
+
+    while (true){
+        left = ev3_motor_get_counts(EV3_PORT_B); 
+        right = ev3_motor_get_counts(EV3_PORT_C) + minus;
+        left = abs(left);
+        right = abs(right);
+        diff = left - right;
+        steer = diff * gein;
+        average = (left + right) / 2.0; 
+        if (average < cm*ROBOT1CM * 1 / 4) {
+            changing_power = (set_power / (cm*ROBOT1CM * 1 / 4)) * average;
+            if (changing_power < 4) changing_power = 4;
+            power = changing_power * sign;
+        }
+        if (average >= cm*ROBOT1CM * 1 / 4) {
+            changing_power = (-set_power / (cm*ROBOT1CM * 3 / 4)) * (average - (cm*ROBOT1CM * 1 / 4)) + set_power;
+            if (changing_power < 7) changing_power = 7;
+            power = changing_power * sign;
+        }
+        if(steer > 0) {
+            lb_power = power;
+            rc_power = power - (power * steer / 50);
+            lb_power = -lb_power;
+        }
+        else {
+            lb_power = power + (power * steer / 50);
+            rc_power = power;
+            lb_power = -lb_power;
+        }
+        (void)ev3_motor_set_power(EV3_PORT_B, lb_power);
+        (void)ev3_motor_set_power(EV3_PORT_C, rc_power);
+        if (cm * ROBOT1CM < average) break;
+    }
+    ev3_motor_stop(EV3_PORT_B, true);
+    ev3_motor_stop(EV3_PORT_C, true);
+    left_data = left;
+    right_data = right;
+    tslp_tsk(1000);
 }
 
 void straight(float cm, float set_power, bool_t savedata) {
@@ -542,7 +615,7 @@ void straight(float cm, float set_power, bool_t savedata) {
         //if (set_power > 0 && power <= 8) power = 8;
         power += diff; 
         if (set_power < 0 && power > -7) power = -7;
-        if(steering > 0) {
+        if(steer > 0) {
             lb_power = power;
             rc_power = power - (power * steer / 50);
             lb_power = -lb_power;
@@ -1426,7 +1499,10 @@ void main_task(intptr_t unused){
 
 
     /*スタートの分岐チェック*/
-    
+    tslp_tsk(1000*MSEC);
+
+
+
     start_nkc();
     blue_nkc();
     green_nkc();
