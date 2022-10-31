@@ -84,6 +84,19 @@ typedef enum way{
     NONE
 } way_t ;
 
+typedef enum map{
+    RED,
+    BROWN,
+    YELLOW,
+    WHITE,
+    GREEN,
+    BLUE
+} map_t ;
+
+typedef enum arm{
+    UP,
+    DOWN
+}arm_t ;
 
 
 
