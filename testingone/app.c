@@ -38,7 +38,7 @@ void chemical_taker(int n, way_t sensor);
 void obj_check(int num, way_t sensor);
 void water(int n);
 //直進
-void straight(float cm, float set_power, bool_t savedata);
+void straight(float cm, float set_power_sign, bool_t savedata);
 //ac,dcで全体を一とした時の加速、減速の割合を変更
 void straight_custom(float cm, float ac, float dc, float set_power);
 void steering_time(int time_stop_4d, int power, int steering);
@@ -167,7 +167,7 @@ void start_nkc() {
     turn(90, 50, -50);
     steering_time(1000, -30, 0);
     tslp_tsk(300*MSEC);
-    straight(10, 50, false);
+    straight(10.5, 50, false);
     tslp_tsk(300*MSEC);
     //waltrace_length(12, 30, 10);
     turn(90, 50, -50);
@@ -175,7 +175,7 @@ void start_nkc() {
     steering_color(COLOR_BLACK, 24, 0);
     linetrace_length(28.5, 6);
     tslp_tsk(500*MSEC);
-    straight(8.2, 20, true);
+    straight(7.2, 20, true);
 }
 
 void blue_nkc() {
@@ -186,13 +186,13 @@ void blue_nkc() {
     chemical_taker(1, RIGHT);
     water(0);
     water(1);
-    straight(9, 80, true);
+    straight(11, 80, true);
 }
 
 void green_nkc() {
     obj_check(2, RIGHT);
     chemical_taker(2, RIGHT);
-    straight(36, 80, true);
+    straight(37, 80, true);
     obj_check(3, RIGHT);
 
     steering_time(600, 15, 0);
@@ -248,7 +248,7 @@ void red_nkc(){
     water(11);
 
     /* brown */
-    walltrace_length(24, 15, 9);
+    walltrace_length(20.7, 10, 9);
 }
 
 void brown_nkc(){
@@ -271,11 +271,11 @@ void brown_nkc(){
     tslp_tsk(400*MSEC);
     water(8);
     water(9);
-    straight(37, 80, false);
+    straight(36.5, 80, false);
     tslp_tsk(600*MSEC);
     turn(90, 50, -50);
     tslp_tsk(400*MSEC);
-    straight(39, -10, false);
+    straight(39, -80, false);
 }
 
 void white_nkc(){
@@ -302,8 +302,9 @@ void chemical_nkc(){
         tslp_tsk(300*MSEC);
         straight(10, -50, false);
         arm_down();
-        ev3_motor_rotate(EV3_PORT_A, 180, -15, false);
+        ev3_motor_set_power(EV3_PORT_A, -15);
         straight(45, -80, false);
+        ev3_motor_stop(EV3_PORT_A, true);
         tslp_tsk(1000*MSEC);
         turn(180, 0, 25);
     }
@@ -313,8 +314,11 @@ void chemical_nkc(){
         tslp_tsk(300*MSEC);
         straight(10, -50, false);
         arm_down();
-        ev3_motor_rotate(EV3_PORT_A, 180, -15, false);
-        straight(70, 80, false);
+        ev3_motor_set_power(EV3_PORT_A, -15);
+        straight(45, 80, false);
+        ev3_motor_stop(EV3_PORT_A, true);
+        steering_time(800, 25, 0);
+        straight(15, -50, false);
         turn(180, 25, 0);
     }
     
@@ -328,8 +332,8 @@ void marking_nkc(){
     map_decide();
     //marking
     steering_time(1500, -20, -3);
-    steering_time(850, 20, -8);
-    turn(100, -50, 50);
+    steering_time(850, 20, -16);
+    turn(110, -50, 50);
     steering_time(1200, 15, 0);
     straight(23, -80, false);
     //get the first block
@@ -421,13 +425,13 @@ void arm_up() {
 }
 
 void arm_down() {
-    if (arm_type == UP) ev3_motor_rotate(EV3_PORT_A, 180, -20, true);
+    if (arm_type == UP) ev3_motor_rotate(EV3_PORT_A, 180, -10, true);
     arm_type = DOWN;
 }
 
 void stopping(){
-    while(ev3_button_is_pressed(ENTER_BUTTON) == false) {}    
-    tslp_tsk(2000*MSEC);
+    //while(ev3_button_is_pressed(ENTER_BUTTON) == false) {}    
+    //tslp_tsk(2000*MSEC);
 }
 
 void turn(float angle, float L_power, float R_power) {
@@ -478,16 +482,19 @@ void turn(float angle, float L_power, float R_power) {
     tslp_tsk(100);
 }
 
-void last(float cm, float set_power_sign, bool_t savedata) {
+void straight(float cm, float set_power_sign, bool_t savedata) {
     int sign = set_power_sign / abs(set_power_sign);
     float set_power = abs(set_power_sign);
     float lb_power;
     float rc_power;
     float gein = -6;
     if (set_power < 30) gein = -0.7;
-    if (cm < 8) {
+    if (cm < 15) {
         gein = -0.7;
         set_power = 30;
+    }
+    if (set_power > 70) {
+        set_power = 70;
     }
     float changing_power = 0;
     float left;
@@ -513,6 +520,7 @@ void last(float cm, float set_power_sign, bool_t savedata) {
 
 
     while (true){
+        int count_chemical = 0;
         left = ev3_motor_get_counts(EV3_PORT_B); 
         right = ev3_motor_get_counts(EV3_PORT_C) + minus;
         left = abs(left);
@@ -522,7 +530,7 @@ void last(float cm, float set_power_sign, bool_t savedata) {
         average = (left + right) / 2.0; 
         if (average < cm*ROBOT1CM * 1 / 4) {
             changing_power = (set_power / (cm*ROBOT1CM * 1 / 4)) * average;
-            if (changing_power < 4) changing_power = 4;
+            if (changing_power < 6) changing_power = 6;
             power = changing_power * sign;
         }
         if (average >= cm*ROBOT1CM * 1 / 4) {
@@ -542,6 +550,10 @@ void last(float cm, float set_power_sign, bool_t savedata) {
         }
         (void)ev3_motor_set_power(EV3_PORT_B, lb_power);
         (void)ev3_motor_set_power(EV3_PORT_C, rc_power);
+        if (timing_chemical == 1 && (left / ROBOT1CM > 1.4) && count_chemical == 0) {
+            count_chemical = 1;
+            arm_up();
+        }
         if (cm * ROBOT1CM < average) break;
     }
     ev3_motor_stop(EV3_PORT_B, true);
@@ -551,7 +563,7 @@ void last(float cm, float set_power_sign, bool_t savedata) {
     tslp_tsk(1000);
 }
 
-void straight(float cm, float set_power, bool_t savedata) {
+void last(float cm, float set_power, bool_t savedata) {
     if (cm < 10 && set_power > 50) { 
         set_power = 50;
     }
@@ -1012,7 +1024,7 @@ void linetrace_length(float length, int power){
         average = (kakudo_B + kakudo_C) / 2;
         reflect = ev3_color_sensor_get_reflect(EV3_PORT_1);
         
-        p = reflect - 22;
+        p = reflect - 25;
         i = (reflect + i);
         d = (reflect - d2); 
         d2 = reflect;
@@ -1115,7 +1127,7 @@ void walltrace_length(float cm, float power, float distance) {
         average = (lb + rc) / 2;
 
         get_distance = ev3_ultrasonic_sensor_get_distance(EV3_PORT_4);
-        steer = (distance - get_distance) * 12;
+        steer = (distance - get_distance) * 6;
         if (steer > 0) {
             lb_power = power;
             rc_power = power + (power * steer / 50);
@@ -1136,7 +1148,7 @@ void walltrace_length(float cm, float power, float distance) {
 
 void chemical_taker(int n, way_t sensor){
     timing_chemical = 0;
-    if(location[n] == CHEMICAL){
+    if(location[n] == CHEMICAL && chemical == 0){
         timing_chemical = 1;
         chemical = chemical + 1;
        if(sensor == RIGHT){
@@ -1164,7 +1176,7 @@ void chemical_took(int n, way_t sensor){
 void obj_check(int num, way_t sensor){
     obj_measure(num, sensor);
     obj_know(num);
-    tslp_tsk(300*MSEC);
+    //tslp_tsk(300*MSEC);
 }
 
 void obj_measure(int num, way_t sensor) {
