@@ -199,7 +199,7 @@ void green_nkc() {
     if (location[3] == CHEMICAL){
         straight(8, -50, false);
         turn(90, 50, -50);
-        straight(5, 50, false);
+        steering_time(800, 15, 0);
         chemical_taker(3, LEFT);
         straight(10, -50, false);
         turn(180, 50, -50);
