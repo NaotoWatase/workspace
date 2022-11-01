@@ -167,7 +167,7 @@ void start_nkc() {
     turn(90, 50, -50);
     steering_time(1000, -30, 0);
     tslp_tsk(300*MSEC);
-    straight(10.5, 50, false);
+    straight(11.2, 50, false);
     tslp_tsk(300*MSEC);
     //waltrace_length(12, 30, 10);
     turn(90, 50, -50);
@@ -209,9 +209,9 @@ void green_nkc() {
         tslp_tsk(100*MSEC);
         ev3_speaker_play_tone(NOTE_A5, 200);
         tslp_tsk(200*MSEC);
-        turn(80, -25, 0);
+        turn(90, -25, 0);
         tslp_tsk(300*MSEC);
-        turn(50, -50, 50);
+        turn(45, -50, 50);
         tslp_tsk(300*MSEC);
         steering_time(800, -15, 0);
         ev3_speaker_play_tone(NOTE_A5, 200);
@@ -248,7 +248,7 @@ void red_nkc(){
     water(11);
 
     /* brown */
-    walltrace_length(20.7, 10, 9);
+    walltrace_length(20.7, 8, 9);
 }
 
 void brown_nkc(){
@@ -273,7 +273,7 @@ void brown_nkc(){
     water(9);
     straight(36.5, 80, false);
     tslp_tsk(600*MSEC);
-    turn(90, 50, -50);
+    turn(90, 30, -30);
     tslp_tsk(400*MSEC);
     straight(39, -80, false);
 }
@@ -303,9 +303,9 @@ void chemical_nkc(){
         straight(10, -50, false);
         arm_down();
         ev3_motor_set_power(EV3_PORT_A, -15);
-        straight(45, -80, false);
+        straight(50, -80, false);
         ev3_motor_stop(EV3_PORT_A, true);
-        tslp_tsk(1000*MSEC);
+        steering_time(700, -25, 0);
         turn(180, 0, 25);
     }
     else {
@@ -332,9 +332,10 @@ void marking_nkc(){
     map_decide();
     //marking
     steering_time(1500, -20, -3);
-    steering_time(850, 20, -16);
-    turn(110, -50, 50);
+    steering_time(750, 20, -14);
+    turn(102, -50, 50);
     steering_time(1200, 15, 0);
+    tslp_tsk(100*MSEC);
     straight(23, -80, false);
     //get the first block
     marking_overall(140, 30);
@@ -495,6 +496,9 @@ void straight(float cm, float set_power_sign, bool_t savedata) {
     }
     if (set_power > 70) {
         set_power = 70;
+    }
+    if(sign < 0 ) {
+        gein = -0.1;
     }
     float changing_power = 0;
     float left;
