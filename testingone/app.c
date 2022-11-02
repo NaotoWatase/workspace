@@ -166,16 +166,13 @@ void start_nkc() {
     straight(80, -100, false);
     turn(90, 50, -50);
     steering_time(1000, -30, 0);
-    tslp_tsk(300*MSEC);
-    straight(11.2, 50, false);
-    tslp_tsk(300*MSEC);
+    straight(11.8, 50, false);
     //waltrace_length(12, 30, 10);
     turn(90, 50, -50);
     steering_color(COLOR_WHITE, 30, 0);
     steering_color(COLOR_BLACK, 24, 0);
     linetrace_length(28.5, 6);
-    tslp_tsk(500*MSEC);
-    straight(7.2, 20, true);
+    straight(6.8, 20, true);
 }
 
 void blue_nkc() {
@@ -207,20 +204,18 @@ void green_nkc() {
     }
     else{
         tslp_tsk(100*MSEC);
-        ev3_speaker_play_tone(NOTE_A5, 200);
         tslp_tsk(200*MSEC);
         turn(90, -25, 0);
         tslp_tsk(300*MSEC);
         turn(45, -50, 50);
         tslp_tsk(300*MSEC);
-        steering_time(800, -15, 0);
-        ev3_speaker_play_tone(NOTE_A5, 200);
+        steering_time(1000, -15, 0);
         tslp_tsk(200*MSEC);
     }
-    water(2);
-    water(3);
 
     straight(25, 80, false);
+    water(2);
+    water(3);
 }
 
 void yellow_nkc() {
@@ -228,7 +223,7 @@ void yellow_nkc() {
     chemical_taker(4, RIGHT);
 
     /* red */
-    straight(37.5, 80, false);
+    straight(37.5, 80, true);
     water(4);
 }
 
@@ -282,11 +277,11 @@ void white_nkc(){
     obj_check(7, RIGHT);
     chemical_taker(7, RIGHT);
     tslp_tsk(300*MSEC);
-    straight(8.5, 80, false);
+    straight(11, 80, true);
     obj_check(6, RIGHT);
     chemical_taker(6, RIGHT);
     tslp_tsk(300*MSEC);
-    straight(37, 80, false);
+    straight(37, 80, true);
     obj_check(5, RIGHT);
     chemical_taker(5, RIGHT);
     water(5);
@@ -295,7 +290,7 @@ void white_nkc(){
 
 void chemical_nkc(){
     tslp_tsk(300*MSEC);
-    straight(63, 80, false);
+    straight(63, 80, true);
     if(chemical_type == RIGHT){
         tslp_tsk(300*MSEC);
         turn(90, -50, 50);
@@ -331,12 +326,12 @@ void chemical_nkc(){
 void marking_nkc(){
     map_decide();
     //marking
-    steering_time(1500, -20, -3);
-    steering_time(750, 20, -14);
+    steering_time(1500, -20, 5);
+    steering_time(720, 20, -14);
     turn(102, -50, 50);
     steering_time(1200, 15, 0);
     tslp_tsk(100*MSEC);
-    straight(23, -80, false);
+    straight(22, -60, false);
     //get the first block
     marking_overall(140, 30);
     marking_overall(160, 10);
@@ -488,17 +483,18 @@ void straight(float cm, float set_power_sign, bool_t savedata) {
     float set_power = abs(set_power_sign);
     float lb_power;
     float rc_power;
-    float gein = -6;
-    if (set_power < 30) gein = -0.7;
+    float p_gein = -6;
+    float d_gein = 0;
+    if (set_power < 30) p_gein = -0.7;
     if (cm < 15) {
-        gein = -0.7;
+        p_gein = -0.7;
         set_power = 30;
     }
     if (set_power > 70) {
         set_power = 70;
     }
     if(sign < 0 ) {
-        gein = -0.1;
+        p_gein = -0.01;
     }
     float changing_power = 0;
     float left;
@@ -506,9 +502,13 @@ void straight(float cm, float set_power_sign, bool_t savedata) {
     float average;
     float steer;
     float diff;
+    float bibun;
     float power = 0;
 
     float minus = 0;
+
+    float hensa = 0;
+    float last_hensa = 0;
 
 
     if (savedata == false) {
@@ -530,17 +530,25 @@ void straight(float cm, float set_power_sign, bool_t savedata) {
         left = abs(left);
         right = abs(right);
         diff = left - right;
-        steer = diff * gein;
+        hensa = diff;
+        bibun = (hensa - last_hensa) / 0.005;
+        steer = diff * p_gein + bibun * d_gein;
         average = (left + right) / 2.0; 
         if (average < cm*ROBOT1CM * 1 / 4) {
             changing_power = (set_power / (cm*ROBOT1CM * 1 / 4)) * average;
-            if (changing_power < 6) changing_power = 6;
+            if (changing_power < 7) changing_power = 7;
             power = changing_power * sign;
         }
         if (average >= cm*ROBOT1CM * 1 / 4) {
             changing_power = (-set_power / (cm*ROBOT1CM * 3 / 4)) * (average - (cm*ROBOT1CM * 1 / 4)) + set_power;
-            if (changing_power < 7) changing_power = 7;
+            if (changing_power < 9) changing_power = 9;
             power = changing_power * sign;
+        }
+        if (average >= cm*ROBOT1CM * 2 / 4) {
+            p_gein = -2;
+        }
+        if (average >= cm*ROBOT1CM * 3 / 4) {
+            p_gein = -6;
         }
         if(steer > 0) {
             lb_power = power;
@@ -554,7 +562,7 @@ void straight(float cm, float set_power_sign, bool_t savedata) {
         }
         (void)ev3_motor_set_power(EV3_PORT_B, lb_power);
         (void)ev3_motor_set_power(EV3_PORT_C, rc_power);
-        if (timing_chemical == 1 && (left / ROBOT1CM > 1.4) && count_chemical == 0) {
+        if (timing_chemical == 1 && (left / ROBOT1CM > 1.8) && count_chemical == 0) {
             count_chemical = 1;
             arm_up();
         }
@@ -564,7 +572,8 @@ void straight(float cm, float set_power_sign, bool_t savedata) {
     ev3_motor_stop(EV3_PORT_C, true);
     left_data = left;
     right_data = right;
-    tslp_tsk(1000);
+    //tslp_tsk(5 * MSEC);
+    last_hensa = hensa;
 }
 
 void last(float cm, float set_power, bool_t savedata) {
@@ -745,7 +754,7 @@ void straight_custom(float cm, float ac, float dc, float set_power) {
         set_power = 50;
     }
     if (set_power > 70) { 
-        set_power = 70;
+        set_power = 80;
     }
     float lb_power;
     float rc_power;
@@ -761,7 +770,7 @@ void straight_custom(float cm, float ac, float dc, float set_power) {
 
     float diff = 0.0006;    // 0.0008 
     if (set_power > 0) {
-        diff = 0.0013;
+        diff = 0.0015;
         gein = -11;
     }
     if (set_power < 0) {
@@ -865,12 +874,12 @@ void straight_custom(float cm, float ac, float dc, float set_power) {
 void water(int n) {
     if (location[n] == FIRE) {
         if(water_count == 1) {
-            ev3_motor_rotate(EV3_PORT_D, 70 , 20, true);
-            ev3_motor_rotate(EV3_PORT_D, 70 , -20, false);
+            ev3_motor_rotate(EV3_PORT_D, 70 , 25, true);
+            ev3_motor_rotate(EV3_PORT_D, 70 , -25, false);
         }
         if(water_count == 2) {
-            ev3_motor_rotate(EV3_PORT_D, 150 , 20, true);
-            ev3_motor_rotate(EV3_PORT_D, 150 , -20, false);
+            ev3_motor_rotate(EV3_PORT_D, 155 , 25, true);
+            ev3_motor_rotate(EV3_PORT_D, 155 , -25, false);
         }
         water_count = water_count + 1;
     }
@@ -1032,7 +1041,7 @@ void linetrace_length(float length, int power){
         i = (reflect + i);
         d = (reflect - d2); 
         d2 = reflect;
-        steer =  p * -0.7 + i * 0 + d * 0; 
+        steer =  p * -0.8 + i * 0 + d * 0; 
         if (length * ROBOT1CM < average) break;
         if(steer > 0) {
             (void)ev3_motor_set_power(EV3_PORT_B, -power);
@@ -1274,7 +1283,7 @@ void obj_know(int num){
             case 12:
             case 14:
             case 17:
-                if (judgement > 100 || blue > 40 || green > 40 || red > 40 || (red - green - blue > 12)) {
+                if (judgement > 100 || blue > 40 || green > 40 || red > 40 || (red - green - blue > 12) || (blue - green - red > 15)) {
                     location[num] = PERSON;
                     if ((red - green - blue > 20) || (h > 10 && h < 50)) location[num] = FIRE;    
                     if (s > 30) location[num] = PERSON;
