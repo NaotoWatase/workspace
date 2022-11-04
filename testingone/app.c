@@ -49,6 +49,7 @@ void steering_color(colorid_t color_stop, int power, int steering);
 void marking_overall(int degree, int power);
 void marking_short();
 void marking_long();
+void walltrace_color(colorid_t color, float power, float distance);
 //mapを定義 marking_countは優先度が高いものが１、低いものは２
 void map_decide();
 void arm_up();
@@ -194,23 +195,24 @@ void green_nkc() {
 
     steering_time(600, 15, 0);
     if (location[3] == CHEMICAL){
-        straight(8, -50, false);
+        straight(5, -50, false);
         turn(90, 50, -50);
         steering_time(800, 15, 0);
+        if (arm_type == DOWN) ev3_motor_rotate(EV3_PORT_A, 180, 30, false);
+        arm_type = UP;
+        chemical = chemical + 1;
+        chemical_type = LEFT;
         chemical_taker(3, LEFT);
+        tslp_tsk(600*MSEC);
         straight(10, -50, false);
         turn(180, 50, -50);
         steering_time(1000, -15, 0);
     }
     else{
-        tslp_tsk(100*MSEC);
-        tslp_tsk(200*MSEC);
         turn(90, -25, 0);
-        tslp_tsk(300*MSEC);
         turn(45, -50, 50);
-        tslp_tsk(300*MSEC);
         steering_time(1000, -15, 0);
-        tslp_tsk(200*MSEC);
+        tslp_tsk(600*MSEC);
     }
 
     straight(25, 80, false);
@@ -243,7 +245,8 @@ void red_nkc(){
     water(11);
 
     /* brown */
-    walltrace_length(20.7, 8, 9);
+    walltrace_color(BROWN, 8, 9);
+    walltrace_length(6, 8, 9);
 }
 
 void brown_nkc(){
@@ -259,18 +262,21 @@ void brown_nkc(){
     tslp_tsk(300*MSEC);
     straight(3, -28, false);
     steering_time(1000, -30, 0);
-    tslp_tsk(400*MSEC);
+    tslp_tsk(600*MSEC);
 
     /* white */
-    straight(14, 20, false);
-    tslp_tsk(400*MSEC);
-    water(8);
-    water(9);
-    straight(36.5, 80, false);
+    if (location[8] == FIRE || location[9] == FIRE) {
+        straight(14, 20, false);
+        tslp_tsk(400*MSEC);
+        water(8);
+        water(9);
+        straight(36.5, 80, true);
+    }
+    else straight(50.5, 80, false);
     tslp_tsk(600*MSEC);
     turn(90, 30, -30);
     tslp_tsk(400*MSEC);
-    straight(39, -80, false);
+    straight(39.5, -80, false);
 }
 
 void white_nkc(){
@@ -326,7 +332,7 @@ void chemical_nkc(){
 void marking_nkc(){
     map_decide();
     //marking
-    steering_time(1500, -20, 5);
+    steering_time(1500, -20, 0);
     steering_time(720, 20, -14);
     turn(102, -50, 50);
     steering_time(1200, 15, 0);
@@ -380,38 +386,10 @@ void goal_nkc(){
 }
 
 void test_turn() { 
-    turn(90, -20, 20);
-    straight(15, 80, false);
-    turn(90, -20, 20);
-    straight(15, 80, false);
-    turn(90, -20, 20);
-    straight(15, 80, false);
-    turn(90, -20, 20);
-    straight(15, 80, false);
-    turn(90, -20, 20);
-    straight(15, 80, false);
-    turn(90, -20, 20);
-    straight(15, 80, false);
-    turn(90, -20, 20);
-    straight(15, 80, false);
-    turn(90, -20, 20);
-    straight(15, 80, false);
-    turn(90, -20, 20);
-    straight(15, 80, false);
-    turn(90, -20, 20);
-    straight(15, 80, false);
-    turn(90, -20, 20);
-    straight(15, 80, false);
-    turn(90, -20, 20);
-    straight(15, 80, false);
-    turn(90, -20, 20);
-    straight(15, 80, false);
-    turn(90, -20, 20);
-    straight(15, 80, false);
-    turn(90, -20, 20);
-    straight(15, 80, false);
-    turn(90, -20, 20);
-
+    straight(25, 80, false);
+    turn(90, 30, -30);
+    straight(39.5, -80, false);
+    stopping();
 } 
 
 void arm_up() {
@@ -426,8 +404,8 @@ void arm_down() {
 }
 
 void stopping(){
-    //while(ev3_button_is_pressed(ENTER_BUTTON) == false) {}    
-    //tslp_tsk(2000*MSEC);
+    while(ev3_button_is_pressed(ENTER_BUTTON) == false) {}    
+    tslp_tsk(2000*MSEC);
 }
 
 void turn(float angle, float L_power, float R_power) {
@@ -547,8 +525,11 @@ void straight(float cm, float set_power_sign, bool_t savedata) {
         if (average >= cm*ROBOT1CM * 2 / 4) {
             p_gein = -2;
         }
-        if (average >= cm*ROBOT1CM * 3 / 4) {
+        if (average >= cm*ROBOT1CM * 3 / 4 && sign > 0) {
             p_gein = -6;
+        }
+        if (average >= cm*ROBOT1CM * 3 / 4 && sign < 0) {
+            p_gein = -3;
         }
         if(steer > 0) {
             lb_power = power;
@@ -1140,7 +1121,7 @@ void walltrace_length(float cm, float power, float distance) {
         average = (lb + rc) / 2;
 
         get_distance = ev3_ultrasonic_sensor_get_distance(EV3_PORT_4);
-        steer = (distance - get_distance) * 6;
+        steer = (distance - get_distance) * 8;
         if (steer > 0) {
             lb_power = power;
             rc_power = power + (power * steer / 50);
@@ -1157,6 +1138,39 @@ void walltrace_length(float cm, float power, float distance) {
     }
     ev3_motor_stop(EV3_PORT_B, true);
     ev3_motor_stop(EV3_PORT_C, true);
+}
+
+void walltrace_color(colorid_t color, float power, float distance) {
+    //power20を想定
+    colorid_t get_color;
+    float get_distance;
+    float lb_power;
+    float rc_power;
+    float steer;
+
+    ev3_motor_reset_counts(EV3_PORT_B);
+    ev3_motor_reset_counts(EV3_PORT_C);
+    while (true) {
+        get_color = ev3_color_sensor_get_color(EV3_PORT_1);
+
+
+        get_distance = ev3_ultrasonic_sensor_get_distance(EV3_PORT_4);
+        steer = (distance - get_distance) * 8;
+        if (steer > 0) {
+            lb_power = power;
+            rc_power = power + (power * steer / 50);
+            lb_power = -lb_power;
+        }
+        else {
+            lb_power = power - (power * steer / 50);
+            rc_power = power;
+            lb_power = -lb_power;
+        }
+        ev3_motor_set_power(EV3_PORT_B, lb_power);
+        ev3_motor_set_power(EV3_PORT_C, rc_power);
+        if (get_color == color) break;
+    }
+
 }
 
 void chemical_taker(int n, way_t sensor){
@@ -1527,22 +1541,24 @@ void main_task(intptr_t unused){
     tslp_tsk(1000*MSEC);
 
 
-
     start_nkc();
+    //stopping();
     blue_nkc();
+    //stopping();
     green_nkc();
+    //stopping();
     yellow_nkc();
+    //stopping();
     red_nkc();  
-    stopping();
+    //stopping();
     brown_nkc();
-    stopping();
+    //stopping();
     white_nkc();
-    stopping();
+    //stopping();
     chemical_nkc();
-    stopping();
+    //stopping();
     marking_nkc();
-    stopping();
+    //stopping();
     goal_nkc();
-    stopping();
 
 }
