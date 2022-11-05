@@ -109,7 +109,7 @@ int white = 0;
 int how_many = 31;
 
 map_t map [6] = {0,0,0,0,0,0};
-int start = 2;
+int start;
 
 int chemical_type = 0;
 
@@ -162,11 +162,17 @@ int check_type;
 
 
 void start_nkc() {
-    tslp_tsk(400*MSEC);
     ev3_motor_reset_counts(EV3_PORT_D);
-    straight(80, -100, false);
+    if(start == 1){
+        straight(92, 100, false);
+        turn(180, 0, -20);
+        straight(70, -100, false);
+    }
+    if(start == 2){
+        straight(80, -100, false);
+    }
     turn(90, 50, -50);
-    steering_time(1000, -30, 0);
+    steering_time(700, -30, 0);
     straight(11.8, 50, false);
     //waltrace_length(12, 30, 10);
     turn(90, 50, -50);
@@ -378,9 +384,16 @@ void marking_nkc(){
 
 void goal_nkc(){
     marking_overall(180, 30);
-    straight(13, 80, false);
-    turn(185, 25, 0);
-    steering_time(1200, -30, 5);
+    if(start == 1){
+        straight(60, -80, false);
+        turn(185, 0, -25);
+        steering_time(1200, -30, -5);
+    }
+    if(start == 2){
+        straight(13, 80, false);
+        turn(185, 25, 0);
+        steering_time(1200, -30, 5);
+    }
 }
 
 void test_turn() { 
@@ -1533,8 +1546,8 @@ void main_task(intptr_t unused){
 
 
     /*スタートの分岐チェック*/
-    tslp_tsk(1000*MSEC);
-
+    start = 1;
+    tslp_tsk(400*MSEC);
 
     /*
     start_nkc();
@@ -1550,9 +1563,6 @@ void main_task(intptr_t unused){
     chemical_nkc();
     stopping();
     */
-    marking_count = 1;
-    map[BLUE] = 1;
-    map[GREEN] = 2;
     marking_nkc();
     stopping();
     goal_nkc();
