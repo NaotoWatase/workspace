@@ -452,35 +452,38 @@ void chemical_white_nkc(){
 void marking_nkc(){
     map_decide();
     //marking
-    steering_time(1500, -20, 0);
-    steering_time(720, 20, -14);
-    turn(102, -50, 50);
+    steering_time(1000, -30, 5);
+    tslp_tsk(100*MSEC);
+    steering_time(520, 30, -15);
+    turn(108, -50, 50);
     steering_time(1200, 15, 0);
     tslp_tsk(100*MSEC);
     straight(22, -60, false);
     //get the first block
     marking_overall(140, 30);
-    marking_overall(160, 10);
+    marking_overall(150, 10);
     //往路
     if (map[BROWN] == 1) marking_long();
     if (map[RED] == 1) marking_short();
     if(map[YELLOW] == 1 || map[WHITE] == 1){
-        straight(14.5, -50, false);
+        straight(14.5, -50, true);
         if (map[WHITE] == 1) marking_long();
         if (map[YELLOW] == 1) marking_short();
-        straight(14.5, -50, false);
+        straight(14.5, -50, true);
     }
     else{
         if(map[BLUE] == 1){
-            straight(14, -50, false);
+            straight(14, -50, true);
             turn(30, -20, 0);
+            tslp_tsk(100*MSEC);
             marking_overall(230, 80);
-            tslp_tsk(200*MSEC);
+            tslp_tsk(100*MSEC);
             marking_overall(120, -40);
             turn(30, 20, 0);
+            tslp_tsk(100*MSEC);
             straight(15, -50, false);
         }
-        else straight(29, -80, false);
+        else straight(29, -80, true);
     }
     marking_overall(160, 10);
     //復路
@@ -498,12 +501,11 @@ void marking_nkc(){
     }
 }
 
-
 void goal_nkc(){
     marking_overall(180, 30);
     straight(13, 80, false);
     turn(185, 25, 0);
-    steering_time(1000, -30, 5);
+    steering_time(1200, -30, 5);
 }
 
 void test_turn() { 
@@ -652,6 +654,9 @@ void straight(float cm, float set_power_sign, bool_t savedata) {
         }
         if (average >= cm*ROBOT1CM * 3 / 4 && sign < 0) {
             p_gein = -3;
+        }
+        if (marking_count >= 1) {
+            p_gein = -6;
         }
         if(steer > 0) {
             lb_power = power;
@@ -1468,15 +1473,17 @@ void marking_overall(int degree, int power){
 }
 
 void marking_long(){
-    marking_overall(230, 60);
-    tslp_tsk(200*MSEC);
-    marking_overall(120, -40);
+    marking_overall(150, 10);
+    marking_overall(220, 40);
+    tslp_tsk(100*MSEC);
+    marking_overall(100, -40);
 }
 
 void marking_short(){
-    marking_overall(225, 18);
-    tslp_tsk(200*MSEC);
-    marking_overall(120, -40);
+    marking_overall(150, 10);
+    marking_overall(222, 20);
+    tslp_tsk(100*MSEC);
+    marking_overall(100, -40);
 }
 
 void sensor_check(uint8_t num) {
