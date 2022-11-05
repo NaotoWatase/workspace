@@ -1579,10 +1579,6 @@ void main_task(intptr_t unused){
 
     /*スタートの分岐チェック*/
     tslp_tsk(700*MSEC);
-    red_nkc();  
-    red_nkc();  
-    red_nkc();  
-
 
 
     start_nkc();
