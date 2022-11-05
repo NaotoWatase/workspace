@@ -162,7 +162,6 @@ int check_type;
 
 
 void start_nkc() {
-    tslp_tsk(400*MSEC);
     ev3_motor_reset_counts(EV3_PORT_D);
     straight(80, -100, false);
     turn(90, 50, -50);
@@ -897,87 +896,7 @@ void steering_color(colorid_t color_stop, int power, int steering){
     (void)ev3_motor_stop(EV3_PORT_C, true);    
 }
 
-void p_turn(int angle, int left_motor, int right_motor){
-    angle = angle * 178 / 180;
-    int turn_check = 0;
-    int gyro = 0;
-    int power;
-    float accele_length = angle / 10 * 1;
-    float maxspeed_length = angle / 10 * 2;
-    ev3_gyro_sensor_reset(EV3_PORT_4);
-    gyro = ev3_gyro_sensor_get_angle(EV3_PORT_4);
-    gyro = ev3_gyro_sensor_get_angle(EV3_PORT_4);
-    while (true) {
-        gyro = ev3_gyro_sensor_get_angle(EV3_PORT_4);
-        gyro = abs(gyro);
-        power = (100 / (angle / 10 * 1)) * gyro;
-        if(power < 20) power = 20;
-        if(power > 80) power = 80;
-        if (gyro > accele_length) break;
 
-        if (left_motor == 0) {
-            power = power * 1.3;
-            (void)ev3_motor_set_power(EV3_PORT_C, -power * right_motor); 
-        }
-        else if (right_motor == 0) {
-            power = power * 1.3;
-            (void)ev3_motor_set_power(EV3_PORT_B, -power * left_motor);
-        } 
-        else {
-            (void)ev3_motor_set_power(EV3_PORT_B, -power * left_motor);
-            (void)ev3_motor_set_power(EV3_PORT_C, -power * right_motor); 
-        }
-    }
-    while (true) {
-        gyro = ev3_gyro_sensor_get_angle(EV3_PORT_4);
-        gyro = abs(gyro);
-        power = 80;
-        if (gyro > maxspeed_length) break;
-
-        if (left_motor == 0) {
-            power = power * 1.3;
-            (void)ev3_motor_set_power(EV3_PORT_C, -power * right_motor); 
-        }
-        else if (right_motor == 0) {
-            power = power * 1.3;
-            (void)ev3_motor_set_power(EV3_PORT_B, -power * left_motor);
-        } 
-        else {
-            (void)ev3_motor_set_power(EV3_PORT_B, -power * left_motor);
-            (void)ev3_motor_set_power(EV3_PORT_C, -power * right_motor); 
-        }
-    }
-    while (true) {
-        gyro = ev3_gyro_sensor_get_angle(EV3_PORT_4);
-        gyro = abs(gyro);
-        power = (angle - gyro) * 1;
-        if (angle - gyro == 0) turn_check = turn_check + 1;
-
-        if (left_motor == 0) {
-            power = power * 1.3;
-            if(power < 6 && power > 0) power = 6;
-            if(power > -6 && power < 0) power = -6;
-            (void)ev3_motor_set_power(EV3_PORT_C, -power * right_motor); 
-        }
-        else if (right_motor == 0) {
-            power = power * 1.3;
-            if(power < 6 && power > 0) power = 6;
-            if(power > -6 && power < 0) power = -6;
-            (void)ev3_motor_set_power(EV3_PORT_B, -power * left_motor);
-        } 
-        else {
-            if(power < 6 && power > 0) power = 6;
-            if(power > -6 && power < 0) power = -6;
-            (void)ev3_motor_set_power(EV3_PORT_B, -power * left_motor);
-            (void)ev3_motor_set_power(EV3_PORT_C, -power * right_motor); 
-        }
-        if (turn_check > 500) break;
-    }
-    ev3_motor_stop(EV3_PORT_B, true);
-    ev3_motor_stop(EV3_PORT_C, true);
-    tslp_tsk(100*MSEC);
-
-}
     
 void tank_turn(float angle, int power_L, int power_R){
     if (power_R == 0) {
@@ -1223,7 +1142,6 @@ void obj_measure(int num, way_t sensor) {
         }  
         if(start == 1){
             obj_distance = ev3_ultrasonic_sensor_get_distance(EV3_PORT_4);
-            tslp_tsk(100);
             check_type = 1;
         }
     } 
@@ -1242,7 +1160,6 @@ void obj_measure(int num, way_t sensor) {
         }
         if(start == 2){
             obj_distance = ev3_ultrasonic_sensor_get_distance(EV3_PORT_4);
-            tslp_tsk(100);
             check_type = 1;
         }  
     }
@@ -1538,7 +1455,7 @@ void main_task(intptr_t unused){
 
 
     /*スタートの分岐チェック*/
-    tslp_tsk(1000*MSEC);
+    tslp_tsk(700*MSEC);
 
 
     start_nkc();
