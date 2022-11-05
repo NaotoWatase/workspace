@@ -63,7 +63,8 @@ void yellow_nkc();
 void red_nkc();
 void brown_nkc();
 void white_nkc();
-void chemical_nkc();
+void chemical_white_nkc();
+void chemical_brown_nkc();
 void marking_nkc();
 void goal_nkc();
 /**
@@ -120,9 +121,11 @@ int y = 0;
 float left_data = 0;
 float right_data = 0;
 
-
+bool_t sp = false;
 
 arm_t arm_type = DOWN;
+
+int brown_obj;
 
 
 uint8_t obj = 0;
@@ -231,51 +234,67 @@ void yellow_nkc() {
 void red_nkc(){
     obj_check(10, RIGHT);
     chemical_taker(10, RIGHT);
-    straight(27, 80, true);
-    obj_check(11, RIGHT);
-    chemical_taker(11, RIGHT);
-    steering_time(1100, 10, 0);
-    tslp_tsk(600*MSEC);
-    straight(5.6, -10, false);
-    tslp_tsk(700*MSEC);
-    turn(90, -50, 50);
-    tslp_tsk(700*MSEC);
-    water(10);
-    water(11);
-
-    /* brown */
-    walltrace_color(BROWN, 8, 9);
-    walltrace_length(6, 8, 9);
-}
-
-void brown_nkc(){
-    obj_check(9, LEFT);
-    chemical_taker(9, LEFT);
-    straight(37, 80, false);
-    obj_check(8, LEFT);
-    chemical_taker(8, RIGHT);
-    tslp_tsk(300*MSEC);
-    straight(10, -50, false);
-    tslp_tsk(200*MSEC);
-    turn(90, -50, 50);
-    tslp_tsk(300*MSEC);
-    straight(3, -28, false);
-    steering_time(1000, -30, 0);
-    tslp_tsk(600*MSEC);
-
-    /* white */
-    if (location[8] == FIRE || location[9] == FIRE) {
-        straight(14, 20, false);
-        tslp_tsk(400*MSEC);
-        water(8);
-        water(9);
-        straight(36.5, 80, true);
+    if (location[10] != NOTHING && location[10] != CHEMICAL && sp == false) {
+        location[11] = NOTHING;
+        straight(12, -80, false);
+        if (location[10] == FIRE) {
+            turn(180, -80, 80);
+            straight(15, -80, false);
+            water(10);
+            water(11);
+            straight(16, 80, false);
+            turn(90, 80, -80);
+        }
+        else {
+            turn(90, -80, 80);
+        }
+        straight(10, -80, false);
+        steering_time(400, -30, 0);
     }
-    else straight(50.5, 80, false);
-    tslp_tsk(600*MSEC);
-    turn(90, 30, -30);
-    tslp_tsk(400*MSEC);
-    straight(39.5, -80, false);
+    else if (location[10] == CHEMICAL) {
+        location[11] = NOTHING;
+        straight(3, 50, true);
+        if (arm_type == DOWN) ev3_motor_rotate(EV3_PORT_A, 180, 30, false);
+        arm_type = UP;
+        chemical = chemical + 1;
+        chemical_type = RIGHT;
+        chemical_taker(10, RIGHT);
+        tslp_tsk(600*MSEC);
+        straight(15, -80, false);
+        turn(90, -80, 80);
+        straight(10, -80, false);
+        steering_time(400, -30, 0);
+    }
+    else {
+        straight(27, 80, true);
+        obj_check(11, RIGHT);
+        if (location[11] == CHEMICAL) {
+            steering_time(600, 30, 0);
+            if (arm_type == DOWN) ev3_motor_rotate(EV3_PORT_A, 180, 30, false);
+            arm_type = UP;
+            chemical = chemical + 1;
+            chemical_type = RIGHT;
+            chemical_taker(11, RIGHT);
+            tslp_tsk(600*MSEC);
+        }
+        else if (location[11] == FIRE) {
+            turn(180, -80, 80);
+            water(10);
+            water(11);
+            straight(8, -80, false);
+            steering_time(600, -30, 0);
+            straight(49.5, 80, false);
+            turn(90, 80, -80);
+        }
+        else {
+            steering_time(600, 30, 0);
+            straight(44, -80, false);
+            turn(90, -80, 80);
+        }
+        straight(10, -80, false);
+        steering_time(400, -30, 0);
+    }
+    straight(22.5, 80, false);
 }
 
 void white_nkc(){
@@ -289,13 +308,115 @@ void white_nkc(){
     straight(37, 80, true);
     obj_check(5, RIGHT);
     chemical_taker(5, RIGHT);
+    straight(3, 50, false);
     water(5);
     water(6);
+    if (location[5] == CHEMICAL) {
+            if (arm_type == DOWN) ev3_motor_rotate(EV3_PORT_A, 180, 30, false);
+            arm_type = UP;
+            chemical = chemical + 1;
+            chemical_type = RIGHT;
+            chemical_taker(11, RIGHT);
+            tslp_tsk(600*MSEC);
+        }
 }
 
-void chemical_nkc(){
+void brown_nkc(){
+    brown_obj = how_many - location[0] - location[1] - location[2] - location[3] - location[4] - location[5] - location[6] - location[7] - location[10] - location[11];
+    switch (brown_obj)
+    {
+    case NOTHING:
+        location[8] = NOTHING;
+        location[9] = NOTHING;
+        break;
+    case PERSON:
+        location[8] = PERSON;
+        location[9] = NOTHING;
+        break;
+    case FIRE:
+        location[8] = FIRE;
+        location[9] = NOTHING;
+        turn(180, -30, 0);
+        straight(12, -80, false);
+        water(8);
+        water(9);
+        straight(12, 80, false);
+        turn(180, 30, 0);
+        break;
+    case CHEMICAL:
+        turn(180, -30, 0);
+        straight(26.5, -80, false);
+        obj_check(8, RIGHT);
+        straight(10.5, -80, false);
+        steering_time(400, -25, 0);
+        straight(11, 80, false);
+        turn(90, 80, -80);
+        if (location[8] == chemical) {
+            straight(5.5, 50, false);
+            chemical_taker(8, LEFT);
+            straight(65.5, 80, true);
+        }
+        else {
+            straight(31.5, -80, false);
+            obj_check(8, LEFT);
+            chemical_taker(8, LEFT);
+            straight(97, 80, false);
+        }
+        break;
+    default:
+        turn(180, -30, 0);
+        straight(26.5, -80, false);
+        obj_check(8, RIGHT);
+        straight(10.5, -80, false);
+        steering_time(400, -25, 0);
+        straight(11, 80, false);
+        turn(90, 80, -80);
+        if (location[8] == chemical) {
+            straight(5.5, 50, false);
+            chemical_taker(8, LEFT);
+            straight(65.5, 80, true);
+        }
+        else {
+            straight(31.5, -80, false);
+            obj_check(8, LEFT);
+            chemical_taker(8, LEFT);
+            straight(97, 80, false);
+        }
+        break;
+    }
+
+}
+
+void chemical_brown_nkc(){
+    if (chemical_type == RIGHT) {
+        turn(90, -80, 80);
+        straight(6.5, -80, false);
+        steering_time(400, -25, 0);
+        straight(42, 80, false);
+        arm_down();
+        ev3_motor_set_power(EV3_PORT_A, -15);
+        straight(50, -80, false);
+        ev3_motor_stop(EV3_PORT_A, true);
+        steering_time(700, -25, 0);
+        turn(180, 0, 25);
+    }
+    else {
+        turn(90, 80, -80);
+        steering_time(400, 25, 0);
+        straight(50, -80, false);
+        arm_down();
+        ev3_motor_set_power(EV3_PORT_A, -15);
+        straight(45, 80, false);
+        ev3_motor_stop(EV3_PORT_A, true);
+        steering_time(800, 25, 0);
+        straight(15, -50, false);
+        turn(180, 25, 0);
+    }
+}
+
+void chemical_white_nkc(){
     tslp_tsk(300*MSEC);
-    straight(63, 80, true);
+    straight(60, 80, true);
     if(chemical_type == RIGHT){
         tslp_tsk(300*MSEC);
         turn(90, -50, 50);
@@ -377,6 +498,7 @@ void marking_nkc(){
     }
 }
 
+
 void goal_nkc(){
     marking_overall(180, 30);
     straight(13, 80, false);
@@ -401,6 +523,7 @@ void arm_down() {
     if (arm_type == UP) ev3_motor_rotate(EV3_PORT_A, 180, -10, true);
     arm_type = DOWN;
 }
+
 
 void stopping(){
     while(ev3_button_is_pressed(ENTER_BUTTON) == false) {}    
@@ -1456,6 +1579,10 @@ void main_task(intptr_t unused){
 
     /*スタートの分岐チェック*/
     tslp_tsk(700*MSEC);
+    red_nkc();  
+    red_nkc();  
+    red_nkc();  
+
 
 
     start_nkc();
@@ -1468,11 +1595,12 @@ void main_task(intptr_t unused){
     //stopping();
     red_nkc();  
     //stopping();
-    brown_nkc();
-    //stopping();
     white_nkc();
     //stopping();
-    chemical_nkc();
+    brown_nkc();
+    //stopping();
+    if (brown_obj == PERSON || brown_obj == NOTHING || brown_obj == FIRE) chemical_white_nkc();
+    else chemical_brown_nkc();
     //stopping();
     marking_nkc();
     //stopping();
