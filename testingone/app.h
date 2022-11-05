@@ -59,13 +59,14 @@
 #define HIGH_PRIORITY	9		/* 並行実行されるタスクの優先度 */
 #define MID_PRIORITY	10
 #define LOW_PRIORITY	11
-#define P_GEIN          4
+#define P_GEIN          -1
 #define I_GEIN          0.013
 #define D_GEIN          0.5
 
 #define MSEC (1000)
-#define ROBOT1CM (18.48)
-#define TURN (0.13395)
+#define ROBOT1CM (13.02)
+#define TURN (0.1447)
+#define MODE (1)
 
 typedef enum object {  
     PERSON = 10,
@@ -83,6 +84,19 @@ typedef enum way{
     NONE
 } way_t ;
 
+typedef enum map{
+    RED,
+    BROWN,
+    YELLOW,
+    WHITE,
+    GREEN,
+    BLUE
+} map_t ;
+
+typedef enum arm{
+    UP,
+    DOWN
+}arm_t ;
 
 
 
