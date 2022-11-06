@@ -213,8 +213,8 @@ void green_nkc() {
         steering_time(1000, -15, 0);
     }
     else{
-        turn(60, -80, 0);
-        turn(60, -50, 50);
+        turn(66, -80, 0);
+        turn(57, -50, 50);
         steering_time(1000, -15, 0);
         tslp_tsk(600*MSEC);
     }
@@ -290,8 +290,8 @@ void red_nkc(){
             turn(90, 80, -80);
         }
         else {
-            steering_time(600, 30, 0);
-            straight(44, -80, false);
+            steering_time(600, 20, 0);
+            straight(45, -80, false);
             turn(90, -80, 80);
         }
         straight(10, -80, false);
@@ -554,34 +554,60 @@ void turn(float angle, float L_power, float R_power) {
     float left;
     float right;
     float average;
-    float now_motor;
+    float now_motor = 0;
     ev3_motor_reset_counts(EV3_PORT_B);
     ev3_motor_reset_counts(EV3_PORT_C);
     set_power = abs(L_power);
-    while (true){
-        left = ev3_motor_get_counts(EV3_PORT_B);
-        right = ev3_motor_get_counts(EV3_PORT_C);
-        left = abs(left);
-        right = abs(right);
-        average = (left + right) / 2.0; 
-        if (R_power == 0) now_motor = left;
-        else if (L_power == 0) now_motor = right;
-        else now_motor = average;
-        if (now_motor < angle*TURN*ROBOT1CM * 1 / 4) {
-            changing_power = (set_power / (angle*TURN*ROBOT1CM * 1 / 4)) * now_motor;
-            if (changing_power < 3) changing_power = 3;
-            changing_L = changing_power * L_sign;
-            changing_R = changing_power * R_sign;
+
+    if (L_power != 0 && R_power != 0) {
+        while (true){
+            left = ev3_motor_get_counts(EV3_PORT_B);
+            right = ev3_motor_get_counts(EV3_PORT_C);
+            left = abs(left);
+            right = abs(right);
+            average = (left + right) / 2.0; 
+            now_motor = average;
+            if (now_motor < angle*TURN*ROBOT1CM * 1 / 4) {
+                changing_power = (set_power / (angle*TURN*ROBOT1CM * 1 / 4)) * now_motor;
+                if (changing_power < 3) changing_power = 3;
+                changing_L = changing_power * L_sign;
+                changing_R = changing_power * R_sign;
+            }
+            if (now_motor >= angle*TURN*ROBOT1CM * 1 / 4) {
+                changing_power = (-set_power / (angle*TURN*ROBOT1CM * 1 / 4)) * (now_motor - (angle*TURN*ROBOT1CM * 1 / 4)) + set_power;
+                if (changing_power < 8) changing_power = 8;
+                changing_L = changing_power * L_sign;
+                changing_R = changing_power * R_sign;
+            }
+            ev3_motor_set_power(EV3_PORT_B, -changing_L);
+            ev3_motor_set_power(EV3_PORT_C, changing_R);
+            if (angle * TURN * ROBOT1CM < now_motor) break;
         }
-        if (now_motor >= angle*TURN*ROBOT1CM * 1 / 4) {
-            changing_power = (-set_power / (angle*TURN*ROBOT1CM * 1 / 4)) * (now_motor - (angle*TURN*ROBOT1CM * 1 / 4)) + set_power;
-            if (changing_power < 8) changing_power = 8;
-            changing_L = changing_power * L_sign;
-            changing_R = changing_power * R_sign;
+    }
+    else {
+        while (true){
+            left = ev3_motor_get_counts(EV3_PORT_B);
+            right = ev3_motor_get_counts(EV3_PORT_C);
+            left = abs(left);
+            right = abs(right);
+            if(R_power == 0) now_motor = left;
+            if(L_power == 0) now_motor = right;
+            if (now_motor < angle*TURN*ROBOT1CM * 1 / 4) {
+                changing_power = (set_power / (angle*TURN*ROBOT1CM * 1 / 4)) * now_motor;
+                if (changing_power < 7) changing_power = 7;
+                changing_L = changing_power * L_sign;
+                changing_R = changing_power * R_sign;
+            }
+            if (now_motor >= angle*TURN*ROBOT1CM * 1 / 4) {
+                changing_power = (-set_power / (angle*TURN*ROBOT1CM * 3 / 4)) * (now_motor - (angle*TURN*ROBOT1CM * 1 / 4)) + set_power;
+                if (changing_power < 8) changing_power = 8;
+                changing_L = changing_power * L_sign;
+                changing_R = changing_power * R_sign;
+            }
+            if(R_power == 0) ev3_motor_set_power(EV3_PORT_B, -changing_L);
+            if(L_power == 0) ev3_motor_set_power(EV3_PORT_C, changing_R);
+            if (angle * TURN * ROBOT1CM < now_motor) break;
         }
-        if (L_power != 0)(void)ev3_motor_set_power(EV3_PORT_B, -changing_L);
-        if (R_power != 0)(void)ev3_motor_set_power(EV3_PORT_C, changing_R);
-        if (angle * TURN * ROBOT1CM < now_motor) break;
     }
     ev3_motor_stop(EV3_PORT_B, true);
     ev3_motor_stop(EV3_PORT_C, true);
@@ -655,7 +681,7 @@ void straight(float cm, float set_power_sign, bool_t savedata) {
             power = changing_power * sign;
         }
         if (average >= cm*ROBOT1CM * 2 / 4) {
-            p_gein = -2;
+            p_gein = -5;
         }
         if (average >= cm*ROBOT1CM * 3 / 4 && sign > 0) {
             p_gein = -6;
@@ -990,14 +1016,16 @@ void straight_custom(float cm, float ac, float dc, float set_power) {
 void water(int n) {
     if (location[n] == FIRE) {
         if(water_count == 1) {
-            ev3_motor_rotate(EV3_PORT_D, 50 , 25, true);
+            ev3_motor_rotate(EV3_PORT_D, 30 ,20, true);
+            ev3_motor_rotate(EV3_PORT_D, 20 , 8, true);
             tslp_tsk(150*MSEC);
-            ev3_motor_rotate(EV3_PORT_D, 50 , -25, false);
+            ev3_motor_rotate(EV3_PORT_D, 50 , -20, false);
         }
         if(water_count == 2) {
-            ev3_motor_rotate(EV3_PORT_D, 130 , 25, true);
+            ev3_motor_rotate(EV3_PORT_D, 110 , 20, true);
+            ev3_motor_rotate(EV3_PORT_D, 20 , 8, true);
             tslp_tsk(150*MSEC);
-            ev3_motor_rotate(EV3_PORT_D, 130 , -25, false);
+            ev3_motor_rotate(EV3_PORT_D, 130 , -20, false);
         }
         water_count = water_count + 1;
     }
@@ -1596,7 +1624,6 @@ void main_task(intptr_t unused){
 
     /*スタートの分岐チェック*/
     tslp_tsk(700*MSEC);
-
 
     start_nkc();
     //stopping();
