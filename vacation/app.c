@@ -1635,14 +1635,19 @@ void newroad(float cm, float set_power_sign, int location_start, float first_cm,
     float hensa = 0;
     float last_hensa = 0;
 
+    float now_ultrasonic;
+    int now_location = the_way[location_start];
+    int through_count = 0;
+
+
 
     ev3_motor_reset_counts(EV3_PORT_B);
     ev3_motor_reset_counts(EV3_PORT_C);	
-
+    int count_chemical = 0;
 
 
     while (true){
-        int count_chemical = 0;
+        now_ultrasonic = ev3_ultrasonic_sensor_get_distance(EV3_PORT_4);
         left = ev3_motor_get_counts(EV3_PORT_B); 
         right = ev3_motor_get_counts(EV3_PORT_C) + minus;
         left = abs(left);
@@ -1663,7 +1668,7 @@ void newroad(float cm, float set_power_sign, int location_start, float first_cm,
             power = changing_power * sign;
         }
         if (average >= cm*ROBOT1CM * 2 / 4) {
-            p_gein = -12;
+            p_gein = -9;
         }
         if (average >= cm*ROBOT1CM * 3 / 4 && sign > 0) {
             p_gein = -6;
@@ -1686,6 +1691,30 @@ void newroad(float cm, float set_power_sign, int location_start, float first_cm,
         }
         (void)ev3_motor_set_power(EV3_PORT_B, lb_power);
         (void)ev3_motor_set_power(EV3_PORT_C, rc_power);
+        if (now_ultrasonic > 9) through_count = 0;
+        if (average / ROBOT1CM < first_cm && first_cm != 0) now_location = the_way[location_start];
+        else if (average / ROBOT1CM < second_cm && second_cm != 0) now_location = the_way[location_start + 1];
+        else if (average / ROBOT1CM < third_cm && third_cm != 0) now_location = the_way[location_start + 2];
+        else if (average / ROBOT1CM < force_cm && force_cm != 0) now_location = the_way[location_start + 3];
+        if (now_ultrasonic < 8 && through_count == 0) { 
+            obj_check(now_location, RIGHT);
+            through_count = 1;
+            switch (location[now_location]) {
+            case FIRE:
+                water(now_location);
+                break;
+            case PERSON:
+                break;
+            case CHEMICAL:
+                chemical_taker(now_location, RIGHT);
+                break;
+            case NOTHING:
+                break;
+            
+            default:
+                break;
+            }
+        }
         if (timing_chemical == 1 && (left / ROBOT1CM > 1.8) && count_chemical == 0) {
             count_chemical = 1;
             arm_up();
