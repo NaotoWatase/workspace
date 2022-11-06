@@ -164,6 +164,8 @@ float obj_distance = 0;
 
 int check_type;
 
+int the_way[12] = {0, 1, 2, 3, 4, 10, 11, 7, 6, 5, 8, 9};
+
 
 
 void start_nkc() {
@@ -686,10 +688,9 @@ void straight(float cm, float set_power_sign, bool_t savedata) {
         ev3_motor_reset_counts(EV3_PORT_B);
         ev3_motor_reset_counts(EV3_PORT_C);	
     }
-
+    int count_chemical = 0;
 
     while (true){
-        int count_chemical = 0;
         left = ev3_motor_get_counts(EV3_PORT_B); 
         right = ev3_motor_get_counts(EV3_PORT_C) + minus;
         left = abs(left);
@@ -743,6 +744,7 @@ void straight(float cm, float set_power_sign, bool_t savedata) {
     ev3_motor_stop(EV3_PORT_C, true);
     left_data = left;
     right_data = right;
+    timing_chemical = 0;
     //tslp_tsk(5 * MSEC);
     last_hensa = hensa;
 }
@@ -1601,8 +1603,101 @@ void location_l_task(intptr_t unused){
     task_counts = task_counts + 1;
 }
 
-void newroad(cm, set_){
-    
+void newroad(float cm, float set_power_sign, int location_start, float first_cm, float second_cm, float third_cm, float force_cm) {
+    int sign = set_power_sign / abs(set_power_sign);
+    float set_power = abs(set_power_sign);
+    float lb_power;
+    float rc_power;
+    float p_gein = -6;
+    float d_gein = 0;
+    if (set_power < 30) p_gein = -0.7;
+    if (cm < 15) {
+        p_gein = -4;
+        set_power = 30;
+    }
+    if (set_power > 70) {
+        set_power = 70;
+    }
+    if(sign < 0 ) {
+        p_gein = -0.01;
+    }
+    float changing_power = 0;
+    float left;
+    float right;
+    float average;
+    float steer;
+    float diff;
+    float bibun;
+    float power = 0;
+
+    float minus = 0;
+
+    float hensa = 0;
+    float last_hensa = 0;
+
+
+    ev3_motor_reset_counts(EV3_PORT_B);
+    ev3_motor_reset_counts(EV3_PORT_C);	
+
+
+
+    while (true){
+        int count_chemical = 0;
+        left = ev3_motor_get_counts(EV3_PORT_B); 
+        right = ev3_motor_get_counts(EV3_PORT_C) + minus;
+        left = abs(left);
+        right = abs(right);
+        diff = left - right;
+        hensa = diff;
+        bibun = (hensa - last_hensa) / 0.005;
+        steer = diff * p_gein + bibun * d_gein;
+        average = (left + right) / 2.0; 
+        if (average < cm*ROBOT1CM * 1 / 4) {
+            changing_power = (set_power / (cm*ROBOT1CM * 1 / 4)) * average;
+            if (changing_power < 7) changing_power = 7;
+            power = changing_power * sign;
+        }
+        if (average >= cm*ROBOT1CM * 1 / 4) {
+            changing_power = (-set_power / (cm*ROBOT1CM * 3 / 4)) * (average - (cm*ROBOT1CM * 1 / 4)) + set_power;
+            if (changing_power < 9) changing_power = 9;
+            power = changing_power * sign;
+        }
+        if (average >= cm*ROBOT1CM * 2 / 4) {
+            p_gein = -12;
+        }
+        if (average >= cm*ROBOT1CM * 3 / 4 && sign > 0) {
+            p_gein = -6;
+        }
+        if (average >= cm*ROBOT1CM * 3 / 4 && sign < 0) {
+            p_gein = -3;
+        }
+        if (marking_count >= 1) {
+            p_gein = -6;
+        }
+        if(steer > 0) {
+            lb_power = power;
+            rc_power = power - (power * steer / 50);
+            lb_power = -lb_power;
+        }
+        else {
+            lb_power = power + (power * steer / 50);
+            rc_power = power;
+            lb_power = -lb_power;
+        }
+        (void)ev3_motor_set_power(EV3_PORT_B, lb_power);
+        (void)ev3_motor_set_power(EV3_PORT_C, rc_power);
+        if (timing_chemical == 1 && (left / ROBOT1CM > 1.8) && count_chemical == 0) {
+            count_chemical = 1;
+            arm_up();
+        }
+        if (cm * ROBOT1CM < average) break;
+    }
+    ev3_motor_stop(EV3_PORT_B, true);
+    ev3_motor_stop(EV3_PORT_C, true);
+    left_data = left;
+    right_data = right;
+    //tslp_tsk(5 * MSEC);
+    last_hensa = hensa;
 }
 
 void main_task(intptr_t unused){
