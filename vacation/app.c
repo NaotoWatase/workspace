@@ -701,9 +701,9 @@ void straight(float cm, float set_power_sign, bool_t savedata) {
         ev3_motor_reset_counts(EV3_PORT_C);	
     }
 
+    int count_chemical = 0;
 
     while (true){
-        int count_chemical = 0;
         left = ev3_motor_get_counts(EV3_PORT_B); 
         right = ev3_motor_get_counts(EV3_PORT_C) + minus;
         left = abs(left);
@@ -755,6 +755,7 @@ void straight(float cm, float set_power_sign, bool_t savedata) {
     }
     ev3_motor_stop(EV3_PORT_B, true);
     ev3_motor_stop(EV3_PORT_C, true);
+    timing_chemical = 0;
     left_data = left;
     right_data = right;
     //tslp_tsk(5 * MSEC);
