@@ -267,7 +267,7 @@ void red_nkc(){
         steering_time(400, -30, 0);
     }
     else {
-        straight(26, 80, true);
+        straight(27, 80, true);
         obj_check(11, RIGHT);
         if (location[11] == CHEMICAL) {
             steering_time(600, 30, 0);
@@ -476,7 +476,7 @@ void marking_nkc(){
     map_decide();
     //marking
     steering_time(1150, 10, 7);
-    steering_time(500, 15, 7);
+    steering_time(500, 15, 12);
     tslp_tsk(100*MSEC);
     straight(1.5, -25, 0);
     turn(180, -80, 0);
@@ -697,7 +697,7 @@ void straight(float cm, float set_power_sign, bool_t savedata) {
             power = changing_power * sign;
         }
         if (average >= cm*ROBOT1CM * 2 / 4) {
-            p_gein = -10;
+            p_gein = -12;
         }
         if (average >= cm*ROBOT1CM * 3 / 4 && sign > 0) {
             p_gein = -6;
@@ -1119,7 +1119,7 @@ void linetrace_length(float length, int power){
         i = (reflect + i);
         d = (reflect - d2); 
         d2 = reflect;
-        steer =  p * -0.8 + i * 0 + d * 0; 
+        steer =  p * -0.9 + i * 0 + d * 0; 
         if (length * ROBOT1CM < average) break;
         if(steer > 0) {
             (void)ev3_motor_set_power(EV3_PORT_B, -power);
@@ -1531,9 +1531,9 @@ void marking_long(){
 
 void marking_short(){
     marking_overall(150, 10);
-    marking_overall(222, 20);
+    marking_overall(225, 15);
     tslp_tsk(100*MSEC);
-    ev3_motor_rotate(EV3_PORT_D, 122, -50, false);
+    ev3_motor_rotate(EV3_PORT_D, 125, -50, false);
 }
 
 void sensor_check(uint8_t num) {
