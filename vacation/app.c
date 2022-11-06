@@ -168,7 +168,14 @@ int check_type;
 
 void start_nkc() {
     ev3_motor_reset_counts(EV3_PORT_D);
-    straight_custom(80, 1, 0, -100);
+    if(start == 1){
+        straight(92, 100, false);
+        turn(180, 0, -20);
+        straight_custom(70, 1, 0, -100);
+    }
+    if(start == 2){
+        straight_custom(80, 1, 0, -100);
+    }
     turn(90, 80, -80);
     steering_time(1000, -30, 0);
     straight(11.7, 50, false);
