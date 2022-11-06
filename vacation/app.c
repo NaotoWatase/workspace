@@ -1601,6 +1601,10 @@ void location_l_task(intptr_t unused){
     task_counts = task_counts + 1;
 }
 
+void newroad(cm, set_){
+    
+}
+
 void main_task(intptr_t unused){
 
     bt = ev3_serial_open_file(EV3_SERIAL_BT);
