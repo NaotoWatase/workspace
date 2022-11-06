@@ -168,7 +168,7 @@ int check_type;
 
 void start_nkc() {
     ev3_motor_reset_counts(EV3_PORT_D);
-    straight(80, -100, false);
+    straight_custom(80, 1, 0, -100);
     turn(90, 80, -80);
     steering_time(1000, -30, 0);
     straight(11.7, 50, false);
@@ -213,8 +213,8 @@ void green_nkc() {
         steering_time(1000, -15, 0);
     }
     else{
-        turn(66, -80, 0);
-        turn(57, -50, 50);
+        turn(70, -80, 0);
+        turn(55, -50, 50);
         steering_time(1000, -15, 0);
         tslp_tsk(600*MSEC);
     }
@@ -290,7 +290,8 @@ void red_nkc(){
             turn(90, 80, -80);
         }
         else {
-            steering_time(600, 20, 0);
+            steering_time(600, 15, 0);
+            tslp_tsk(200*MSEC);
             straight(45, -80, false);
             turn(90, -80, 80);
         }
@@ -396,10 +397,14 @@ void chemical_brown_nkc(){
         turn(90, -80, 80);
         straight(6.5, -80, false);
         steering_time(400, -25, 0);
+        //ちょっとずつおろしていく
+        ev3_motor_rotate(EV3_PORT_A, 130, -10, false);
+        arm_type = DOWN;
         straight(42, 80, false);
-        arm_down();
-        ev3_motor_set_power(EV3_PORT_A, -15);
-        straight(50, -80, false);
+        //しっかりおろす
+        ev3_motor_set_power(EV3_PORT_A, -20);
+        tslp_tsk(200*MSEC);
+        straight(42, -80, false);
         ev3_motor_stop(EV3_PORT_A, true);
         steering_time(700, -25, 0);
         turn(180, 0, 80);
@@ -407,9 +412,13 @@ void chemical_brown_nkc(){
     else {
         turn(90, 80, -80);
         steering_time(400, 25, 0);
+        //ちょっとずつおろしていく
+        ev3_motor_rotate(EV3_PORT_A, 130, -10, false);
+        arm_type = DOWN;
         straight(50, -80, false);
-        arm_down();
-        ev3_motor_set_power(EV3_PORT_A, -15);
+        //しっかりおろす
+        ev3_motor_set_power(EV3_PORT_A, -20);
+        tslp_tsk(200*MSEC);
         straight(45, 80, false);
         ev3_motor_stop(EV3_PORT_A, true);
         steering_time(800, 25, 0);
@@ -424,14 +433,18 @@ void chemical_brown_nkc(){
 
 void chemical_white_nkc(){
     tslp_tsk(300*MSEC);
-    straight(58, 80, false);
+    straight(59, 80, false);
+    //ちょっとずつおろしていく
+    ev3_motor_rotate(EV3_PORT_A, 130, -10, false);
+    arm_type = DOWN;
     if(chemical_type == RIGHT){
         tslp_tsk(300*MSEC);
         turn(90, -50, 50);
         tslp_tsk(300*MSEC);
         straight(10, -50, false);
-        arm_down();
-        ev3_motor_set_power(EV3_PORT_A, -15);
+        //しっかりおろす
+        ev3_motor_set_power(EV3_PORT_A, -20);
+        tslp_tsk(200*MSEC);
         straight(50, -80, false);
         ev3_motor_stop(EV3_PORT_A, true);
         steering_time(700, -25, 0);
@@ -442,8 +455,9 @@ void chemical_white_nkc(){
         turn(90, 50, -50);
         tslp_tsk(300*MSEC);
         straight(10, -50, false);
-        arm_down();
-        ev3_motor_set_power(EV3_PORT_A, -15);
+        //しっかりおろす
+        ev3_motor_set_power(EV3_PORT_A, -20);
+        tslp_tsk(200*MSEC);
         straight(45, 80, false);
         ev3_motor_stop(EV3_PORT_A, true);
         steering_time(800, 25, 0);
@@ -453,7 +467,7 @@ void chemical_white_nkc(){
     
     /* crossingB */
     tslp_tsk(200*MSEC);
-    straight_custom(83, 1, 0, -100);
+    straight_custom(87, 1, 0, -100);
     straight(4, -30, false);
     tslp_tsk(200*MSEC);
 }
@@ -514,7 +528,7 @@ void marking_nkc(){
 }
 
 void goal_nkc(){
-    marking_overall(180, 30);
+    ev3_motor_rotate(EV3_PORT_D, 80, 30, false);
     straight(13, 80, false);
     turn(185, 80, 0);
     steering_time(1200, -30, 5);
@@ -550,14 +564,15 @@ void turn(float angle, float L_power, float R_power) {
     float changing_L = 0;
     float changing_R = 0;
     float changing_power = 0;
-    float set_power;
+    float set_power = 80;
     float left;
     float right;
     float average;
     float now_motor = 0;
     ev3_motor_reset_counts(EV3_PORT_B);
     ev3_motor_reset_counts(EV3_PORT_C);
-    set_power = abs(L_power);
+    if (L_power != 0)set_power = abs(L_power);
+    if (R_power != 0)set_power = abs(R_power);
 
     if (L_power != 0 && R_power != 0) {
         while (true){
@@ -623,7 +638,7 @@ void straight(float cm, float set_power_sign, bool_t savedata) {
     float d_gein = 0;
     if (set_power < 30) p_gein = -0.7;
     if (cm < 15) {
-        p_gein = -0.7;
+        p_gein = -4;
         set_power = 30;
     }
     if (set_power > 70) {
@@ -650,6 +665,8 @@ void straight(float cm, float set_power_sign, bool_t savedata) {
     if (savedata == false) {
         ev3_motor_reset_counts(EV3_PORT_B);
         ev3_motor_reset_counts(EV3_PORT_C);	
+        left_data = 0;
+        right_data = 0;
     }
     if (savedata == true) {
         if (left_data - right_data >= 0) minus = right_data - left_data;
@@ -681,7 +698,7 @@ void straight(float cm, float set_power_sign, bool_t savedata) {
             power = changing_power * sign;
         }
         if (average >= cm*ROBOT1CM * 2 / 4) {
-            p_gein = -5;
+            p_gein = -10;
         }
         if (average >= cm*ROBOT1CM * 3 / 4 && sign > 0) {
             p_gein = -6;
@@ -895,9 +912,7 @@ void straight_custom(float cm, float ac, float dc, float set_power) {
     if (cm < 10 && set_power > 50) { 
         set_power = 50;
     }
-    if (set_power > 70) { 
-        set_power = 80;
-    }
+
     float lb_power;
     float rc_power;
     float power = 0;
@@ -912,7 +927,7 @@ void straight_custom(float cm, float ac, float dc, float set_power) {
 
     float diff = 0.0006;    // 0.0008 
     if (set_power > 0) {
-        diff = 0.0015;
+        diff = 0.0013;
         gein = -11;
     }
     if (set_power < 0) {
@@ -1439,7 +1454,7 @@ void obj_know(int num){
                 case 16:
                 case 17:
                     location[num] = CHEMICAL;
-                    if (judgement > 80 || blue > 40 || green > 40 || red > 40 || (h < 50 && h > 11)) {
+                    if (judgement > 80 || blue > 40 || green > 40 || red > 40 || (h < 50 && h > 11) || (h < 200 && h > 100)) {
                         location[num] = PERSON;
                         if (red - green - blue > 20 || (h > 10 && h < 50)) location[num] = FIRE;    
                     }    
@@ -1514,14 +1529,14 @@ void marking_long(){
     marking_overall(150, 10);
     marking_overall(220, 40);
     tslp_tsk(100*MSEC);
-    marking_overall(100, -40);
+    ev3_motor_rotate(EV3_PORT_D, 120, -50, false);
 }
 
 void marking_short(){
     marking_overall(150, 10);
     marking_overall(222, 20);
     tslp_tsk(100*MSEC);
-    marking_overall(100, -40);
+    ev3_motor_rotate(EV3_PORT_D, 122, -50, false);
 }
 
 void sensor_check(uint8_t num) {
@@ -1623,7 +1638,7 @@ void main_task(intptr_t unused){
 
 
     /*スタートの分岐チェック*/
-    tslp_tsk(700*MSEC);
+    tslp_tsk(400*MSEC);
 
     start_nkc();
     //stopping();
