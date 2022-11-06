@@ -1179,6 +1179,30 @@ void walltrace_length(float cm, float power, float distance) {
     ev3_motor_stop(EV3_PORT_C, true);
 }
 
+void wall_turn(int power_L, int power_R){
+    //ある程度壁に近づけてから使うべし
+    float now_distance;
+    float old_distance;
+    if (power_R == 0) {
+        //(void)ev3_motor_rotate(EV3_PORT_B, angle*TURN*ROBOT1CM, (int16_t)-power_L, true);
+    } 
+    if (power_L == 0) {
+    }
+    if (power_L != 0 && power_R != 0) {
+        now_distance = ev3_ultrasonic_sensor_get_distance(EV3_PORT_4);
+        while (true){
+            old_distance = now_distance;
+            now_distance = ev3_ultrasonic_sensor_get_distance(EV3_PORT_4);
+            (void)ev3_motor_set_power(EV3_PORT_B, -power_L);
+            (void)ev3_motor_set_power(EV3_PORT_C, power_R);
+            if (now_distance > old_distance)break;
+        } 
+        ev3_motor_stop(EV3_PORT_B, true);
+        ev3_motor_stop(EV3_PORT_C, true);
+        turn(35, -power_L, -power_R);
+    }   
+}
+
 void chemical_taker(int n, way_t sensor){
     timing_chemical = 0;
     if(location[n] == CHEMICAL && chemical == 0){
@@ -1548,7 +1572,20 @@ void main_task(intptr_t unused){
     /*スタートの分岐チェック*/
     start = 1;
     tslp_tsk(400*MSEC);
+    
+    straight_custom(83, 1, 0, -100);
 
+    //marking
+    turn(75, 20, -20);
+    wall_turn(15, -15);
+    steering_time(800, 30, 5);
+    tslp_tsk(100*MSEC);
+    steering_time(520, -30, 0);
+    turn(90, 50, -50);
+    steering_time(800, 15, 0);
+    tslp_tsk(100*MSEC);
+    straight(22, -60, false);
+    
     /*
     start_nkc();
     blue_nkc();
@@ -1562,10 +1599,9 @@ void main_task(intptr_t unused){
     stopping();
     chemical_nkc();
     stopping();
-    */
     marking_nkc();
     stopping();
     goal_nkc();
     stopping();
-
+    */
 }
