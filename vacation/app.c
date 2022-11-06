@@ -177,7 +177,7 @@ void start_nkc() {
         straight_custom(80, 1, 0, -100);
     }
     turn(90, 80, -80);
-    steering_time(1000, -30, 0);
+    steering_time(800, -30, 0);
     straight(11.7, 50, false);
     //waltrace_length(12, 30, 10);
     turn(90, 50, -50);
@@ -306,7 +306,7 @@ void red_nkc(){
         steering_time(400, -20, 0);
     }
     tslp_tsk(400*MSEC);
-    straight(21.5, 80, false);
+    straight(23, 80, false);
 }
 
 void white_nkc(){
@@ -405,7 +405,7 @@ void chemical_brown_nkc(){
         straight(6.5, -80, false);
         steering_time(400, -25, 0);
         //ちょっとずつおろしていく
-        ev3_motor_rotate(EV3_PORT_A, 130, -10, false);
+        ev3_motor_rotate(EV3_PORT_A, 80, -10, false);
         arm_type = DOWN;
         straight(42, 80, false);
         //しっかりおろす
@@ -420,7 +420,7 @@ void chemical_brown_nkc(){
         turn(90, 80, -80);
         steering_time(400, 25, 0);
         //ちょっとずつおろしていく
-        ev3_motor_rotate(EV3_PORT_A, 130, -10, false);
+        ev3_motor_rotate(EV3_PORT_A, 80, -10, false);
         arm_type = DOWN;
         straight(50, -80, false);
         //しっかりおろす
@@ -439,10 +439,9 @@ void chemical_brown_nkc(){
 }
 
 void chemical_white_nkc(){
-    tslp_tsk(300*MSEC);
-    straight(59, 80, false);
+    straight(60, 80, false);
     //ちょっとずつおろしていく
-    ev3_motor_rotate(EV3_PORT_A, 130, -10, false);
+    ev3_motor_rotate(EV3_PORT_A, 80, -10, false);
     arm_type = DOWN;
     if(chemical_type == RIGHT){
         tslp_tsk(300*MSEC);
@@ -450,9 +449,9 @@ void chemical_white_nkc(){
         tslp_tsk(300*MSEC);
         straight(10, -50, false);
         //しっかりおろす
-        ev3_motor_set_power(EV3_PORT_A, -20);
-        tslp_tsk(200*MSEC);
-        straight(50, -80, false);
+        ev3_motor_set_power(EV3_PORT_A, -15);
+        tslp_tsk(300*MSEC);
+        straight(40, -80, false);
         ev3_motor_stop(EV3_PORT_A, true);
         steering_time(700, -25, 0);
         turn(180, 0, 80);
@@ -463,8 +462,8 @@ void chemical_white_nkc(){
         tslp_tsk(300*MSEC);
         straight(10, -50, false);
         //しっかりおろす
-        ev3_motor_set_power(EV3_PORT_A, -20);
-        tslp_tsk(200*MSEC);
+        ev3_motor_set_power(EV3_PORT_A, -15);
+        tslp_tsk(300*MSEC);
         straight(45, 80, false);
         ev3_motor_stop(EV3_PORT_A, true);
         steering_time(800, 25, 0);
