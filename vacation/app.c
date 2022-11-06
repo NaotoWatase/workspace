@@ -536,9 +536,16 @@ void marking_nkc(){
 
 void goal_nkc(){
     ev3_motor_rotate(EV3_PORT_D, 80, 30, false);
-    straight(13, 80, false);
-    turn(185, 80, 0);
-    steering_time(1200, -30, 5);
+    if (start == 1) {
+        straight(60, -80, false);
+        turn(185, 0, -80);
+        steering_time(1200, -30, -5);
+    }
+    if (start == 2) {
+        straight(13, 80, false);
+        turn(185, 80, 0);
+        steering_time(1200, -30, 5);
+    }
 }
 
 void test_turn() { 
@@ -1325,10 +1332,6 @@ void obj_measure(int num, way_t sensor) {
         while ( ! ht_nxt_color_sensor_measure_rgb(EV3_PORT_2, &rgb_val)) {
             ;
         }  
-        if(start == 1){
-            obj_distance = ev3_ultrasonic_sensor_get_distance(EV3_PORT_4);
-            check_type = 1;
-        }
     } 
     else{ 
         while ( ! ht_nxt_color_sensor_measure_color(EV3_PORT_3, &test)) {
@@ -1343,10 +1346,8 @@ void obj_measure(int num, way_t sensor) {
         while ( ! ht_nxt_color_sensor_measure_rgb(EV3_PORT_3, &rgb_val)) {
             ;
         }
-        if(start == 2){
-            obj_distance = ev3_ultrasonic_sensor_get_distance(EV3_PORT_4);
-            check_type = 1;
-        }  
+        obj_distance = ev3_ultrasonic_sensor_get_distance(EV3_PORT_4);
+        check_type = 1;
     }
     
     red = rgb_val.r;
