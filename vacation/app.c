@@ -552,7 +552,6 @@ void arm_down() {
     arm_type = DOWN;
 }
 
-
 void stopping(){
     while(ev3_button_is_pressed(ENTER_BUTTON) == false) {}    
     tslp_tsk(2000*MSEC);
@@ -1076,8 +1075,6 @@ void steering_color(colorid_t color_stop, int power, int steering){
     (void)ev3_motor_stop(EV3_PORT_B, true);
     (void)ev3_motor_stop(EV3_PORT_C, true);    
 }
-
-
     
 void tank_turn(float angle, int power_L, int power_R){
     if (power_R == 0) {
