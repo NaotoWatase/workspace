@@ -169,8 +169,8 @@ int check_type;
 void start_nkc() {
     ev3_motor_reset_counts(EV3_PORT_D);
     if(start == 1){
-        straight_custom(89, 1, 0, 100);
-        turn(181, 0, -80);
+        straight_custom(87, 1, 0, 100);
+        turn(190, 0, -80);
         tslp_tsk(100*MSEC);
         straight_custom(75, 1, 0, -100);
     }
@@ -185,7 +185,7 @@ void start_nkc() {
     steering_color(COLOR_WHITE, 30, 0);
     steering_color(COLOR_BLACK, 24, 0);
     linetrace_length(28.5, 6);
-    straight(6.8, 20, true);
+    straight(7, 20, true);
 }
 
 void blue_nkc() {
@@ -248,7 +248,7 @@ void red_nkc(){
         straight(13.5, -80, false);
         if (location[10] == FIRE) {
             turn(180, -80, 80);
-            straight(15, -80, false);
+            straight(16, -80, false);
             water(10);
             water(11);
             straight(16, 80, false);
@@ -419,6 +419,7 @@ void chemical_brown_nkc(){
         ev3_motor_rotate(EV3_PORT_A, 80, -10, false);
         straight(42, 80, false);
         //しっかりおろす
+        tslp_tsk(400*MSEC);
         ev3_motor_set_power(EV3_PORT_A, -20);
         tslp_tsk(200*MSEC);
         straight(42, -80, false);
@@ -434,6 +435,7 @@ void chemical_brown_nkc(){
         ev3_motor_rotate(EV3_PORT_A, 80, -10, false);
         straight(50, -80, false);
         //しっかりおろす
+        tslp_tsk(400*MSEC);
         ev3_motor_set_power(EV3_PORT_A, -15);
         tslp_tsk(300*MSEC);
         straight(45, 80, false);
@@ -458,6 +460,7 @@ void chemical_white_nkc(){
         turn(90, -50, 50);
         tslp_tsk(300*MSEC);
         straight(10, -50, false);
+        tslp_tsk(400*MSEC);
         //しっかりおろす
         ev3_motor_set_power(EV3_PORT_A, -15);
         tslp_tsk(300*MSEC);
@@ -472,6 +475,7 @@ void chemical_white_nkc(){
         turn(90, 50, -50);
         tslp_tsk(300*MSEC);
         straight(10, -50, false);
+        tslp_tsk(400*MSEC);
         //しっかりおろす
         ev3_motor_set_power(EV3_PORT_A, -15);
         tslp_tsk(300*MSEC);
@@ -493,7 +497,7 @@ void chemical_white_nkc(){
 void marking_nkc(){
     map_decide();
     //marking
-    steering_time(500, 20, 7);
+    steering_time(800, 10, 7);
     steering_time(300, 20, 12);
     tslp_tsk(100*MSEC);
     straight(1.5, -25, 0);
@@ -559,6 +563,7 @@ void goal_nkc(){
         steering_time(1200, -30, 5);
     }
     ev3_motor_stop(EV3_PORT_D, true);
+    ev3_motor_stop(EV3_PORT_A, true);
 }
 
 void test_turn() { 
@@ -724,7 +729,7 @@ void straight(float cm, float set_power_sign, bool_t savedata) {
             power = changing_power * sign;
         }
         if (average >= cm*ROBOT1CM * 2 / 4) {
-            p_gein = -9;
+            p_gein = -8;
         }
         if (average >= cm*ROBOT1CM * 3 / 4 && sign > 0) {
             p_gein = -6;
