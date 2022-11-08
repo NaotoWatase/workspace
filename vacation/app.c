@@ -67,6 +67,8 @@ void chemical_white_nkc();
 void chemical_brown_nkc();
 void marking_nkc();
 void goal_nkc();
+void water_on(int n);
+void water_off(int n);
 /**
  * Define the connection ports of the sensors and motors.
  * By default, this application uses the following ports:
@@ -129,6 +131,7 @@ int brown_obj;
 
 int battery;
 
+bool_t water_end = true;
 
 uint8_t obj = 0;
 uint8_t test = 0;
@@ -1054,6 +1057,31 @@ void water(int n) {
             ev3_motor_rotate(EV3_PORT_D, 110 , 20, true);
             ev3_motor_rotate(EV3_PORT_D, 20 , 8, true);
             tslp_tsk(150*MSEC);
+            ev3_motor_rotate(EV3_PORT_D, 130 , -20, false);
+        }
+        water_count = water_count + 1;
+    }
+}
+
+void water_on(int n) {
+    water_end = false;
+    if (location[n] == FIRE) {
+        if(water_count == 1) {
+            ev3_motor_rotate(EV3_PORT_D, 50 ,13, false);
+        }
+        if(water_count == 2) {
+            ev3_motor_rotate(EV3_PORT_D, 130 , 13, false);
+
+        }
+    }
+}
+
+void water_off(int n) {
+    if (location[n] == FIRE) {
+        if(water_count == 1) {
+            ev3_motor_rotate(EV3_PORT_D, 50 , -20, false);
+        }
+        if(water_count == 2) {
             ev3_motor_rotate(EV3_PORT_D, 130 , -20, false);
         }
         water_count = water_count + 1;
