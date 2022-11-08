@@ -170,10 +170,9 @@ void start_nkc() {
     ev3_motor_reset_counts(EV3_PORT_D);
     if(start == 1){
         straight_custom(88, 1, 0, 100);
-        turn(80, 0, -80);
-        turn(100, 80, 0);
+        turn(190, 0, -80);
         tslp_tsk(100*MSEC);
-        straight_custom(77, 1, 0, -100);
+        straight_custom(75, 1, 0, -100);
         turn(90, 80, -80);
     }
     if(start == 2){
@@ -250,11 +249,15 @@ void red_nkc(){
         straight(13.5, -80, false);
         if (location[10] == FIRE) {
             turn(180, -80, 80);
+            tslp_tsk(600*MSEC);
             straight(16, -80, false);
             water(10);
             water(11);
+            tslp_tsk(300*MSEC);
             straight(16, 80, false);
+            tslp_tsk(300*MSEC);
             turn(90, 80, -80);
+            tslp_tsk(300*MSEC);
         }
         else {
             turn(90, -80, 80);
@@ -377,6 +380,7 @@ void brown_nkc(){
         tslp_tsk(200*MSEC);
         if (location[8] != NOTHING) {
             location[8] = CHEMICAL;
+            location[9] = NOTHING;
             straight(4.7, 50, false);
             chemical_taker(8, LEFT);
             straight(61, 80, true);
@@ -391,23 +395,28 @@ void brown_nkc(){
         break;
     default:
         turn(180, -60, 0);
+        tslp_tsk(200*MSEC);
         straight(28, -80, false);
         obj_check(8, RIGHT);
+        tslp_tsk(200*MSEC);
         straight(10.5, -80, false);
-        steering_time(400, -20, 0);
+        steering_time(600, -20, 0);
         straight(11, 80, false);
         turn(90, 80, -80);
+        tslp_tsk(200*MSEC);
         if (location[8] != NOTHING) {
             location[8] = CHEMICAL;
+            location[9] = NOTHING;
             straight(4.7, 50, false);
             chemical_taker(8, LEFT);
-            straight(59.5, 80, true);
+            straight(61, 80, true);
         }
         else {
             straight(32, -80, false);
-            obj_check(9, LEFT);
+            //obj_check(9, LEFT);
+            location[9] = CHEMICAL;
             chemical_taker(9, LEFT);
-            straight(96, 80, false);
+            straight(100, 80, false);
         }
         break;
     }
@@ -463,15 +472,15 @@ void chemical_white_nkc(){
         tslp_tsk(300*MSEC);
         turn(90, -50, 50);
         tslp_tsk(300*MSEC);
-        straight(10, -50, false);
+        straight(6, -50, false);
         tslp_tsk(400*MSEC);
         //しっかりおろす
         ev3_motor_set_power(EV3_PORT_A, -15);
         tslp_tsk(300*MSEC);
-        straight(40, -80, false);
+        straight(44, -80, false);
         arm_type = DOWN;
         ev3_motor_stop(EV3_PORT_A, true);
-        steering_time(700, -25, 0);
+        steering_time(500, -25, 0);
         turn(180, 0, 80);
     }
     else {
@@ -501,8 +510,8 @@ void chemical_white_nkc(){
 void marking_nkc(){
     map_decide();
     //marking
-    steering_time(800, 10, 7);
-    steering_time(300, 20, 12);
+    steering_time(800, 10, 12);
+    steering_time(500, 20, 30);
     tslp_tsk(100*MSEC);
     straight(1.5, -25, 0);
     turn(180, -80, 0);
@@ -669,7 +678,7 @@ void straight(float cm, float set_power_sign, bool_t savedata) {
     float set_power = abs(set_power_sign);
     float lb_power;
     float rc_power;
-    float p_gein = -9;
+    float p_gein = -6;
     float d_gein = 0;
     if (set_power < 30) p_gein = -0.7;
     if (cm < 16) {
@@ -681,9 +690,6 @@ void straight(float cm, float set_power_sign, bool_t savedata) {
     }
     if(sign < 0 ) {
         p_gein = -0.5;
-    }
-    if (marking_count >= 1 && set_power < 60) {
-            set_power = 60;
     }
     float changing_power = 0;
     float left;
@@ -736,7 +742,7 @@ void straight(float cm, float set_power_sign, bool_t savedata) {
             power = changing_power * sign;
         }
         if (average >= cm*ROBOT1CM * 1 / 4) {
-            p_gein = -8;
+            p_gein = -6;
         }
         if (average >= cm*ROBOT1CM * 3 / 4 && sign > 0) {
             p_gein = -6;
@@ -1159,7 +1165,7 @@ void linetrace_length(float length, int power){
         i = (reflect + i);
         d = (reflect - d2); 
         d2 = reflect;
-        steer =  p * -1 + i * 0 + d * 0; 
+        steer =  p * -1.2 + i * 0 + d * 0; 
         if (length * ROBOT1CM < average) break;
         if(steer > 0) {
             (void)ev3_motor_set_power(EV3_PORT_B, -power);
