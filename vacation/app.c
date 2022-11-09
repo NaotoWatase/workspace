@@ -251,6 +251,7 @@ void red_nkc(){
             turn(180, -80, 80);
             tslp_tsk(600*MSEC);
             straight(16, -80, false);
+            tslp_tsk(300*MSEC);
             water(10);
             water(11);
             tslp_tsk(300*MSEC);
@@ -751,7 +752,7 @@ void straight(float cm, float set_power_sign, bool_t savedata) {
             p_gein = -3;
         }
         if (marking_count >= 1) {
-            p_gein = -6;
+            p_gein = -3;
         }
         if(steer > 0) {
             lb_power = power;
