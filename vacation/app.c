@@ -1729,7 +1729,7 @@ void newroad(float cm, float set_power_sign, int location_start, float first_cm,
             through_count = 1;
             switch (location[now_location]) {
             case FIRE:
-                water(now_location);
+                water_on(now_location);
                 break;
             case PERSON:
                 break;
@@ -1742,6 +1742,9 @@ void newroad(float cm, float set_power_sign, int location_start, float first_cm,
             default:
                 break;
             }
+        }
+        if (water_end == true) {
+            water_off(now_location);
         }
         if (timing_chemical == 1 && (left / ROBOT1CM > 1.8) && count_chemical == 0) {
             count_chemical = 1;
