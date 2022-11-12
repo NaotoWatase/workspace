@@ -98,6 +98,12 @@ typedef enum arm{
     DOWN
 }arm_t ;
 
+typedef enum armsp{
+    RIGHT_UP,
+    LEFT_UP,
+    NORMAL
+}armsp_t ;
+
 
 
 /*
