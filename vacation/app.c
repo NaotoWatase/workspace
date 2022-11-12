@@ -177,9 +177,10 @@ void start_nkc() {
     ev3_motor_reset_counts(EV3_PORT_D);
     if(start == 1){
         straight_custom(88, 1, 0, 100);
-        turn(190, 0, -80);
+        turn(130, 0, -80);
+        turn(57, 80, -80);
         tslp_tsk(100*MSEC);
-        straight_custom(75, 1, 0, -100);
+        straight_custom(74, 1, 0, -100);
         turn(90, 80, -80);
     }
     if(start == 2){
@@ -219,7 +220,7 @@ void green_nkc() {
         turn(90, 50, -50);
         steering_time(800, 15, 0);
         if (arm_type == DOWN) ev3_motor_rotate(EV3_PORT_A, 176, 30, false);
-        arm_type = RIGHT_UP;
+        arm_type = UP;
         chemical = chemical + 1;
         chemical_type = LEFT;
         chemical_taker(3, LEFT);
@@ -255,14 +256,15 @@ void red_nkc(){
         location[11] = NOTHING;
         straight(13.5, -80, false, false);
         if (location[10] == FIRE) {
+            tslp_tsk(200*MSEC);
             turn(180, -80, 80);
             tslp_tsk(600*MSEC);
             straight(19, -80, false, false);
-            tslp_tsk(300*MSEC);
+            tslp_tsk(400*MSEC);
             water(10);
             water(11);
-            tslp_tsk(300*MSEC);
-            straight(17.5, 80, false, false);
+            tslp_tsk(400*MSEC);
+            straight(16, 80, false, false);
             tslp_tsk(300*MSEC);
             turn(90, 80, -80);
             tslp_tsk(300*MSEC);
@@ -277,7 +279,7 @@ void red_nkc(){
         location[11] = NOTHING;
         straight(3.3, 40, true, false);
         if (arm_type == DOWN) ev3_motor_rotate(EV3_PORT_A, 176, 30, false);
-        arm_type = RIGHT_UP;
+        arm_type = UP;
         chemical = chemical + 1;
         chemical_type = RIGHT;
         chemical_taker(10, RIGHT);
@@ -297,7 +299,7 @@ void red_nkc(){
             steering_time(200, 10, 3);
             tslp_tsk(100*MSEC);
             if (arm_type == DOWN) ev3_motor_rotate(EV3_PORT_A, 176, 30, false);
-            arm_type = RIGHT_UP;
+            arm_type = UP;
             chemical = chemical + 1;
             chemical_type = RIGHT;
             chemical_taker(11, RIGHT);
@@ -341,7 +343,7 @@ void white_nkc(){
     straight(3.3, 50, true, false);
     if (location[5] == CHEMICAL) {
             if (arm_type == DOWN) ev3_motor_rotate(EV3_PORT_A, 176, 30, false);
-            arm_type = RIGHT_UP;
+            arm_type = UP;
             chemical = chemical + 1;
             chemical_type = RIGHT;
             chemical_taker(11, RIGHT);
@@ -393,18 +395,18 @@ void brown_nkc(){
     case CHEMICAL:
         turn(180, -60, 0);
         tslp_tsk(200*MSEC);
-        straight(28, -80, false, false);
+        straight(29.4, -80, false, false);
         obj_check(8, RIGHT);
         tslp_tsk(200*MSEC);
-        straight(10.5, -80, false, false);
+        straight(9.4, -80, false, false);
         steering_time(600, -20, 0);
-        straight(11, 80, false, false);
+        straight(12, 80, false, false);
         turn(90, 80, -80);
         tslp_tsk(200*MSEC);
         if (location[8] != NOTHING) {
             location[8] = CHEMICAL;
             location[9] = NOTHING;
-            straight(4.7, 50, false, false);
+            straight(5.3, 50, false, false);
             chemical_taker(8, LEFT);
             straight(63, 80, true, false);
         }
@@ -412,28 +414,28 @@ void brown_nkc(){
             straight(25, -50, false, false);
             steering_color(COLOR_RED, -25, 0);
             tslp_tsk(400*MSEC);
-            straight(5, 50, false, false);
+            straight(8, 50, false, false);
             //obj_check(9, LEFT);
             location[9] = CHEMICAL;
             chemical_taker(9, LEFT);
-            straight(103, 80, false, false);
+            straight(100, 80, false, false);
         }
         break;
     default:
         turn(180, -60, 0);
         tslp_tsk(200*MSEC);
-        straight(28, -80, false, false);
+        straight(29.4, -80, false, false);
         obj_check(8, RIGHT);
         tslp_tsk(200*MSEC);
-        straight(10.5, -80, false, false);
+        straight(9.4, -80, false, false);
         steering_time(600, -20, 0);
-        straight(11, 80, false, false);
+        straight(12, 80, false, false);
         turn(90, 80, -80);
         tslp_tsk(200*MSEC);
         if (location[8] != NOTHING) {
             location[8] = CHEMICAL;
             location[9] = NOTHING;
-            straight(4.7, 50, false, false);
+            straight(5.3, 50, false, false);
             chemical_taker(8, LEFT);
             straight(63, 80, true, false);
         }
@@ -441,10 +443,10 @@ void brown_nkc(){
             straight(25, -50, false, false);
             steering_color(COLOR_RED, -25, 0);
             tslp_tsk(400*MSEC);
-            straight(5, 50, false, false);
+            straight(8, 50, false, false);
             location[9] = CHEMICAL;
             chemical_taker(9, LEFT);
-            straight(103, 80, false, false);
+            straight(100, 80, false, false);
         }
         break;
     }
@@ -605,11 +607,13 @@ void goal_nkc(){
     ev3_motor_rotate(EV3_PORT_A, 176, -10, false);
     if (start == 1) {
         straight(62.5, -80, false, false);
+        marking_overall(180, -30);
         turn(176, 0, -80);
         steering_time(1200, -30, -5);
     }
     if (start == 2) {
         straight(13, 80, false, false);
+        marking_overall(180, -30);
         turn(185, 80, 0);
         steering_time(1200, -30, 5);
     }
@@ -773,7 +777,7 @@ void straight(float cm, float set_power_sign, bool_t savedata, bool_t wall_check
         right = abs(right);
         if (wall_check == true) {
             wall_length = ev3_ultrasonic_sensor_get_distance(EV3_PORT_4);
-            if (wall_length > 10) wall_steer = -15;
+            if (wall_length > 9.8) wall_steer = -25;
             else wall_steer = 0;
         }
         diff = left - right;
