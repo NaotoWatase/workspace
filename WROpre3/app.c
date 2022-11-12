@@ -504,7 +504,7 @@ void chemical_white_nkc(){
         ev3_motor_stop(EV3_PORT_A, true);
         steering_time(500, -25, 0);   
         tslp_tsk(300*MSEC);     
-        straight(9.4, 60, false, false);
+        straight(20.4, 60, false, false);
         tslp_tsk(300*MSEC);     
         turn(90, -80, 80);
         tslp_tsk(300*MSEC);     
@@ -525,7 +525,9 @@ void chemical_white_nkc(){
         arm_type = DOWN;
         ev3_motor_stop(EV3_PORT_A, true);
         steering_time(800, 25, 0);
-        straight(4, -50, false, false);
+        tslp_tsk(300*MSEC);
+        straight(15, -50, false, false);
+        tslp_tsk(300*MSEC);
         turn(90, 80, -80);
     }
     
@@ -1747,22 +1749,12 @@ void main_task(intptr_t unused){
     //stopping();
     chemical_white_nkc();
 
-    straight(7, -60, false, false);
     tslp_tsk(500*MSEC);
 
-    steering_color(COLOR_WHITE, 30, 0);
-    steering_color(COLOR_BLACK, 24, 0);
-    arm_down();
-    linetrace_length(28.5, 6);
-    straight(12.2, 20, false, false);
-    ev3_motor_rotate(EV3_PORT_A, 176, 30, true);
-    straight(37, 80, true, false);
+
+    straight(64.6, 16, false, false);
     tslp_tsk(1000*MSEC);
-    turn(50, 30, 0);
-    turn(50, 0, 30);
-    ev3_motor_rotate(EV3_PORT_A, 70, -13, true);
-    tslp_tsk(1000*MSEC);
-    ev3_motor_rotate(EV3_PORT_A, 106, -8, true);
+
     straight(67, -80, false, false);
     turn(50, 30, 0);
     turn(50, 0, 30);
