@@ -35,6 +35,7 @@ void obj_measure(int num, way_t sensor);
 void obj_know(int num);
 void stopping();
 void chemical_taker(int n, way_t sensor);
+void chemical_special(int num);
 void obj_check(int num, way_t sensor);
 void water(int n);
 //直進
@@ -192,27 +193,13 @@ void start_nkc() {
 void blue_nkc() {
     obj_check(0, RIGHT);
     chemical_taker(0, RIGHT);
+    chemical_special(0);
     straight(37, 80, true);
     obj_check(1, RIGHT);
     chemical_taker(1, RIGHT);
     water(0);
     water(1);
-    if (chemical == 2 && location[1] == CHEMICAL){
-        if (chemical_type == RIGHT){
-            turn(180, 80, -80);
-            straight(18, -80, false);
-            arm_right_up();
-            tslp_tsk(600*MSEC);
-            straight(18, 80, false);
-            turn(180, -80, 80);
-        }
-        if (chemical_type == LEFT){
-            straight(3, 50, true);
-            arm_normal();
-            tslp_tsk(600*MSEC);
-            straight(3, -50, false);
-        }
-    }
+    chemical_special(1);
     straight(11, 80, true);
 }
 
@@ -250,22 +237,7 @@ void green_nkc() {
 void yellow_nkc() {
     obj_check(4, RIGHT);
     chemical_taker(4, RIGHT);
-    if (chemical == 2 && location[4] == CHEMICAL){
-        if (chemical_type == RIGHT){
-            turn(180, -80, 80);
-            straight(18, -80, false);
-            arm_normal();
-            tslp_tsk(600*MSEC);
-            straight(18, 80, false);
-            turn(180, 80, -80);
-        }
-        if (chemical_type == LEFT){
-            straight(3, 50, true);
-            arm_normal();
-            tslp_tsk(600*MSEC);
-            straight(3, -50, false);
-        }
-    }
+    chemical_special(4);
 
     /* red */
     straight(37.5, 80, true);
@@ -312,7 +284,6 @@ void red_nkc(){
             }
         }
         if (chemical == 1){
-
             straight(3, 50, true);
             arm_right_up();
             tslp_tsk(600*MSEC);
@@ -1373,6 +1344,51 @@ void chemical_taker(int n, way_t sensor){
             chemical_type = LEFT;
         }
     }
+}
+
+void chemical_special(int num){
+    if (chemical == 2 && location[num] == CHEMICAL){
+        if (chemical_type == RIGHT){
+            turn(180, 80, -80);
+            straight(18, -80, false);
+            arm_right_up();
+            tslp_tsk(600*MSEC);
+            straight(18, 80, false);
+            turn(180, -80, 80);
+        }
+        if (chemical_type == LEFT){
+            straight(3, 50, true);
+            arm_normal();
+            tslp_tsk(600*MSEC);
+            straight(3, -50, false);
+        }
+    }
+
+
+
+
+    
+
+    if (chemical == 2){
+                if (chemical_type == RIGHT){
+                    straight(6, -50, false);
+                    arm_left_up();
+                    tslp_tsk(600*MSEC);
+                    straight(6, 50, false);
+                }
+            }
+
+            if (chemical == 2 && location[11] == CHEMICAL){
+                straight(10, -50, false);
+                turn(180, -80, 80);
+                straight(8, -50, false);
+                steering_time(500, -30, 0);
+                arm_normal();
+                tslp_tsk(600*MSEC);
+                straight(10, 50, false);
+                turn(180, -80, 80);
+                steering_time(600, 30, 0);
+            }
 }
 
 void chemical_took(int n, way_t sensor){
