@@ -410,7 +410,8 @@ void brown_nkc(){
         }
         else {
             straight(25, -50, false, false);
-            steering_color(COLOR_RED, -30, 0);
+            steering_color(COLOR_RED, -25, 0);
+            tslp_tsk(400*MSEC);
             straight(5, 50, false, false);
             //obj_check(9, LEFT);
             location[9] = CHEMICAL;
@@ -437,8 +438,10 @@ void brown_nkc(){
             straight(63, 80, true, false);
         }
         else {
-            straight(33.2, -80, false, false);
-            //obj_check(9, LEFT);
+            straight(25, -50, false, false);
+            steering_color(COLOR_RED, -25, 0);
+            tslp_tsk(400*MSEC);
+            straight(5, 50, false, false);
             location[9] = CHEMICAL;
             chemical_taker(9, LEFT);
             straight(103, 80, false, false);
@@ -623,12 +626,12 @@ void test_turn() {
 
 void arm_up() {
     if (arm_type == DOWN) ev3_motor_rotate(EV3_PORT_A, 176, 30, false);
-    arm_type = RIGHT_UP;
+    arm_type = UP;
 
 }
 
 void arm_down() {
-    if (arm_type == RIGHT_UP) ev3_motor_rotate(EV3_PORT_A, 176, -10, true);
+    if (arm_type == UP) ev3_motor_rotate(EV3_PORT_A, 176, -10, true);
     arm_type = DOWN;
 }
 
