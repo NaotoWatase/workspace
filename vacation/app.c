@@ -28,6 +28,9 @@
 
 static FILE *bt = NULL;
 
+FILE *file;                             // 結果を出力するファイルのポインタ
+const char* logfilename = "/object_result.txt";  //ファイル名
+
 
 
 void sensor_check(uint8_t num);
@@ -71,6 +74,9 @@ void chemical_white_nkc();
 void chemical_brown_nkc();
 void marking_nkc();
 void goal_nkc();
+
+/*サプライズ！！！！！*/
+void water_sp(int n);
 /**
  * Define the connection ports of the sensors and motors.
  * By default, this application uses the following ports:
@@ -176,6 +182,8 @@ int check_type;
 void start_nkc() {
     ev3_motor_reset_counts(EV3_PORT_D);
     if(start == 1){
+        ev3_motor_rotate(EV3_PORT_D, 5, 7, true);
+        ev3_motor_rotate(EV3_PORT_D, 5, -7, true);
         straight_custom(89, 1, 0, 100);
         turn(180, 0, -80);
         tslp_tsk(100*MSEC);
@@ -183,6 +191,8 @@ void start_nkc() {
         turn(90, 80, -80);
     }
     if(start == 2){
+        ev3_motor_rotate(EV3_PORT_D, 5, 7, true);
+        ev3_motor_rotate(EV3_PORT_D, 5, -7, true);
         straight_custom(80, 1, 0, -100);
         turn(90, 80, -80);
     }
@@ -1144,6 +1154,8 @@ void water(int n) {
     }
 }
 
+
+
 void steering_time(int time_stop_4d, int power, int steering){
     if(steering > 0) {
     (void)ev3_motor_set_power(EV3_PORT_B, -power);
@@ -1399,6 +1411,7 @@ void chemical_took(int n, way_t sensor){
 void obj_check(int num, way_t sensor){
     obj_measure(num, sensor);
     obj_know(num);
+    stopping();
     //tslp_tsk(300*MSEC);
 }
 
@@ -1559,6 +1572,9 @@ void obj_know(int num){
         }
     }  
     fprintf(bt, "LOCATION = %d\r\nCOLOR = %d\r\nRGB:%f,%f,%f = JUDGE:%f\r\nHSV:%f,%f,%f = MAX:%f MIN:%f\r\nDISTANCE:%f\r\nRESULT = %d\r\n-----------------\r\n", num, obj, red, green, blue, judgement, h, s, v, max, min, obj_distance, location[num]);
+    file=fopen(logfilename,"a");//ファイルをオープン(名前の指定)
+    fprintf(file, "LOCATION = %d\r\nCOLOR = %d\r\nRGB:%f,%f,%f = JUDGE:%f\r\nHSV:%f,%f,%f = MAX:%f MIN:%f\r\nDISTANCE:%f\r\nRESULT = %d\r\n-----------------\r\n", num, obj, red, green, blue, judgement, h, s, v, max, min, obj_distance, location[num]);
+    fclose(file);
 }
 
 void map_decide(){
@@ -1714,6 +1730,9 @@ void main_task(intptr_t unused){
     ev3_lcd_set_font(EV3_FONT_SMALL);
 
     fprintf(bt, "----GAME_START----\r\n");
+    file=fopen(logfilename,"w");//ファイルをオープン(名前の指定)
+    fprintf(file,"----GAME_START----\r\n");//書き込み
+    fclose(file);//ファイルを閉じる
 
     while(ev3_button_is_pressed(ENTER_BUTTON) == false) {}
 
@@ -1726,9 +1745,46 @@ void main_task(intptr_t unused){
     11 = WhBl, 12 = WhGr, 13 = WhYe, 14 = WhOr, 15 = WhRe, 16 = WhPi,
     17 = White*/
 
+    /*チェックする内容
+    １、コースの滑り
+    ２、照明（ライントレースのしきい値、オブジェクトのカラーRGBが依存している）
+    ３、ケーブルの引っ掛かり(タイヤ　アーム　WATER);
+    ４、壁の位置・高さ
+    ５、straight・回転
+    
+    */
 
     /*スタートの分岐チェック*/
+
     tslp_tsk(400*MSEC);
+
+    ev3_motor_rotate(EV3_PORT_D, 5, 7, true);
+    ev3_motor_rotate(EV3_PORT_D, 5, -7, true);
+
+    tslp_tsk(1000*MSEC);
+    ev3_motor_rotate(EV3_PORT_D, 20 , 50, true);
+    ev3_motor_rotate(EV3_PORT_D, 30 , 6, true);
+    tslp_tsk(400*MSEC);
+    ev3_motor_rotate(EV3_PORT_D, 50 , -20, true);
+    tslp_tsk(1000*MSEC);
+
+    ev3_motor_rotate(EV3_PORT_D, 100 , 50, true);
+    ev3_motor_rotate(EV3_PORT_D, 30 , 6, true);
+    tslp_tsk(400*MSEC);
+    ev3_motor_rotate(EV3_PORT_D, 130 , -20, true);
+    tslp_tsk(1000*MSEC);
+
+    ev3_motor_rotate(EV3_PORT_D, 25 , -50, true);
+    ev3_motor_rotate(EV3_PORT_D, 30 , -6, true);
+    tslp_tsk(400*MSEC);
+    ev3_motor_rotate(EV3_PORT_D, 55 , 20, true);
+    tslp_tsk(1000*MSEC);
+
+    ev3_motor_rotate(EV3_PORT_D, 105 , -50, true);
+    ev3_motor_rotate(EV3_PORT_D, 30 , -6, true);
+    tslp_tsk(400*MSEC);
+    ev3_motor_rotate(EV3_PORT_D, 135 , 20, true);
+    stopping();
 
     start_nkc();
     //stopping();
