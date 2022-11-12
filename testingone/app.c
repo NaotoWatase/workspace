@@ -198,7 +198,7 @@ void green_nkc() {
         turn(90, 50, -50);
         steering_time(800, 15, 0);
         if (arm_type == DOWN) ev3_motor_rotate(EV3_PORT_A, 180, 30, false);
-        arm_type = UP;
+        arm_type = RIGHT_UP;
         chemical = chemical + 1;
         chemical_type = LEFT;
         chemical_taker(3, LEFT);
@@ -393,12 +393,12 @@ void test_turn() {
 
 void arm_up() {
     if (arm_type == DOWN) ev3_motor_rotate(EV3_PORT_A, 180, 30, false);
-    arm_type = UP;
+    arm_type = RIGHT_UP;
 
 }
 
 void arm_down() {
-    if (arm_type == UP) ev3_motor_rotate(EV3_PORT_A, 180, -10, true);
+    if (arm_type == RIGHT_UP) ev3_motor_rotate(EV3_PORT_A, 180, -10, true);
     arm_type = DOWN;
 }
 

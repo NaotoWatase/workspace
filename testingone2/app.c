@@ -421,12 +421,12 @@ void test_turn() {
 
 void arm_up() {
     if (arm_type == DOWN) ev3_motor_rotate(EV3_PORT_A, 180, 30, false);
-    arm_type = UP;
+    arm_type = RIGHT_UP;
 
 }
 
 void arm_down() {
-    if (arm_type == UP) ev3_motor_rotate(EV3_PORT_A, 180, -10, true);
+    if (arm_type == RIGHT_UP) ev3_motor_rotate(EV3_PORT_A, 180, -10, true);
     arm_type = DOWN;
 }
 

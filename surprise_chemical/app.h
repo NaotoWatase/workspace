@@ -95,7 +95,8 @@ typedef enum map{
 
 typedef enum arm{
     RIGHT_UP,
-    DOWN
+    LEFT_UP,
+    NORMAL
 }arm_t ;
 
 
