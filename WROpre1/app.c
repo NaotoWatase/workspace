@@ -716,7 +716,7 @@ void straight(float cm, float set_power_sign, bool_t savedata, bool_t wall_check
     float lb_power;
     float rc_power;
     //float p_gein = -3;
-    float p_gein = -6;
+    float p_gein = -8;
     float d_gein = 0;
     if (set_power < 30) p_gein = -0.7;
     if (cm < 16) {
