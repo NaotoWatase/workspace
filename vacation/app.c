@@ -313,11 +313,12 @@ void red_nkc(){
         }
         else if (location[11] == FIRE) {
             turn(180, -80, 80);
-            water(10);
-            water(11);
             straight(8, -80, false, false);
             steering_time(600, -30, 0);
-            straight(49.5, 80, false, false);
+            straight(16, 80, false, false);
+            water(10);
+            water(11);
+            straight(33.5, 80, true, false);
             turn(90, 80, -80);
         }
         else {
@@ -336,15 +337,15 @@ void red_nkc(){
 void white_nkc(){
     obj_check(7, RIGHT);
     chemical_taker(7, RIGHT);
-    straight(11, 80, true, false);
+    straight(11, 80, false, false);
     water(4);
     water(7);
     obj_check(6, RIGHT);
     chemical_taker(6, RIGHT);
-    straight(37, 80, true, false);
+    straight(37, 80, false, false);
     obj_check(5, RIGHT);
     chemical_taker(5, RIGHT);
-    straight(3.3, 50, true, false);
+    straight(3.3, 50, false, false);
     if (location[5] == CHEMICAL) {
             tslp_tsk(200*MSEC);
         }
@@ -504,6 +505,7 @@ void chemical_white_nkc(){
         tslp_tsk(300*MSEC);
         steering_color(COLOR_WHITE, -25, 0);
         steering_color(COLOR_BLACK, -25, 0);
+        tslp_tsk(200*MSEC);
         straight(5, 50, false, false);
         tslp_tsk(500*MSEC);
         //しっかりおろす
@@ -522,6 +524,7 @@ void chemical_white_nkc(){
         tslp_tsk(300*MSEC);
         steering_color(COLOR_WHITE, -25, 0);
         steering_color(COLOR_BLACK, -25, 0);
+        tslp_tsk(200*MSEC);
         straight(7, 50, false, false);
         tslp_tsk(500*MSEC);
         //しっかりおろす
@@ -722,11 +725,15 @@ void straight(float cm, float set_power_sign, bool_t savedata, bool_t wall_check
     float lb_power;
     float rc_power;
     //float p_gein = -3;
-    float p_gein = -6;
+    float p_gein = -2;
     float d_gein = 0;
     if (set_power < 30) p_gein = -0.7;
     if (cm < 16) {
         p_gein = -6;
+        set_power = 30;
+    }
+    if (cm < 12) {
+        p_gein = -2;
         set_power = 30;
     }
     if (set_power > 70) {
@@ -802,10 +809,10 @@ void straight(float cm, float set_power_sign, bool_t savedata, bool_t wall_check
         if (average >= cm*ROBOT1CM * 1 / 4) {
             //p_gein = -2;
             //p_gein = -3;
-            p_gein = -8;
+            p_gein = -3;
         }
         if (average >= cm*ROBOT1CM * 3 / 4 && sign > 0) {
-            p_gein = -6;
+            p_gein = -3;
             //p_gein = -3;
             //p_gein = -2;
         }
@@ -1411,7 +1418,6 @@ void chemical_took(int n, way_t sensor){
 void obj_check(int num, way_t sensor){
     obj_measure(num, sensor);
     obj_know(num);
-    stopping();
     //tslp_tsk(300*MSEC);
 }
 
