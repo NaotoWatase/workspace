@@ -1,6 +1,6 @@
 /*
     Header file for wro 2022 robomission junior program
-    wave.h
+    motor.h
     Written by Naoto Watase and Kaita Suzuki.
     Copyright by NK Cells 2022. All rights reserved.
     This source code is a property of NK Cells. Nobody can use, copy, modify, transmit, redistibute and 
@@ -28,39 +28,6 @@ typedef enum object {
 
 */
 
-// wave fileの指定
-typedef enum wave {
-    WAVE_0 = 0,
-    WAVE_1,
-    WAVE_2,
-    WAVE_3,
-    WAVE_4,
-    WAVE_5,
-    WAVE_6,
-    WAVE_7,
-    WAVE_8,
-    WAVE_9,
-    WAVE_10,
-    WAVE_11,
-    WAVE_12,
-    WAVE_13,
-    WAVE_14,
-    WAVE_15,
-    WAVE_16,
-    WAVE_17,
-    WAVE_Nashi,
-    WAVE_Kuro,
-    WAVE_Ao,
-    WAVE_Midori,
-    WAVE_Kiiro,
-    WAVE_Aka,
-    WAVE_Shiro,
-    WAVE_Chairo,
-} wave_t ;
-
-
-
-
 /*
 	アプリケーションのグローバル変数の宣言
     注意：
@@ -68,7 +35,7 @@ typedef enum wave {
     #define _MOTOR_H_
     と書いておく。(MOTORはそのファイル名)
 */
-#ifndef _WAVE_H_ 
+#ifndef _MOTOR_C_ 
 // グローバル変数をここでextern 宣言する。
 // extern int test;
 
@@ -77,9 +44,9 @@ typedef enum wave {
 /*
  *  関数のプロトタイプ宣言
  */
-
-extern void init_wave();
-extern int play_wave(wave_t wave); 
+extern void steering(int power, int cm, int steering);
 
 
 
+
+//EOF
