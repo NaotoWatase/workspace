@@ -1765,29 +1765,91 @@ void main_task(intptr_t unused){
     /*スタートの分岐チェック*/
 
     tslp_tsk(400*MSEC);
+    straight(60, -80, false, false);
+    tslp_tsk(400*MSEC);
+    arm_up();
+    straight(59, 80, false, false);
+    tslp_tsk(400*MSEC);
+    turn(180, 0, -80);
+    tslp_tsk(100*MSEC);
+    straight_custom(71, 1, 0, -100);
+    turn(90, 80, -80);
+    steering_time(800, -30, 0);
+    straight(11.7, 50, false, false);
+    //waltrace_length(12, 30, 10);
+    turn(90, 50, -50);
+    steering_color(COLOR_WHITE, 30, 0);
+    steering_color(COLOR_BLACK, 24, 0);
+    turn(180, -80, 0);
+    steering_time(1000, -20, 0);
+    tslp_tsk(300*MSEC);
+    steering_color(COLOR_WHITE, 30, 0);
+    steering_color(COLOR_BLACK, 24, 0);
+    
+    straight(40, 80, false, false);
+    tslp_tsk(300*MSEC);
+    steering_time(1000, 20, 0);
+    tslp_tsk(300*MSEC);
+    straight(9, -50, false, false);
+    turn(90, 80, -80);
+    straight(45, 80, false, false);
+    steering_color(COLOR_RED, 30, 0);
+    straight(38, 80, false, false);
+    steering_time(1000, 20, 0);
+    tslp_tsk(300*MSEC);
+    ev3_motor_rotate(EV3_PORT_A, 76, -10, true);
+    tslp_tsk(300*MSEC);
+    straight(2, -30, false, false);
+    turn(30, 30, -30);
+    tslp_tsk(1000*MSEC);
+    ev3_motor_rotate(EV3_PORT_A, 100, -10, true);
+    turn(33, -30, 30);
+    turn(3, 20, -20);
+
+
+    /*straight(10, -50, false, false);
+    turn()*/
 
 
 
-    start_nkc();
-    //stopping();
-    blue_nkc();
-    //stopping();
-    green_nkc();
-    //stopping();
-    yellow_nkc();
-    //stopping();
-    red_nkc();  
-    //stopping();
-    white_nkc();
-    //stopping();
-    brown_nkc();
-    //stopping();
-    if (brown_obj == PERSON || brown_obj == NOTHING || brown_obj == FIRE) chemical_white_nkc();
-    else chemical_brown_nkc();
-    //stopping();
-    marking_nkc();
-    //stopping();
-    goal_nkc();
+
+    straight(3, -50, false, false);
+    turn(90, -80, 80);
+    steering_time(500, 20, 0);
+    
+    straight(10, -80, false, false);
+    turn(180, -80, 80);
+    steering_time(800, -20, 0);
+    tslp_tsk(300*MSEC);
+    straight(85, 80, false, false);
+    steering_time(500, 20, 0);
+    arm_type = DOWN;
+    arm_up();
+    tslp_tsk(500*MSEC);
+    straight(16, -50, false, false);
+    turn(90, 80, -80);
+    steering_time(800, -20, 0);
+    tslp_tsk(300*MSEC);
+    straight(85, 80, false, false);
+    steering_color(COLOR_WHITE, 30, 0);
+    steering_color(COLOR_BLACK, 24, 0);
+    straight(30, 80, false, false);
+    turn(90, 80, -80);
+    straight(12, -80, false, false);
+    steering_time(600, -20, 0);
+    tslp_tsk(200*MSEC);
+    straight(25, 80, false, false);
+    steering_color(COLOR_WHITE, 30, 0);
+    steering_color(COLOR_BLACK, 24, 0);
+    straight(25, 80, false, false);
+    turn(180, 0, 80);
+    steering_time(500, 20, 0);
+    arm_down();
+
+
+
+
+
 
 
     tslp_tsk(1000*MSEC);
