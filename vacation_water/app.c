@@ -62,6 +62,16 @@ void arm_right_up();
 void arm_left_up();
 //surprise
 void arm_normal();
+//surprise
+void sp_know(int num);
+//surprise
+void sp_check(int num, way_t sensor);
+//surprise
+void sp_checker(int num);
+//surprise
+void sp_water(int n);
+//surprise
+void chemical_special(int num);
 
 
 void start_nkc();
@@ -123,6 +133,7 @@ int start = 1;
 int chemical_type = 0;
 
 int water_count = 1;
+int sp_water_count = 1;
 
 int y = 0;
 
@@ -171,6 +182,8 @@ float judgement = 0;
 float obj_distance = 0;
 
 int check_type;
+
+
 
 void start_nkc() {
     if (sp == true) how_many = 32;
@@ -643,20 +656,20 @@ void arm_down() {
 }
 
 void arm_right_up() {
-    if (arm_type == LEFT_UP) ev3_motor_rotate(EV3_PORT_A, 220, 12, false);
-    if (arm_type == NORMAL) ev3_motor_rotate(EV3_PORT_A, 110, 12, false);
+    if (arm_sptype == LEFT_UP) ev3_motor_rotate(EV3_PORT_A, 220, 12, false);
+    if (arm_sptype == NORMAL) ev3_motor_rotate(EV3_PORT_A, 110, 12, false);
     arm_sptype = RIGHT_UP;
 }
 
 void arm_normal() {
-    if (arm_type == RIGHT_UP) ev3_motor_rotate(EV3_PORT_A, 110, -12, false);
-    if (arm_type == LEFT_UP) ev3_motor_rotate(EV3_PORT_A, 110, 12, false);
+    if (arm_sptype == RIGHT_UP) ev3_motor_rotate(EV3_PORT_A, 110, -12, false);
+    if (arm_sptype == LEFT_UP) ev3_motor_rotate(EV3_PORT_A, 110, 12, false);
     arm_sptype = NORMAL;
 }
 
 void arm_left_up() {
-    if (arm_type == RIGHT_UP) ev3_motor_rotate(EV3_PORT_A, 220, -12, false);
-    if (arm_type == NORMAL) ev3_motor_rotate(EV3_PORT_A, 110, -12, false);
+    if (arm_sptype == RIGHT_UP) ev3_motor_rotate(EV3_PORT_A, 220, -12, false);
+    if (arm_sptype == NORMAL) ev3_motor_rotate(EV3_PORT_A, 110, -12, false);
     arm_sptype = LEFT_UP;
 }
 
@@ -1426,39 +1439,39 @@ void chemical_special(int num){
                 case 9:
                     break;
                 case 11:
-                    straight(6, -50, false);
+                    straight(6, -50, false, false);
                     arm_left_up();
                     tslp_tsk(600*MSEC);
-                    straight(6, 50, false);
+                    straight(6, 50, false, false);
                     steering_time(500, 30, -8);
                     steering_time(200, 10, 3);
                     arm_right_up();
                     tslp_tsk(600*MSEC);
-                    straight(10, -50, false);
+                    straight(10, -50, false, false);
                     turn(180, -80, 80);
-                    straight(8, -50, false);
+                    straight(8, -50, false, false);
                     steering_time(200, -30, 0);
                     arm_normal();
                     tslp_tsk(600*MSEC);
-                    straight(10, 50, false);
+                    straight(10, 50, false, false);
                     turn(180, -80, 80);
                     steering_time(600, 30, 0);
                     break;
                 default:  
                     turn(180, 80, -80);
-                    straight(18, -80, false);
+                    straight(18, -80, false, false);
                     arm_right_up();
                     tslp_tsk(600*MSEC);
-                    straight(18, 80, false);
+                    straight(18, 80, false, false);
                     turn(180, -80, 80);
                     break;
             }
         }
         if (chemical_type == LEFT){
-            straight(3, 50, true);
+            straight(3, 50, false, false);
             arm_normal();
             tslp_tsk(600*MSEC);
-            straight(3, -50, false);
+            straight(3, -50, false, false);
         }
     }
 }
@@ -1722,6 +1735,24 @@ void check_task(intptr_t unused){
     fprintf(bt, "\r\ny:%d", y);
 }
 
+void sp_water(int n) {
+    if (location[n] == FIRE) {
+        if(sp_water_count == 1) {
+            ev3_motor_rotate(EV3_PORT_D, 20 , -50, true);
+            ev3_motor_rotate(EV3_PORT_D, 30 , -6, true);
+            tslp_tsk(200*MSEC);
+            ev3_motor_rotate(EV3_PORT_D, 50 , 20, false);
+        }
+        if(sp_water_count == 2) {
+            ev3_motor_rotate(EV3_PORT_D, 100 , -50, true);
+            ev3_motor_rotate(EV3_PORT_D, 30 , -6, true);
+            tslp_tsk(200*MSEC);
+            ev3_motor_rotate(EV3_PORT_D, 130 , 20, false);
+        }
+        sp_water_count = sp_water_count + 1;
+    }
+}
+
 void location_r_task(intptr_t unused){
     stp_cyc(LOCATION_R_CYC);
     while ( ! ht_nxt_color_sensor_measure_color(EV3_PORT_3, &test)) {
@@ -1808,30 +1839,14 @@ void main_task(intptr_t unused){
 
     /*スタートの分岐チェック*/
     tslp_tsk(400*MSEC);
+    location[1] = FIRE;
 
-    start_nkc();
-    //stopping();
-    blue_nkc();
-    //stopping();
-    green_nkc();
-    //stopping();
-    yellow_nkc();
-    //stopping();
-    red_nkc();  
-    //stopping();
-    white_nkc();
-    //stopping();
-    brown_nkc();
-    //stopping();
-    if (brown_obj == PERSON || brown_obj == NOTHING || brown_obj == FIRE) chemical_white_nkc();
-    else chemical_brown_nkc();
-    //stopping();
-    marking_nkc();
-    //stopping();
-    goal_nkc();
-
-
+    water(1);
     tslp_tsk(1000*MSEC);
-    battery = ev3_battery_voltage_mV();
-    fprintf(bt, "BATTERY:%d", battery);
+    sp_water(1);
+    tslp_tsk(1000*MSEC);
+    water(1);
+    tslp_tsk(1000*MSEC);
+    sp_water(1);
+
 }

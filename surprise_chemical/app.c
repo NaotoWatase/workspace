@@ -591,24 +591,6 @@ void test_turn() {
     stopping();
 } 
 
-void arm_right_up() {
-    if (arm_type == LEFT_UP) ev3_motor_rotate(EV3_PORT_A, 220, 12, false);
-    if (arm_type == NORMAL) ev3_motor_rotate(EV3_PORT_A, 110, 12, false);
-    arm_type = RIGHT_UP;
-
-}
-
-void arm_normal() {
-    if (arm_type == RIGHT_UP) ev3_motor_rotate(EV3_PORT_A, 110, -12, false);
-    if (arm_type == LEFT_UP) ev3_motor_rotate(EV3_PORT_A, 110, 12, false);
-    arm_type = NORMAL;
-}
-
-void arm_left_up() {
-    if (arm_type == RIGHT_UP) ev3_motor_rotate(EV3_PORT_A, 220, -12, false);
-    if (arm_type == NORMAL) ev3_motor_rotate(EV3_PORT_A, 110, -12, false);
-    arm_type = LEFT_UP;
-}
 
 void stopping(){
     while(ev3_button_is_pressed(ENTER_BUTTON) == false) {}    
