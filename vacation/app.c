@@ -186,7 +186,7 @@ void start_nkc() {
     if(start == 1){
         ev3_motor_rotate(EV3_PORT_D, 13, 7, true);
         ev3_motor_rotate(EV3_PORT_D, 13, -7, true);
-        straight_custom(89, 1, 0, 100);
+        straight_custom(87, 1, 0, 100);
         tslp_tsk(100*MSEC);
         turn(184, 0, -80);
         tslp_tsk(100*MSEC);
@@ -276,7 +276,7 @@ void red_nkc(){
             water(10);
             water(11);
             tslp_tsk(400*MSEC);
-            straight(16.5, 80, false, false);
+            straight(16.8, 80, false, false);
             tslp_tsk(300*MSEC);
             turn(90, 80, -80);
             tslp_tsk(300*MSEC);
@@ -326,7 +326,7 @@ void red_nkc(){
             straight(16, 80, false, false);
             water(10);
             water(11);
-            straight(30.8, 80, true, false);
+            straight(31.8, 80, true, false);
             turn(90, 80, -80);
         }
         else {
@@ -373,7 +373,7 @@ void white_nkc(){
         water(5);
         water(6);
         tslp_tsk(500*MSEC);
-        straight(15, 80, false, false);
+        straight(15.5, 80, false, false);
         tslp_tsk(300*MSEC);
     } 
     else {
@@ -411,10 +411,10 @@ void brown_nkc(){
     case CHEMICAL:
         turn(180, -60, 0);
         tslp_tsk(200*MSEC);
-        straight(29.4, -80, false, false);
+        straight(28.7, -80, false, false);
         obj_check(8, RIGHT);
         tslp_tsk(200*MSEC);
-        straight(9.4, -80, false, false);
+        straight(9.8, -80, false, false);
         steering_time(600, -20, 0);
         straight(12, 80, false, false);
         turn(90, 80, -80);
@@ -545,7 +545,7 @@ void chemical_white_nkc(){
         tslp_tsk(500*MSEC);
         //しっかりおろす
         ev3_motor_set_power(EV3_PORT_A, -15);
-        tslp_tsk(300*MSEC);
+        tslp_tsk(500*MSEC);
         straight(45, 80, false, false);
         arm_type = DOWN;
         ev3_motor_stop(EV3_PORT_A, true);
