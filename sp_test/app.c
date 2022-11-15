@@ -1941,27 +1941,19 @@ void main_task(intptr_t unused){
 
 
     tslp_tsk(300*MSEC);
-                    arm_sptype = RIGHT_UP;
+                    
+
+            ev3_motor_rotate(EV3_PORT_D, 55 , -30, true);
+            ev3_motor_rotate(EV3_PORT_D, 30 , -7, true);
+            tslp_tsk(200*MSEC);
+            ev3_motor_rotate(EV3_PORT_D, 85 , 20, true);
+        
+            
+            ev3_motor_rotate(EV3_PORT_D, 120 , -30, true);
+            ev3_motor_rotate(EV3_PORT_D, 30 , -7, true);
+            tslp_tsk(200*MSEC);
 
 
-                        straight(6, -80, false, false);
-                        ev3_motor_rotate(EV3_PORT_A, 160, -10, false);
-                        tslp_tsk(1600*MSEC);
-                        ev3_motor_rotate(EV3_PORT_A, 80, -8, false);
-                        tslp_tsk(200*MSEC);
-                        straight(6, 80, false, false);
-                        steering_time(300, 30, 0);
-                        arm_sptype = LEFT_UP;
-                        arm_right_up();
-                        tslp_tsk(700*MSEC);
-                        straight(8, -80, false, false);
-                        turn(180, -80, 80);
-                        steering_time(500, -20, 0);
-                        arm_normal();
-                        tslp_tsk(700*MSEC);
-                        straight(8, 80, false, false);
-                        turn(180, 80, -80);
-                        steering_time(800, 20, 0);
     //test_turn();
     stopping();
 
