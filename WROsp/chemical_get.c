@@ -1,7 +1,7 @@
 //surprise
 void sp_know(int num);
 //surprise
-void sp_obj_check(int num, way_t sensor);
+void sp_obj_check(int num);
 //surprise
 void sp_obj_checker(int num);
 
@@ -22,7 +22,7 @@ void chemical_taker(int n, way_t sensor){
     }
 }
 
-void sp_chemical_check(int num){
+void sp_obj_check(int num){
     obj_measure(num, LEFT);
     sp_obj_know(num);
 }
