@@ -119,13 +119,12 @@ int timing_chemical = 0;
 int judgement_check = 0;
 int chemical = 0;
 int marking_count = 0;
-int person_count = 0;
 
 int white = 0;
 int how_many = 31;
 
 map_t map [6] = {0,0,0,0,0,0};
-int start = 2;
+int start = 1;
 
 int chemical_type = 0;
 
@@ -184,9 +183,9 @@ int about_start = 0;
 
 void start_nkc() {
     if (sp == true) how_many = 32;
-    /*about_start = ev3_ultrasonic_sensor_get_distance(EV3_PORT_4);
+    about_start = ev3_ultrasonic_sensor_get_distance(EV3_PORT_4);
     if (about_start > 20) start = 2;
-    else start = 1;*/
+    else start = 1;
     ev3_motor_reset_counts(EV3_PORT_D);
     if(start == 1){
         straight_custom(87, 1, 0, 100);
@@ -197,17 +196,17 @@ void start_nkc() {
         turn(90, 80, -80);
     }
     if(start == 2){
-        straight_custom(78, 1, 0, -100);
+        straight_custom(80, 1, 0, -100);
         turn(90, 80, -80);
     }
     ev3_motor_rotate(EV3_PORT_D, 15, 7, false);
     steering_time(800, -30, 0);
     straight(13.2, 50, false, false);
-    ev3_motor_rotate(EV3_PORT_D, 15, -7, false);
     //waltrace_length(12, 30, 10);
     turn(90, 50, -50);
     steering_color(COLOR_WHITE, 30, 0);
     steering_color(COLOR_BLACK, 24, 0);
+    ev3_motor_rotate(EV3_PORT_D, 15, -7, false);
     linetrace_length( 28.5, 6);
     tslp_tsk(400*MSEC);
     straight(8.3, 20, false, false);
@@ -821,7 +820,7 @@ void straight(float cm, float set_power_sign, bool_t savedata, bool_t wall_check
         if (wall_check == true) {
             wall_length = ev3_ultrasonic_sensor_get_distance(EV3_PORT_4);
             //15 or -10　今までは-10
-            if (wall_length > 9.8) wall_steer = -6;
+            if (wall_length > 9.8) wall_steer = 15;
             else wall_steer = 0;
         }
         diff = left - right;
@@ -879,7 +878,7 @@ void straight(float cm, float set_power_sign, bool_t savedata, bool_t wall_check
         }
         (void)ev3_motor_set_power(EV3_PORT_B, lb_power);
         (void)ev3_motor_set_power(EV3_PORT_C, rc_power);
-        if (timing_chemical == 1 && (left / ROBOT1CM > 2) && count_chemical == 0) {
+        if (timing_chemical == 1 && (left / ROBOT1CM > 1.6) && count_chemical == 0) {
             count_chemical = 1;
             arm_up();
         }
@@ -1633,52 +1632,45 @@ void obj_know(int num){
 }
 
 void map_decide(){
-    if ((location[8] == NOTHING && location[9] == NOTHING) || location[8] == PERSON || location[9] == PERSON) {
-        if (location[8] == PERSON || location[9] == PERSON) person_count = person_count + 1;
-        if (person_count <= 1)map[BROWN] = 1;
-        marking_count = marking_count + 1;
+    if (location[8] == PERSON || location[9] == PERSON) {
+        map[BROWN] = 1;
+        marking_count = 1;
     }
-    if ((location[10] == NOTHING && location[11] == NOTHING) || location[10] == PERSON || location[11] == PERSON) {
-        if (location[10] == PERSON || location[11] == PERSON) person_count = person_count + 1;
-        if (person_count <= 1){
-            if(marking_count == 1) map[RED] = 2;
-            else map[RED] = 1;
-            marking_count = marking_count + 1;
-        }
+    if (location[10] == PERSON || location[11] == PERSON) {
+        if(marking_count == 1) map[RED] = 2;
+        else {
+            map[RED] = 1;
+            marking_count = 1;
+        }   
     }
-    if ((location[5] == NOTHING && location[6] == NOTHING) || location[5] == PERSON || location[6] == PERSON) {
-        if (location[5] == PERSON || location[6] == PERSON) person_count = person_count + 1;
-        if (person_count <= 1){
-            if(marking_count == 1) map[WHITE] = 2;
-            else map[WHITE] = 1;
-            marking_count = marking_count + 1;
-        }
+    if (location[5] == PERSON || location[6] == PERSON) {
+        if(marking_count == 1) map[WHITE] = 2;
+        else {
+            map[WHITE] = 1;
+            marking_count = 1;
+        }   
     }  
-    if ((location[4] == NOTHING && location[7] == NOTHING) || location[4] == PERSON || location[7] == PERSON) {
-        if (location[4] == PERSON || location[7] == PERSON) person_count = person_count + 1;
-        if (person_count <= 1){
-            if(marking_count == 1) map[YELLOW] = 2;
-            else map[YELLOW] = 1;
-            marking_count = marking_count + 1;
-        }
+    if (location[4] == PERSON || location[7] == PERSON) {
+        if(marking_count == 1) map[YELLOW] = 2;
+        else {
+            map[YELLOW] = 1;
+            marking_count = 1;
+        }   
     } 
-    if ((location[0] == NOTHING && location[1] == NOTHING) || location[0] == PERSON || location[1] == PERSON) {
-        if (location[0] == PERSON || location[1] == PERSON) person_count = person_count + 1;
-        if (person_count <= 1){
-            if(marking_count == 1) map[BLUE] = 2;
-            else map[BLUE] = 1;
-            marking_count = marking_count + 1;
-        }  
+    if (location[0] == PERSON || location[1] == PERSON) {
+        if(marking_count == 1) map[BLUE] = 2;
+        else {
+            map[BLUE] = 1;
+            marking_count = 1;
+        }   
     }  
-    if ((location[2] == NOTHING && location[3] == NOTHING) || location[2] == PERSON || location[3] == PERSON) {
-        if (location[2] == PERSON || location[3] == PERSON) person_count = person_count + 1;
-        if (person_count <= 1){
-            if(marking_count == 1) map[GREEN] = 2;
-            else map[GREEN] = 1;
-            marking_count = marking_count + 1;
-        }
+    if (location[2] == PERSON || location[3] == PERSON) {
+        if(marking_count == 1) map[GREEN] = 2;
+        else {
+            map[GREEN] = 1;
+            marking_count = 1;
+        }   
     }
-
 }
 
 void marking_overall(int degree, int power){    
@@ -1838,6 +1830,80 @@ void main_task(intptr_t unused){
 
     tslp_tsk(400*MSEC);
 
+    straight(10, 50, false, false);
+    turn(90, -80, 80);
+    steering_time(800, -20, 0);
+    straight(40, 80, false, false);
+    turn(180, 50, -50);
+    steering_color(COLOR_WHITE, -30, 0);
+    steering_color(COLOR_BLACK, -24, 0);
+    ev3_motor_rotate(EV3_PORT_D, 90, 30, true);
+    straight(5, -50, false, false);
+    turn(90, -50, 50);
+    ev3_motor_rotate(EV3_PORT_D, 40, 30, true);
+    straight(30, -50, false, false);
+    ev3_motor_rotate(EV3_PORT_D, 40, -30, true);
+    turn(360, 0, 80);
+    straight(50, 80, false, false);
+    turn(180, 50, -50);
+    ev3_motor_rotate(EV3_PORT_D, 40, 30, true);
+    steering_time(900, -30, 0);
+    straight(10, 50, false, false);
+    turn(90, -50, 50);
+    straight(20, -50, false, false);
+    ev3_motor_rotate(EV3_PORT_D, 90, -30, true);
+    straight(70, 80, false, false);
+    turn(180, 50, -50);
+    ev3_motor_rotate(EV3_PORT_D, 300, 30, false);
+    turn(90, -80, 80);
+    straight(40, 80, false, false);
+    turn(90, 50, -50);
+    straight(10, 50, false, false);
+    ev3_motor_rotate(EV3_PORT_D, 90, 30, true);
+    turn(180, 0, 50);
+    straight(20, 80, false, false);
+    turn(90, 50, -50);
+    straight(30, 80, false, false);
+    turn(90, -50, 50);
+    straight(20, -80, false, false);
+    ev3_motor_rotate(EV3_PORT_D, 90, -30, true);
+    straight(50, 80, false, false);
+    turn(90, 80, -80);
+    straight(40, 80, false, false);
+    steering_time(500, 30, 0);
+    straight(10, -50, false, false);
+    turn(90, 50, -50);
+    straight_custom(100, 1, 0, -100);
+    steering_time(800, -30, 0);
+    straight(20, 80, false, false);
+    turn(180, -50, 0);
+    straight_custom(85, 1, 0, 100);
+    steering_time(500, -20, 0);
+    
+
+    
+
+    
+
+
+    
+
+
+
+
+
+
+
+    while (true)
+    {
+        /* code */
+        straight(8.3, 20, false, false);
+        straight(37, 80, true, true);
+        straight(37.0, 80, true, true);
+        straight(11, 80, true, true);
+        stopping();
+
+    }
     
     
     
