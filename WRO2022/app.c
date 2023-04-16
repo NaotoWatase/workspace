@@ -283,11 +283,6 @@ void red_nkc(){
             tslp_tsk(300*MSEC);
             turn(90, 80, -80);
             tslp_tsk(300*MSEC);
-        }
-        else {
-            turn(90, -80, 80);
-        }
-        straight(10, -80, false, false);
         steering_time(400, -30, 0);
     }
     else if (location[10] == CHEMICAL) {
