@@ -15,7 +15,6 @@
 #include "wave.h"
 #include <stdio.h>
 #include"math.h"
-
 /* /dev/tty.MindstormsEV3-SerialPor */
 
 #define DEBUG
