@@ -30,15 +30,22 @@
  * Left motor:   Port B
  * Right motor:  Port C
  */
+static const sensor_port_t  PortSensorColor1 = EV3_PORT_1;
 static const sensor_port_t  PortSensorColor2 = EV3_PORT_2;
 static const sensor_port_t  PortSensorColor3 = EV3_PORT_3;
-static const motor_port_t   PortMotorLeft   = EV3_PORT_B;
-static const motor_port_t   PortMotorRight  = EV3_PORT_C;
+static const sensor_port_t  PortSensorColor4 = EV3_PORT_4;
 
-uint8_t obj = 0;
-uint8_t test = 0;
+static const motor_port_t   PortMotorArmUp   = EV3_PORT_A;
+static const motor_port_t   PortMotorLeft    = EV3_PORT_B;
+static const motor_port_t   PortMotorRight   = EV3_PORT_C;
+static const motor_port_t   PortMotorArmDown = EV3_PORT_D;
+colorid_t obj = 0;
 rgb_raw_t testrgb;
 rgb_raw_t rgb_val;//カラーセンサーの値を保存するために必要な変数(必須)
+
+int location_t[2] = {0, 0};
+int location_f[4] = {0, 0, 0, 0};
+int location[6] = {0, 0, 0, 0, 0, 0};
 
 float h = 0;
 float s = 0;
@@ -50,11 +57,15 @@ float green = 0;
 float blue = 0;
 float judgement = 0;
 
+armmode_t now_armmode = SET;
+
 void straight(float cm, int power);
 void turn(int lb_power, int rc_power, int angle);
 void steering_color(colorid_t color_stop, int power, int steering);
 void start();
-void check_SIC();
+void obj_check(int num, port_t sensor);
+void obj_measure(port_t sensor);
+void obj_know(int num);
 
 
 
@@ -278,42 +289,20 @@ void test_turn(int lb_power, int rc_power, int angle){
 }
 
 void obj_check(int num, port_t sensor){
-    obj_measure(num, sensor);
+    obj_measure(sensor);
     obj_know(num);
 
     //tslp_tsk(300*MSEC);
 }
 
-void obj_measure(int num, port_t sensor) {
+void obj_measure(port_t sensor) {
     if(sensor == LEFT){
-        while ( ! ht_nxt_color_sensor_measure_color(EV3_PORT_2, &test)) {
-            ;
-        }  
-        while ( ! ht_nxt_color_sensor_measure_color(EV3_PORT_2, &obj)) {
-            ;
-        }  
-        while ( ! ht_nxt_color_sensor_measure_rgb(EV3_PORT_2, &testrgb)) {
-            ;
-        }  
-        while ( ! ht_nxt_color_sensor_measure_rgb(EV3_PORT_2, &rgb_val)) {
-            ;
-        }  
+        obj = ev3_color_sensor_get_color(EV3_PORT_2);
+        ev3_color_sensor_get_rgb_raw(EV3_PORT_2, &rgb_val);
     } 
     else{ 
-        while ( ! ht_nxt_color_sensor_measure_color(EV3_PORT_3, &test)) {
-            ;
-        }  
-        while ( ! ht_nxt_color_sensor_measure_color(EV3_PORT_3, &obj)) {
-            ;
-        }  
-        while ( ! ht_nxt_color_sensor_measure_rgb(EV3_PORT_3, &testrgb)) {
-            ;
-        }
-        while ( ! ht_nxt_color_sensor_measure_rgb(EV3_PORT_3, &rgb_val)) {
-            ;
-        }
-        obj_distance = ev3_ultrasonic_sensor_get_distance(EV3_PORT_4);
-        check_type = 1;
+        obj = ev3_color_sensor_get_color(EV3_PORT_3);
+        ev3_color_sensor_get_rgb_raw(EV3_PORT_3, &rgb_val);
     }
     
     red = rgb_val.r;
@@ -352,110 +341,59 @@ void obj_measure(int num, port_t sensor) {
 }
 
 void obj_know(int num){
-    if (check_type == 0){
-        switch (obj){
-            case 2:
-            case 3:
-            case 4:
-            case 11:
-            case 13:
-            case 16:
-                location[num] = PERSON;
-                break;
-            case 1:
-            case 12:
-            case 14:
-            case 17:
-                if (judgement > 100 || blue > 40 || green > 40 || red > 40 || (red - green - blue > 12) || (blue - red > 15)) {
-                    location[num] = PERSON;
-                    if ((red - green - blue > 20) || (h > 10 && h < 50)) location[num] = FIRE;    
-                    if (s > 30) location[num] = PERSON;
-                } 
-                else {
-                    judgement_check = judgement;
-                    location[num] = NOTHING;
-                }
-                break;
-            case 5:
-            case 6:
-            case 7:
-            case 8:
-            case 9:
-            case 10:
-            case 15:
-                location[num] = FIRE;
-                break;
-            case 0:
-                if (red > 15 && red > blue && red > green) location[num] = FIRE;
-                else location[num] = CHEMICAL;
-                break; 
-            default:
-                location[num] = NOTHING;
-                break;
-        }
-    }
-    if (check_type == 1){
-        if (obj_distance < 8) {
-            switch (obj){
-                case 1:
-                case 2:
-                case 3:
-                    location[num] = PERSON;
-                    sensor_check(obj);
-                    break;
-                case 4:
-                case 13:
-                    location[num] = PERSON;
-                    sensor_check(obj);
-                    break;
-                case 5:
-                case 6:
-                case 7:
-                case 8:
-                case 9:
-                case 10:
-                case 15:
-                    location[num] = FIRE;
-                    sensor_check(obj);
-                    break;
-                case 0:
-                case 11:
-                case 12:
-                case 14:
-                case 16:
-                case 17:
-                    location[num] = CHEMICAL;
-                    if (judgement > 100 || blue > 35 || green > 35 || red > 35 || (h < 200 && h > 100) || (blue - red > 14) || (red - blue > 10) ) {
-                        location[num] = PERSON;
-                        if (red - blue > 19 || (h > 10 && h < 50 && judgement > 20)) location[num] = FIRE;    
-                    }    
-                    sensor_check(obj);
-                    break; 
-                default:
-                    break;
-            } 
-        }
-        else {
-            location[num] = NOTHING;
-        }
-    }  
+    switch(obj){
+        case 0:
+        case 1:
+        case 2:
+            location[num] = 2;
+        case 3:
+            location[num] = 3;
+        case 4:
+        case 5:
+        case 6:
+        default:
+            break;
+    } 
+    if(num <= 1)location_t[num] = location[num];
+    else location_f[num - 2] = location[num];
 }
-
-void sensor_check(sensor_port_t sensor){
-    colorid_t color = ev3_color_sensor_get_rgb_raw(sensor_port_t 	port,rgb_raw_t * 	val )		
-}
-
-
-
-
 
 void stopping(){
     while(ev3_button_is_pressed(ENTER_BUTTON) == false) {}    
     tslp_tsk(2000*MSEC);
 }
 
-void start(){
+void arm_take(){
+    int now_counts = 0;
+    int goal_counts = 270;
+    ev3_motor_reset_counts(EV3_PORT_A);
+    ev3_motor_set_power(EV3_PORT_A, 30);
+    while (true) {
+        now_counts = ev3_motor_get_counts(EV3_PORT_A);
+        if(now_counts > (goal_counts - 20))break;
+    }
+    ev3_motor_set_power(EV3_PORT_A, 40);
+    tslp_tsk(300*MSEC);
+    ev3_motor_stop(EV3_PORT_A, true);
+}
 
+void arm_mode_change(armmode_t mode) {
+    switch (now_armmode) {
+        case SET:
+            
+        case LEFT:
+        case RIGHT:
+            break;
+        
+        default:
+            break;
+        }
+}
+
+void arm_reset_A(){
+    ev3_motor_set_power(EV3_PORT_A, -30);
+    tslp_tsk(300*MSEC);
+    ev3_motor_set_power(EV3_PORT_A, -10);
 }
 
 void main_task(intptr_t unused) {
@@ -463,12 +401,16 @@ void main_task(intptr_t unused) {
     ev3_button_set_on_clicked(BACK_BUTTON, &button_clicked_handler, BACK_BUTTON);
 
     /* Configure motors */
-    ev3_motor_config(PortMotorLeft, LARGE_MOTOR);
-    ev3_motor_config(PortMotorRight, LARGE_MOTOR);
+    ev3_motor_config(PortMotorLeft, MEDIUM_MOTOR);
+    ev3_motor_config(PortMotorRight, MEDIUM_MOTOR);
+    ev3_motor_config(PortMotorArmDown, MEDIUM_MOTOR);
+    ev3_motor_config(PortMotorArmUp, MEDIUM_MOTOR);
 
     /* Configure sensors */
+    ev3_sensor_config(PortSensorColor1, COLOR_SENSOR);
     ev3_sensor_config(PortSensorColor2, COLOR_SENSOR);
     ev3_sensor_config(PortSensorColor3, COLOR_SENSOR);
+    ev3_sensor_config(PortSensorColor4, COLOR_SENSOR);
 
     /* ここからコーディング */
     stopping();

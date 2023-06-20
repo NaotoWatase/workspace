@@ -72,6 +72,12 @@ typedef enum port {
     BOTH
 } port_t ;
 
+typedef enum armmode {
+    RIGHT,
+    LEFT,
+    SET
+} armmode_t ;
+
 
 /*
  *  ターゲットに依存する可能性のある定数の定義
