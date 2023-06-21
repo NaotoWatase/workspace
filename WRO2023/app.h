@@ -73,8 +73,8 @@ typedef enum port {
 } port_t ;
 
 typedef enum armmode {
-    RIGHT,
-    LEFT,
+    RIGHTDOWN,
+    LEFTDOWN,
     SET
 } armmode_t ;
 

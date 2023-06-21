@@ -58,6 +58,7 @@ float blue = 0;
 float judgement = 0;
 
 armmode_t now_armmode = SET;
+int now_arm_angle = 0;
 
 void straight(float cm, int power);
 void turn(int lb_power, int rc_power, int angle);
@@ -378,16 +379,28 @@ void arm_take(){
 }
 
 void arm_mode_change(armmode_t mode) {
-    switch (now_armmode) {
+    switch (mode) {
         case SET:
-            
-        case LEFT:
-        case RIGHT:
+            if(now_arm_angle >= 0)ev3_motor_set_power(EV3_PORT_D, -20);
+            else ev3_motor_set_power(EV3_PORT_D, 20);
             break;
-        
-        default:
+        case RIGHTDOWN:
+            ev3_motor_set_power(EV3_PORT_D, 20);
             break;
-        }
+        case LEFTDOWN:
+            ev3_motor_set_power(EV3_PORT_D, -20);
+            break;
+    default:
+        break;
+    }
+    while (true) {
+        now_arm_angle = ev3_motor_get_counts(EV3_PORT_D);
+        if(now_arm_angle >= 60 && mode == RIGHTDOWN) break;
+        if(now_arm_angle <= -60 && mode == LEFTDOWN) break;
+        if((now_arm_angle >= -4 || now_arm_angle <= 4) && mode == SET) break;
+    }
+    ev3_motor_stop(EV3_PORT_D, true);
+    now_arm_angle = ev3_motor_get_counts(EV3_PORT_D);
 }
 
 void arm_reset_A(){
