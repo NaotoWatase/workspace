@@ -22,6 +22,8 @@
 #define _debug(x)
 #endif
 
+static FILE *bt = NULL;
+
 /**
  * Define the connection ports of the sensors and motors.
  * By default, this application uses the following ports:
@@ -57,8 +59,13 @@ float green = 0;
 float blue = 0;
 float judgement = 0;
 
+//fprintf(bt, "LOCATION = %d\r\nCOLOR = %d\r\nRGB:%f,%f,%f = JUDGE:%f\r\nHSV:%f,%f,%f = MAX:%f MIN:%f\r\nDISTANCE:%f\r\nRESULT = %d\r\n-----------------\r\n", num, obj, red, green, blue, judgement, h, s, v, max, min, obj_distance, location[num]);
+
 armmode_t now_armmode = SET;
 int now_arm_angle = 0;
+
+int battery;
+
 
 void straight(float cm, int power);
 void turn(int lb_power, int rc_power, int angle);
@@ -135,26 +142,29 @@ void turn(int lb_power, int rc_power, int angle){
     int now_left_angle = 0;
     int maximum = 80;
     int points = 30;
+    float turn_num = 0.1531;
+    if (lb_power < 0 && rc_power == 0) turn_num = 0.151;
+    if (lb_power == 0 && rc_power < 0) turn_num = 0.152;
     if (abs(lb_power) >= abs(rc_power)) maximum = abs(lb_power);
     if (abs(rc_power) > abs(lb_power)) maximum = abs(rc_power);
     float changing_power = 15;
-    int goal_angle = angle*0.1531*ROBOT1CM;
+    int goal_angle = angle*turn_num*ROBOT1CM;
     while (true) {
         now_left_angle = abs(ev3_motor_get_counts(EV3_PORT_B));
         now_right_angle = abs(ev3_motor_get_counts(EV3_PORT_C));
         
         if (changing_power <= 15) changing_power = 15;
         if (lb_power == 0) {
-            if (changing_power < maximum && goal_angle - (points*0.1531*ROBOT1CM) > now_right_angle) changing_power = changing_power + 0.007;
-            if (goal_angle - (points*0.1531*ROBOT1CM) <= now_right_angle) changing_power = changing_power - 0.17;
+            if (changing_power < maximum && goal_angle - (points*turn_num*ROBOT1CM) > now_right_angle) changing_power = changing_power + 0.007;
+            if (goal_angle - (points*turn_num*ROBOT1CM) <= now_right_angle) changing_power = changing_power - 0.17;
             if (changing_power <= 20) changing_power = 20;
             if (goal_angle <= now_right_angle) break; 
             rc_power = changing_power*rc_sign;
             ev3_motor_set_power(EV3_PORT_C, rc_power);
         }
         if (rc_power == 0) {
-            if (changing_power < maximum && goal_angle - (points*0.1531*ROBOT1CM) > now_left_angle) changing_power = changing_power + 0.007;
-            if (goal_angle - (points*0.1531*ROBOT1CM) <= now_left_angle) changing_power = changing_power - 0.17;
+            if (changing_power < maximum && goal_angle - (points*turn_num*ROBOT1CM) > now_left_angle) changing_power = changing_power + 0.007;
+            if (goal_angle - (points*turn_num*ROBOT1CM) <= now_left_angle) changing_power = changing_power - 0.17;
             if (changing_power <= 20) changing_power = 20;
             if (goal_angle <= now_left_angle) break; 
             lb_power = -changing_power*lb_sign;
@@ -162,8 +172,8 @@ void turn(int lb_power, int rc_power, int angle){
 
         }
         if (lb_power != 0 && rc_power != 0){
-            if (changing_power < maximum && goal_angle - (points*0.1531*ROBOT1CM) > now_right_angle) changing_power = changing_power + 0.004;
-            if (goal_angle - (points*0.1531*ROBOT1CM) <= now_right_angle) changing_power = changing_power - 0.1;
+            if (changing_power < maximum && goal_angle - (points*turn_num*ROBOT1CM) > now_right_angle) changing_power = changing_power + 0.004;
+            if (goal_angle - (points*turn_num*ROBOT1CM) <= now_right_angle) changing_power = changing_power - 0.1;
             if (changing_power <= 15) changing_power = 15;
             if (goal_angle <= now_right_angle) break; 
             rc_power = changing_power*rc_sign;
@@ -187,19 +197,21 @@ void linetrace_cm(int power, float gain, float cm){
     int rc_power;
     int now_reflect_2; 
     int now_reflect_3; 
-
-    int diff;
+    int last_diff = 0;
+    int diff = 0;
+    float d;
     int steering;
-    while (true)
-    {
+    while (true) {
         
         now_reflect_2 = ev3_color_sensor_get_reflect(EV3_PORT_2);
         now_reflect_3 = ev3_color_sensor_get_reflect(EV3_PORT_3);
         now_angle_lb = abs(ev3_motor_get_counts(EV3_PORT_B));
         now_angle_rc = abs(ev3_motor_get_counts(EV3_PORT_C));
         average = (now_angle_lb + now_angle_rc) / 2;
+        last_diff = diff;
         diff = now_reflect_2 - now_reflect_3;
-        steering = diff * gain;
+        d = (diff - last_diff) / 0.005 * 0.027;
+        steering = diff * gain + d;
         if(steering > 0) {
             lb_power = power;
             rc_power = power - (power * steering / 50);
@@ -220,24 +232,25 @@ void linetrace_cm(int power, float gain, float cm){
 
 }
 
-void linetrace_color(int power, int gain, port_t port, colorid_t color){
+void linetrace_color(int power, float gain, port_t port, colorid_t color){
     ev3_motor_reset_counts(EV3_PORT_B);
     ev3_motor_reset_counts(EV3_PORT_C);
     int lb_power;
     int rc_power;
     int now_reflect_2; 
     int now_reflect_3;
-    int color_2;
-    int color_3; 
+    colorid_t color_2 = 0;
+    colorid_t color_3 = 0; 
 
     int diff;
     int steering;
-    while (true)
-    {
+    while (true) {
         now_reflect_2 = ev3_color_sensor_get_reflect(EV3_PORT_2);
         now_reflect_3 = ev3_color_sensor_get_reflect(EV3_PORT_3);
-        color_2 = ev3_color_sensor_get_color(EV3_PORT_2);
-        color_3 = ev3_color_sensor_get_color(EV3_PORT_3);
+        if(color != COLOR_BLACK) {
+            color_2 = ev3_color_sensor_get_color(EV3_PORT_2);
+            color_3 = ev3_color_sensor_get_color(EV3_PORT_3);
+        }
         diff = now_reflect_2 - now_reflect_3;
         steering = diff * gain;
 
@@ -253,10 +266,12 @@ void linetrace_color(int power, int gain, port_t port, colorid_t color){
         }
         ev3_motor_set_power(EV3_PORT_B, lb_power);
         ev3_motor_set_power(EV3_PORT_C, rc_power);
-
-        if (port == RIGHT && color_3 == color)break;
-        if (port == LEFT && color_2 == color)break;
-        if (port == BOTH && color_2 == color && color_3 == color)break;
+        if (port == RIGHT && color == COLOR_BLACK && now_reflect_3 <= 8)break;
+        if (port == LEFT && color == COLOR_BLACK && now_reflect_2 <= 8)break;
+        if (port == BOTH && color == COLOR_BLACK && now_reflect_3 <= 10 && now_reflect_2 <= 10)break;
+        if (port == RIGHT && color_3 == color && color != COLOR_BLACK)break;
+        if (port == LEFT && color_2 == color && color != COLOR_BLACK)break;
+        if (port == BOTH && color_2 == color && color_3 == color && color != COLOR_BLACK)break;
     }
     ev3_motor_stop(EV3_PORT_B, true);
     ev3_motor_stop(EV3_PORT_C, true);
@@ -364,7 +379,7 @@ void stopping(){
     tslp_tsk(2000*MSEC);
 }
 
-void arm_take(){
+void arm_take_obj(){
     int now_counts = 0;
     int goal_counts = 270;
     ev3_motor_reset_counts(EV3_PORT_A);
@@ -376,6 +391,19 @@ void arm_take(){
     ev3_motor_set_power(EV3_PORT_A, 40);
     tslp_tsk(300*MSEC);
     ev3_motor_stop(EV3_PORT_A, true);
+}
+
+void arm_take_ship(){
+    int now_counts = 0;
+    int goal_counts = 90;
+    ev3_motor_reset_counts(EV3_PORT_A);
+    ev3_motor_set_power(EV3_PORT_A, 40);
+    while (true) {
+        now_counts = ev3_motor_get_counts(EV3_PORT_A);
+        if(now_counts > (goal_counts - 2))break;
+    }
+    ev3_motor_set_power(EV3_PORT_A, 10);
+    tslp_tsk(300*MSEC);
 }
 
 void arm_mode_change(armmode_t mode) {
@@ -405,11 +433,15 @@ void arm_mode_change(armmode_t mode) {
 
 void arm_reset_A(){
     ev3_motor_set_power(EV3_PORT_A, -30);
-    tslp_tsk(300*MSEC);
-    ev3_motor_set_power(EV3_PORT_A, -10);
+    tslp_tsk(900*MSEC);
+    ev3_motor_stop(EV3_PORT_A, true);
 }
 
 void main_task(intptr_t unused) {
+
+    bt = ev3_serial_open_file(EV3_SERIAL_BT);
+    assert(bt != NULL);
+
     /* Register button handlers */
     ev3_button_set_on_clicked(BACK_BUTTON, &button_clicked_handler, BACK_BUTTON);
 
@@ -425,23 +457,47 @@ void main_task(intptr_t unused) {
     ev3_sensor_config(PortSensorColor3, COLOR_SENSOR);
     ev3_sensor_config(PortSensorColor4, COLOR_SENSOR);
 
+    fprintf(bt, "----GAME_START----\r\n");
+
     /* ここからコーディング */
     stopping();
-    steering_reflect(30, 20, 0);
-    linetrace_cm(30, 0.7, 17);
+    turn(0, -30, 180);
+    stopping();
+    turn(0, -30, 180);
+    stopping();
+    turn(0, -30, 180);
+    stopping();
+    turn(0, -30, 180);
+    stopping();
+    turn(0, -30, 180);
+    stopping();
+    turn(0, -30, 180);
+    stopping();
+    turn(0, -30, 180);
+    stopping();
+    turn(0, -30, 180);
+    stopping();
 
+
+
+    straight(6, 30);
+    linetrace_color(20, 0.5, BOTH, COLOR_BLACK);
+    straight(10.5, 30);
+    //船押して燃料補給
+
+    straight(13.5, -30);
     //ここで色を読む
-    straight(5, 30);
+    straight(5, -30);
     //ここで色を読む
-    straight(14, 30);
-    straight(10, -30);
-    turn(30, -30, 90);
-    linetrace_cm(30, 0.3, 40);
-    linetrace_color(30, 0.5, BOTH, COLOR_BLACK);
-    straight(5.5, 30);
+
+    turn(30, 0, 180);
+    arm_reset_A();
+    linetrace_cm(30, 0.35, 38);
+    linetrace_color(25, 0.4, BOTH, COLOR_BLACK);
+    straight(6, 30);
     turn(-30, 30, 90);
     //ev3_motor_rotate();
-    linetrace_cm(30, 0.7, 26.5);
+    linetrace_cm(30, 0.35, 26.5);
     turn(30, 0, 180);
     straight(6, -30);
     //ここで色を読む
@@ -453,38 +509,52 @@ void main_task(intptr_t unused) {
     //ここで色を読む
     //何やかんやあってオブジェクトとりました
     stopping();
-    linetrace_color(30, 0.7, BOTH, COLOR_BLACK);
-    linetrace_cm(30, 0.7, 24.5);
+    linetrace_cm(30, 0.35, 10);
+    linetrace_color(20, 0.4, BOTH, COLOR_BLACK);
+    linetrace_cm(30, 0.35, 20);
+    linetrace_cm(15, 0.6, 5);
     //armで船掴む
-    straight(18, -30);
+    arm_take_ship();
+
+    straight(20, -30);
     turn(-30, 30, 90);
-    linetrace_cm(50, 0.7, 45);
-    linetrace_color(30, 0.7, BOTH, COLOR_BLACK);
+    linetrace_cm(12, 0.6, 10);
+    linetrace_cm(40, 0.2, 35);
+    linetrace_color(20, 0.6, BOTH, COLOR_BLACK);
     //arm開く
+    arm_reset_A();
+
     turn(30, -30, 180);
-    straight(13, -30);
+    straight(16.5, -30);
     //armおろしてオブジェクト下ろす
     turn(30, 0, 180);
-    linetrace_cm(30, 0.7, 30);
+    linetrace_cm(30, 0.35, 24);
+    linetrace_cm(12, 0.6, 8);
+    arm_take_obj();
     //armでオブジェクトとる
     turn(-30, 0, 180);
+    arm_reset_A();
     straight(98, 50);
+    arm_take_ship();
     //armで船掴む
     turn(0, 30, 180);
     straight(12, 30);
     turn(0, 30, 180);
-    linetrace_cm(50, 0.7, 150);
-    linetrace_color(30, 0.6, BOTH, COLOR_BLACK);
+    linetrace_cm(20, 0.6, 15);
+    linetrace_cm(35, 0.3, 135);
+    linetrace_color(25, 0.4, BOTH, COLOR_BLACK);
     straight(17, -30);
-    turn(30, -30, 45);
-    straight(31, 30);
-    turn(30, -30, 45);
-    linetrace_cm(30, 0.7, 10);
+    turn(30, -30, 35);
+    straight(33, 30);
+    turn(30, -30, 55);
+    linetrace_cm(20, 0.6, 10);
     //arm戻す
-    turn(30, -30, 180);
+    arm_reset_A();
+    turn(30, -30, 180);linetrace_cm(30, 0.35, 55);
 
 
-
+    battery = ev3_battery_voltage_mV();
+    fprintf(bt, "BATTERY:%d", battery);
 
 
 }
