@@ -427,6 +427,7 @@ void arm_mode_change(armmode_t mode) {
         if(now_arm_angle <= -60 && mode == LEFTDOWN) break;
         if((now_arm_angle >= -4 || now_arm_angle <= 4) && mode == SET) break;
     }
+    if(mode == RIGHTDOWN || mode == LEFTDOWN)tslp_tsk(200*MSEC);
     ev3_motor_stop(EV3_PORT_D, true);
     now_arm_angle = ev3_motor_get_counts(EV3_PORT_D);
 }
@@ -435,70 +436,11 @@ void arm_reset_A(){
     ev3_motor_set_power(EV3_PORT_A, -30);
     tslp_tsk(900*MSEC);
     ev3_motor_stop(EV3_PORT_A, true);
+    ev3_motor_rotate(EV3_PORT_A, 3, 10, true);
+    ev3_motor_stop(EV3_PORT_A, true);
 }
 
-void main_task(intptr_t unused) {
-
-    bt = ev3_serial_open_file(EV3_SERIAL_BT);
-    assert(bt != NULL);
-
-    /* Register button handlers */
-    ev3_button_set_on_clicked(BACK_BUTTON, &button_clicked_handler, BACK_BUTTON);
-
-    /* Configure motors */
-    ev3_motor_config(PortMotorLeft, MEDIUM_MOTOR);
-    ev3_motor_config(PortMotorRight, MEDIUM_MOTOR);
-    ev3_motor_config(PortMotorArmDown, MEDIUM_MOTOR);
-    ev3_motor_config(PortMotorArmUp, MEDIUM_MOTOR);
-
-    /* Configure sensors */
-    ev3_sensor_config(PortSensorColor1, COLOR_SENSOR);
-    ev3_sensor_config(PortSensorColor2, COLOR_SENSOR);
-    ev3_sensor_config(PortSensorColor3, COLOR_SENSOR);
-    ev3_sensor_config(PortSensorColor4, COLOR_SENSOR);
-
-    fprintf(bt, "----GAME_START----\r\n");
-
-    /* ここからコーディング */
-    stopping();
-
-
-
-    straight(6, 30);
-    linetrace_color(20, 0.5, BOTH, COLOR_BLACK);
-    straight(10.5, 30);
-    //船押して燃料補給
-
-    straight(13.5, -30);
-    //ここで色を読む
-    straight(5, -30);
-    //ここで色を読む
-
-    turn(180, 30, 0);
-    arm_reset_A();
-    linetrace_cm(30, 0.35, 38);
-    linetrace_color(25, 0.4, BOTH, COLOR_BLACK);
-    straight(6, 30);
-    turn(90, -30, 30);
-    //ev3_motor_rotate();
-    linetrace_cm(25, 0.4, 16);
-    linetrace_cm(15, 0.6, 10.5);
-    turn(180, 30, 0);
-    straight(6, -30);
-    //ここで色を読む
-    straight(7, -30);
-    //ここで色を読む
-    straight(7, -30);
-    //ここで色を読む
-    straight(7, -30);
-    //ここで色を読む
-    //何やかんやあってオブジェクトとりました
-
-
-    turn(85, 30, 0);
-    turn(85, 0, 30);
-    stopping();
-
+void obj_nkc(){
     //pattern1 version1
     turn(90, -30, 30);
     straight(7, 30);
@@ -655,6 +597,85 @@ void main_task(intptr_t unused) {
     straight(7, -30);
     arm_reset_A();
     turn(180, 30, -30);
+}
+
+void main_task(intptr_t unused) {
+
+    bt = ev3_serial_open_file(EV3_SERIAL_BT);
+    assert(bt != NULL);
+
+    /* Register button handlers */
+    ev3_button_set_on_clicked(BACK_BUTTON, &button_clicked_handler, BACK_BUTTON);
+
+    /* Configure motors */
+    ev3_motor_config(PortMotorLeft, MEDIUM_MOTOR);
+    ev3_motor_config(PortMotorRight, MEDIUM_MOTOR);
+    ev3_motor_config(PortMotorArmDown, MEDIUM_MOTOR);
+    ev3_motor_config(PortMotorArmUp, MEDIUM_MOTOR);
+
+    /* Configure sensors */
+    ev3_sensor_config(PortSensorColor1, COLOR_SENSOR);
+    ev3_sensor_config(PortSensorColor2, COLOR_SENSOR);
+    ev3_sensor_config(PortSensorColor3, COLOR_SENSOR);
+    ev3_sensor_config(PortSensorColor4, COLOR_SENSOR);
+
+    fprintf(bt, "----GAME_START----\r\n");
+
+    /* ここからコーディング */
+    stopping();
+
+    straight(6, 30);
+    linetrace_color(20, 0.5, BOTH, COLOR_BLACK);
+    straight(10.5, 30);
+    //船押して燃料補給
+
+    straight(13.5, -30);
+    //ここで色を読む
+    straight(5, -30);
+    //ここで色を読む
+
+    turn(180, 30, 0);
+    arm_reset_A();
+    linetrace_cm(30, 0.35, 38);
+    linetrace_color(25, 0.4, BOTH, COLOR_BLACK);
+    straight(6, 30);
+    turn(90, -30, 30);
+    //ev3_motor_rotate();
+    linetrace_cm(25, 0.4, 16);
+    linetrace_cm(15, 0.6, 10.5);
+    turn(180, 30, 0);
+    straight(6, -30);
+    //ここで色を読む
+    straight(7, -30);
+    //ここで色を読む
+    straight(7, -30);
+    //ここで色を読む
+    straight(7, -30);
+    //ここで色を読む
+    //何やかんやあってオブジェクトとりました
+
+
+    turn(85, 30, 0);
+    turn(85, 0, 30);
+
+    //pattern1 version1
+    turn(90, -30, 30);
+    straight(7, 30);
+    //armの角度を調整した方がいい
+    arm_take_obj();
+    straight(7, -30);
+    arm_reset_A();
+    turn(90, 30, -30);
+    straight(14, 30);
+    turn(90, -30, 30);
+    straight(7, 30);
+    //armの角度を調整した方がいい
+    arm_take_obj();
+    straight(7, -30);
+    arm_reset_A();
+    turn(90, -30, 30);
+    straight(7, 30);
+    turn(90, -30, 30);
 
 
     linetrace_cm(30, 0.35, 10);
@@ -666,31 +687,45 @@ void main_task(intptr_t unused) {
 
     straight(20, -30);
     turn(90, -30, 30);
-    linetrace_cm(12, 0.6, 10);
-    linetrace_cm(40, 0.2, 35);
+    linetrace_cm(12, 0.6, 12);
+    linetrace_cm(25, 0.4, 33);
     linetrace_color(20, 0.6, BOTH, COLOR_BLACK);
     //arm開く
     arm_reset_A();
 
     turn(180, 30, -30);
-    straight(16.5, -30);
+    straight(16.5, -15);
     //armおろしてオブジェクト下ろす
+    arm_mode_change(RIGHTDOWN);
+    tslp_tsk(200*MSEC);
+    arm_mode_change(LEFTDOWN);
+    tslp_tsk(200*MSEC);
+    arm_mode_change(RIGHTDOWN);
+    tslp_tsk(200*MSEC);
     turn(180, 30, 0);
-    linetrace_cm(25, 0.4, 24);
+    linetrace_cm(23, 0.4, 24);
     linetrace_cm(12, 0.6, 8);
     arm_take_obj();
     //armでオブジェクトとる
-    turn(180, -30, 0);
+    straight(39, -30);
+    turn(90, -30, 30);
     arm_reset_A();
-    straight(98, 50);
+    linetrace_cm(20, 0.5, 10);
+    linetrace_color(25, 0.4, BOTH, COLOR_BLACK);
+    turn(274, 30, 0);
+    turn(274, 0, 30);
+    straight(24.5, 30);
+    straight(4.5, 12);
+
     arm_take_ship();
     //armで船掴む
-    turn(180, 0, 30);
-    straight(14, 30);
-    turn(180, 0, 30);
+    turn(90, -20, 20);
+    straight(29.5, 30);
+    turn(90, -20, 20);
+    stopping();
     linetrace_cm(20, 0.6, 15);
-    linetrace_cm(30, 0.3, 135);
-    linetrace_color(20, 0.5, BOTH, COLOR_BLACK);
+    linetrace_cm(25, 0.4, 130);
+    linetrace_color(18, 0.5, BOTH, COLOR_BLACK);
     straight(17, -30);
     turn(35, 30, -30);
     straight(28.5, 30);
