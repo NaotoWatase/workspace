@@ -68,7 +68,7 @@ int battery;
 
 
 void straight(float cm, int power);
-void turn(int lb_power, int rc_power, int angle);
+void turn(int angle, int lb_power, int rc_power);
 void steering_color(colorid_t color_stop, int power, int steering);
 void start();
 void obj_check(int num, port_t sensor);
@@ -133,7 +133,7 @@ void straight(float cm, int power){
     ev3_motor_stop(EV3_PORT_C, true);
 }
 
-void turn(int lb_power, int rc_power, int angle){
+void turn(int angle, int lb_power, int rc_power){
     ev3_motor_reset_counts(EV3_PORT_B);
     ev3_motor_reset_counts(EV3_PORT_C);
     int lb_sign = lb_power / abs(lb_power);
@@ -461,22 +461,6 @@ void main_task(intptr_t unused) {
 
     /* ここからコーディング */
     stopping();
-    turn(0, -30, 180);
-    stopping();
-    turn(0, -30, 180);
-    stopping();
-    turn(0, -30, 180);
-    stopping();
-    turn(0, -30, 180);
-    stopping();
-    turn(0, -30, 180);
-    stopping();
-    turn(0, -30, 180);
-    stopping();
-    turn(0, -30, 180);
-    stopping();
-    turn(0, -30, 180);
-    stopping();
 
 
 
@@ -490,15 +474,16 @@ void main_task(intptr_t unused) {
     straight(5, -30);
     //ここで色を読む
 
-    turn(30, 0, 180);
+    turn(180, 30, 0);
     arm_reset_A();
     linetrace_cm(30, 0.35, 38);
     linetrace_color(25, 0.4, BOTH, COLOR_BLACK);
     straight(6, 30);
-    turn(-30, 30, 90);
+    turn(90, -30, 30);
     //ev3_motor_rotate();
-    linetrace_cm(30, 0.35, 26.5);
-    turn(30, 0, 180);
+    linetrace_cm(25, 0.4, 16);
+    linetrace_cm(15, 0.6, 10.5);
+    turn(180, 30, 0);
     straight(6, -30);
     //ここで色を読む
     straight(7, -30);
@@ -508,7 +493,170 @@ void main_task(intptr_t unused) {
     straight(7, -30);
     //ここで色を読む
     //何やかんやあってオブジェクトとりました
+
+
+    turn(85, 30, 0);
+    turn(85, 0, 30);
     stopping();
+
+    //pattern1 version1
+    turn(90, -30, 30);
+    straight(7, 30);
+    //armの角度を調整した方がいい
+    arm_take_obj();
+    straight(7, -30);
+    arm_reset_A();
+    turn(90, 30, -30);
+    straight(14, 30);
+    turn(90, -30, 30);
+    straight(7, 30);
+    //armの角度を調整した方がいい
+    arm_take_obj();
+    straight(7, -30);
+    arm_reset_A();
+    turn(90, -30, 30);
+    straight(7, 30);
+    turn(90, -30, 30);
+
+    stopping();
+
+    //pattern1 version2
+    straight(14, 30);
+    turn(90, -30, 30);
+    straight(7, 30);
+    //armの角度を調整した方がいい
+    arm_take_obj();
+    straight(7, -30);
+    arm_reset_A();
+    turn(90, -30, 30);
+    straight(14.5, 30);
+    turn(90, 30, -30);
+    straight(7, 30);
+    //armの角度を調整した方がいい
+    arm_take_obj();
+    straight(7, -30);
+    arm_reset_A();
+    turn(90, 30, -30);
+    straight(7, 30);
+    turn(90, 30, -30);
+
+    
+    stopping();
+
+    //pattern2 version1
+    straight(7, 30);
+    turn(90, -30, 30);
+    straight(7, 30);
+    //armの角度を調整した方がいい
+    arm_take_obj();
+    straight(7, -30);
+    arm_reset_A();
+    turn(100, 0, -30);
+    turn(100, -30, 0);
+    straight(22, 30);
+    //armの角度を調整した方がいい
+    arm_take_obj();
+    straight(7, -30);
+    arm_reset_A();
+    turn(90, 30, -30);
+    straight(14, 30);
+    turn(90, -30, 30);
+    straight(7, 30);
+    //armの角度を調整した方がいい
+    arm_take_obj();
+    straight(7, -30);
+    arm_reset_A();
+    turn(90, -30, 30);
+    straight(7, 30);
+    turn(90, -30, 30);
+
+
+    stopping();
+
+    //pattern2 version2
+    straight(7.5, -30);
+    turn(90, -30, 30);
+    straight(7, 30);
+    //armの角度を調整した方がいい
+    arm_take_obj();
+    straight(7, -30);
+    arm_reset_A();
+    turn(90, 30, -30);
+    straight(28.5, 30);
+    turn(90, -30, 30);
+    straight(7, 30);
+    //armの角度を調整した方がいい
+    arm_take_obj();
+    straight(7, -30);
+    arm_reset_A();
+    turn(90, -30, 30);
+    straight(14, 30);
+    turn(90, 30, -30);
+    straight(7, 30);
+    //armの角度を調整した方がいい
+    arm_take_obj();
+    straight(7, -30);
+    arm_reset_A();
+    turn(180, -30, 30);
+
+
+    stopping();
+
+    //pattern3
+    straight(21.5, 30);
+    turn(90, -30, 30);
+    straight(7, 30);
+    //armの角度を調整した方がいい
+    arm_take_obj();
+    straight(7, -30);
+    arm_reset_A();
+    turn(90, -30, 30);
+    straight(28.5, 30);
+    straight(7, 30);
+    //armの角度を調整した方がいい
+    arm_take_obj();
+    straight(7, -30);
+    arm_reset_A();
+    turn(100, -30, 0);
+    turn(100, 0, -30);
+    straight(7, 30);
+    //armの角度を調整した方がいい
+    arm_take_obj();
+    straight(7, -30);
+    arm_reset_A();
+    turn(90, 30, -30);
+    straight(7, 30);
+    turn(90, 30, -30);
+
+
+    stopping();
+
+    //pattern4
+    straight(7.5, -30);
+    turn(90, -30, 30);
+    straight(7, 30);
+    //armの角度を調整した方がいい
+    arm_take_obj();
+    straight(7, -30);
+    arm_reset_A();
+    turn(90, 30, -30);
+    straight(21, 30);
+    turn(-30, 30, 90);
+    straight(7, 30);
+    //armの角度を調整した方がいい
+    arm_take_obj();
+    straight(7, -30);
+    arm_reset_A();
+    turn(100, 0, -30);
+    turn(100, -30, 0);
+    straight(22, 30);
+    //armの角度を調整した方がいい
+    arm_take_obj();
+    straight(7, -30);
+    arm_reset_A();
+    turn(180, 30, -30);
+
+
     linetrace_cm(30, 0.35, 10);
     linetrace_color(20, 0.4, BOTH, COLOR_BLACK);
     linetrace_cm(30, 0.35, 20);
@@ -517,40 +665,41 @@ void main_task(intptr_t unused) {
     arm_take_ship();
 
     straight(20, -30);
-    turn(-30, 30, 90);
+    turn(90, -30, 30);
     linetrace_cm(12, 0.6, 10);
     linetrace_cm(40, 0.2, 35);
     linetrace_color(20, 0.6, BOTH, COLOR_BLACK);
     //arm開く
     arm_reset_A();
 
-    turn(30, -30, 180);
+    turn(180, 30, -30);
     straight(16.5, -30);
     //armおろしてオブジェクト下ろす
-    turn(30, 0, 180);
-    linetrace_cm(30, 0.35, 24);
+    turn(180, 30, 0);
+    linetrace_cm(25, 0.4, 24);
     linetrace_cm(12, 0.6, 8);
     arm_take_obj();
     //armでオブジェクトとる
-    turn(-30, 0, 180);
+    turn(180, -30, 0);
     arm_reset_A();
     straight(98, 50);
     arm_take_ship();
     //armで船掴む
-    turn(0, 30, 180);
-    straight(12, 30);
-    turn(0, 30, 180);
+    turn(180, 0, 30);
+    straight(14, 30);
+    turn(180, 0, 30);
     linetrace_cm(20, 0.6, 15);
-    linetrace_cm(35, 0.3, 135);
-    linetrace_color(25, 0.4, BOTH, COLOR_BLACK);
+    linetrace_cm(30, 0.3, 135);
+    linetrace_color(20, 0.5, BOTH, COLOR_BLACK);
     straight(17, -30);
-    turn(30, -30, 35);
-    straight(33, 30);
-    turn(30, -30, 55);
+    turn(35, 30, -30);
+    straight(28.5, 30);
+    turn(55, 30, -30);
     linetrace_cm(20, 0.6, 10);
     //arm戻す
     arm_reset_A();
-    turn(30, -30, 180);linetrace_cm(30, 0.35, 55);
+    turn(180, 30, -30);
+    linetrace_cm(30, 0.35, 55);
 
 
     battery = ev3_battery_voltage_mV();
