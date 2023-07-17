@@ -157,7 +157,7 @@ void turn(int angle, int lb_power, int rc_power){
         points = 35;
     }
     if (angle == 180) turn_num = 0.1531;
-
+    if (lb_power < 0 && rc_power > 0) turn_num = 0.1518;
     if (lb_power < 0 && rc_power == 0) turn_num = 0.151;
     //if (lb_power > 0 && rc_power == 0) turn_num = 0.1518;
     if (lb_power == 0 && rc_power < 0) turn_num = 0.151;
@@ -945,7 +945,6 @@ void start_nkc(){
 }
 
 void objprepare_nkc(){
-    arm_reset_A();
     linetrace_cm_pd_SP(38, 30);
     linetrace_color_pd_SP(BOTH, COLOR_BLACK, 20);
     straight(6.5, 30);
@@ -974,6 +973,7 @@ void obj_nkc(){
     check_pattern();
     turn(85, 30, 0);
     turn(85, 0, 30);
+    arm_reset_A();
     switch (pattern){
     case 1122: 
         pattern1122();
