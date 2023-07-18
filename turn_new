@@ -1,0 +1,64 @@
+void turn_new(int angle, int lb_power, int rc_power) {
+    ev3_motor_reset_counts(EV3_PORT_B);
+    ev3_motor_reset_counts(EV3_PORT_C);
+    float turn_num = 0.151;
+    int lb_sign = lb_power / abs(lb_power);
+    int rc_sign = rc_power / abs(rc_power);
+    int now_right_angle = 0;
+    int now_left_angle = 0;
+    int maximum = 80;
+    int points = 30;
+    float changing_power = 10;
+    if (abs(lb_power) >= abs(rc_power)) maximum = abs(lb_power);
+    if (abs(rc_power) > abs(lb_power)) maximum = abs(rc_power);
+    int goal_angle = angle*turn_num*ROBOT1CM;
+    float diff;
+    float last_diff;
+    float d;
+    now_left_angle = abs(ev3_motor_get_counts(EV3_PORT_B));
+    now_right_angle = abs(ev3_motor_get_counts(EV3_PORT_C));
+    diff = goal_angle - now_right_angle;
+    last_diff = diff;
+    while (true) {
+
+        now_left_angle = abs(ev3_motor_get_counts(EV3_PORT_B));
+        now_right_angle = abs(ev3_motor_get_counts(EV3_PORT_C));
+
+        //if (changing_power <= 10) changing_power = 10;
+        if (lb_power == 0) {
+            last_diff = diff;
+            diff = goal_angle - now_right_angle;
+            d = diff - last_diff;
+            //if (changing_power <= 10) changing_power = 10;
+            if (changing_power < maximum && goal_angle - (points*turn_num*ROBOT1CM) > now_right_angle) changing_power = changing_power + 0.006;
+            else changing_power = diff * 0.5 - d * 10 + 5 * sin(atan(3*diff));
+            if (changing_power >= maximum) changing_power = maximum;
+            if (goal_angle == now_right_angle && d == 0) break; 
+            rc_power = changing_power*rc_sign;
+            ev3_motor_set_power(EV3_PORT_C, rc_power);
+        }
+        /*if (rc_power == 0) {
+            if (changing_power < maximum && goal_angle - (points*turn_num*ROBOT1CM) > now_left_angle) changing_power = changing_power + 0.006;
+            if (goal_angle - (points*turn_num*ROBOT1CM) <= now_left_angle) changing_power = changing_power - 0.17;
+            if (changing_power <= 15) changing_power = 15;
+            if (goal_angle <= now_left_angle) break; 
+            lb_power = -changing_power*lb_sign;
+            ev3_motor_set_power(EV3_PORT_B, lb_power);
+
+        }
+        if (lb_power != 0 && rc_power != 0){
+            if (changing_power < maximum && goal_angle - (points*turn_num*ROBOT1CM) > now_right_angle) changing_power = changing_power + 0.004;
+            if (goal_angle - (points*turn_num*ROBOT1CM) <= now_right_angle) changing_power = changing_power - 0.15;
+            if (changing_power <= 15) changing_power = 15;
+            if (goal_angle <= now_right_angle) break; 
+            rc_power = changing_power*rc_sign;
+            lb_power = -changing_power*lb_sign;
+            ev3_motor_set_power(EV3_PORT_C, rc_power);
+            ev3_motor_set_power(EV3_PORT_B, lb_power);
+
+        }*/  
+    }
+    ev3_motor_stop(EV3_PORT_B, true);
+    ev3_motor_stop(EV3_PORT_C, true);
+    fprintf(bt, "%d\r\n", now_right_angle);
+}
