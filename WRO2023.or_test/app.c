@@ -674,7 +674,7 @@ void arm_take_obj(){
     tslp_tsk(600*MSEC);
     ev3_motor_stop(EV3_PORT_A, true);
     */
-    ev3_motor_set_power(EV3_PORT_A, 25);
+    ev3_motor_set_power(EV3_PORT_A, 40);
 }
 
 void arm_take_ship(){
@@ -738,11 +738,11 @@ void arm_reset_A(){
     ev3_motor_set_power(EV3_PORT_A, -30);
 }
 
-void arm_set_A(int arm_angle){
+void arm_set_A(int arm_angle, bool_t stop){
     ev3_motor_stop(EV3_PORT_A, true);
-    int power = 20;
+    int power = 25;
     if (arm_angle == 80) power = 70;
-    ev3_motor_rotate(EV3_PORT_A, arm_angle, power, true);
+    ev3_motor_rotate(EV3_PORT_A, arm_angle, power, stop);
     arm_set = arm_angle + arm_set;
     fprintf(bt, "ARM:%d\r\n", arm_set);
 }
@@ -973,8 +973,8 @@ void start_nkc(){
 void objprepare_nkc(){
     linetrace_cm_pd_SP(8, 30, false);
     linetrace_cm_pd_SP(30, 60, false);
-    linetrace_color_pd_SP(BOTH, COLOR_BLACK, 20, false);
-    linetrace_cm_pd_SP(6.5, 20, true);
+    linetrace_color_pd_SP(BOTH, COLOR_BLACK, 40, false);
+    linetrace_cm_pd_SP(6.5, 40, true);
     turn(90, -30, 30);
     //ev3_motor_rotate();
     linetrace_cm_pd_SP(19, 30, false);
@@ -991,7 +991,7 @@ void objprepare_nkc(){
     obj_check(3, LEFT);
     straight_off(7.5, true);
     obj_check(2, LEFT);
-    tslp_tsk(100*MSEC);
+    tslp_tsk(200*MSEC);
     
     /*
     straight(3.6, -30);
@@ -1012,10 +1012,11 @@ void objprepare_nkc(){
 void obj_nkc(){
     //patternの確認
     check_pattern();
-    turn(83, 31, 0);
-    turn(83, 0, 31);
+    turn(83, 26, 0);
+    turn(83, 0, 26);
     arm_reset_A();
     tslp_tsk(500*MSEC);
+
     switch (pattern){
     case 1122: 
         pattern1122();
@@ -1044,22 +1045,22 @@ void obj_nkc(){
 void pattern1122(){
     straight(0.5, -30);
     turn(90, -30, 30);
-    arm_set_A(90);
-    straight(7, 20);
+    arm_set_A(90, true);
+    straight(8, 20);
     //objとる
-    arm_set_A(80);
+    arm_set_A(80, true);
     arm_take_obj();
-    straight(9, -20);
+    straight(10, -20);
     turn(90, 30, -30);
     arm_reset_A();
     straight(14, 30);
     turn(90, -30, 30);
-    arm_set_A(90);
-    straight(9, 20);
+    arm_set_A(90, true);
+    straight(10, 20);
     //objとる
-    arm_set_A(80);
+    arm_set_A(80, true);
     arm_take_obj();
-    straight(9, -20);
+    straight(10, -20);
     turn(90, -30, 30);
     straight(7, 30);
     turn(90, -30, 30);
@@ -1069,22 +1070,22 @@ void pattern1122(){
 void pattern2211(){
     straight(13, 30);
     turn(90, -30, 30);
-    arm_set_A(90);
-    straight(7, 20);
+    arm_set_A(90, true);
+    straight(8, 20);
     //objとる
-    arm_set_A(80);
+    arm_set_A(80, true);
     arm_take_obj();
-    straight(9, -20);
+    straight(10, -20);
     turn(90, -30, 30);
     arm_reset_A();
     straight(15.5, 30);
     turn(90, 30, -30);
-    arm_set_A(90);
-    straight(9, 20);
+    arm_set_A(90, true);
+    straight(10, 20);
     //objとる
-    arm_set_A(80);
+    arm_set_A(80, true);
     arm_take_obj();
-    straight(9, -20);
+    straight(10, -20);
     turn(90, 30, -30);
     straight(8, 30);
     turn(90, 30, -30);
@@ -1094,33 +1095,33 @@ void pattern2211(){
 void pattern2112(){
     straight(6, 30);
     turn(90, -30, 30);
-    arm_set_A(90);
-    straight(7, 20);
+    arm_set_A(90, true);
+    straight(8, 20);
     //objとる
-    arm_set_A(80);
+    arm_set_A(80, true);
     arm_take_obj();
-    straight(9, -20);
+    straight(10, -20);
     arm_reset_A();
     turn(115, 0, -30);
     turn(115, -30, 0);
-    arm_set_A(90);
-    straight(23.5, 20);
+    arm_set_A(90, true);
+    straight(24.5, 20);
     //objとる
-    arm_set_A(80);
+    arm_set_A(80, true);
     arm_take_obj();
-    straight(9, -20);
+    straight(10, -20);
     turn(90, 30, -30);
     arm_reset_A();
-    straight(14.5, 30);
+    straight(15.5, 30);
     turn(90, -30, 30);
-    arm_set_A(90);
-    straight(9, 20);
+    arm_set_A(90, true);
+    straight(10, 20);
     //objとる
-    arm_set_A(80);
+    arm_set_A(80, true);
     arm_take_obj();
-    straight(9, -20);
+    straight(10, -20);
     turn(90, -30, 30);
-    straight(7, 30);
+    straight(8, 30);
     turn(90, -30, 30);
     arm_reset_A();
 }
@@ -1128,32 +1129,32 @@ void pattern2112(){
 void pattern1221(){
     straight(8.5, -30);
     turn(90, -30, 30);
-    arm_set_A(90);
-    straight(7, 20);
+    arm_set_A(90, true);
+    straight(8, 20);
     //objとる
-    arm_set_A(80);
+    arm_set_A(80, true);
     arm_take_obj();
-    straight(9, -20);
+    straight(10, -20);
     turn(90, 30, -30);
     arm_reset_A();
     straight(29.5, 30);
     turn(90, -30, 30);
-    arm_set_A(90);
-    straight(9, 20);
+    arm_set_A(90, true);
+    straight(10, 20);
     //objとる
-    arm_set_A(80);
+    arm_set_A(80, true);
     arm_take_obj();
-    straight(9, -20);
+    straight(10, -20);
     turn(90, -30, 30);
     arm_reset_A();
     straight(14, 30);
     turn(90, 30, -30);
-    arm_set_A(90);
-    straight(9, 20);
+    arm_set_A(90, true);
+    straight(10, 20);
     //objとる
-    arm_set_A(80);
+    arm_set_A(80, true);
     arm_take_obj();
-    straight(9, -20);
+    straight(10, -20);
     turn(180, -30, 30);
     arm_reset_A();
 }
@@ -1161,31 +1162,31 @@ void pattern1221(){
 void pattern2121(){
     straight(20.5, 30);
     turn(90, -30, 30);
-    arm_set_A(90);
-    straight(7, 20);
+    arm_set_A(90, true);
+    straight(8, 20);
     //objとる
-    arm_set_A(80);
+    arm_set_A(80, true);
     arm_take_obj();
-    straight(9, -20);
+    straight(10, -20);
     turn(90, -30, 30);
     arm_reset_A();
-    straight(23, 30);
+    straight(22, 30);
     turn(90, 30, -30);
-    arm_set_A(90);
-    straight(9, 20);
+    arm_set_A(90, true);
+    straight(10, 20);
     //objとる
-    arm_set_A(80);
+    arm_set_A(80, true);
     arm_take_obj();
-    straight(9, -20);
+    straight(10, -20);
     arm_reset_A();
-    turn(115, -30, 0);
-    turn(115, 0, -30);
-    arm_set_A(90);
-    straight(23.5, 20);
+    turn(110, -30, 0);
+    turn(110, 0, -30);
+    arm_set_A(90, true);
+    straight(25, 20);
     //objとる
-    arm_set_A(80);
+    arm_set_A(80, true);
     arm_take_obj();
-    straight(9, -20);
+    straight(10, -20);
     turn(180, 30, -30);
     arm_reset_A();
 }
@@ -1193,39 +1194,39 @@ void pattern2121(){
 void pattern1212(){
     straight(8.5, -30);
     turn(90, -30, 30);
-    arm_set_A(90);
-    straight(7, 20);
+    arm_set_A(90, true);
+    straight(8, 20);
     //objとる
-    arm_set_A(80);
+    arm_set_A(80, true);
     arm_take_obj();
-    straight(9, -20);
+    straight(10, -20);
     turn(90, 30, -30);
     arm_reset_A();
-    straight(21, 30);
+    straight(22, 30);
     turn(90, -30, 30);
-    arm_set_A(90);
-    straight(9, 20);
+    arm_set_A(90, true);
+    straight(10, 20);
     //objとる
-    arm_set_A(80);
+    arm_set_A(80, true);
     arm_take_obj();
-    straight(9, -20);
+    straight(10, -20);
     arm_reset_A();
     turn(110, 0, -30);
     turn(110, -30, 0);
-    arm_set_A(90);
-    straight(24, 20);
+    arm_set_A(90, true);
+    straight(25, 20);
     //objとる
-    arm_set_A(80);
+    arm_set_A(80, true);
     arm_take_obj();
-    straight(9, -20);
+    straight(10, -20);
     turn(180, 30, -30);
     arm_reset_A();
 }
 
 void smallship_nkc(){
-    linetrace_cm_pd_SP(10, 30, false);
-    linetrace_color_pd_SP(BOTH, COLOR_BLACK, 20, true);
-    arm_set_A(100);
+    linetrace_cm_pd_SP(10, 20, false);
+    arm_set_A(100, false);
+    linetrace_color_pd_SP(BOTH, COLOR_BLACK, 40, true);
     straight(25.5, 50);
     /*linetrace_cm_pd_SP(20, 40, false);
     linetrace_cm_pd_SP(5.5, 20, true);*/
@@ -1264,13 +1265,13 @@ void smallship_nkc(){
 void whiteobj_nkc(){
     linetrace_cm_pd_SP(15, 30, false);
     linetrace_color_pd_SP(BOTH, COLOR_BLACK, 60, false);
-    straight(6.5, 30);
+    linetrace_cm_pd_SP(6.2, 60, true);
     turn(90, 30, -30);
-    arm_set_A(70);
-    linetrace_cm_pd_SP(15, 20, false);
-    linetrace_cm_pd_SP(21, 40, true);
+    arm_set_A(70, false);
+    linetrace_cm_pd_SP(15, 30, false);
+    linetrace_cm_pd_SP(21, 60, true);
     tslp_tsk(100*MSEC);
-    arm_set_A(80);
+    arm_set_A(80, true);
     tslp_tsk(100*MSEC);
     arm_take_obj();
     //armでオブジェクトとる
@@ -1282,12 +1283,11 @@ void bigprepare_nkc(){
     arm_reset_A();
     linetrace_cm_pd_SP(15, 20, false);
     linetrace_color_pd_SP(BOTH, COLOR_BLACK, 60, false);
-    linetrace_cm_pd_SP(20, 30, false);
-    linetrace_cm_pd_SP(15, 20, true);
+    arm_set_A(100, false);
+    linetrace_cm_pd_SP(35, 30, true);
     turn(90, 30, -30);
     straight(31.5, 50);
     turn(90, -30, 30);
-    arm_set_A(100);
     straight(7.5, 15);
 }
 
@@ -1321,7 +1321,7 @@ void bigship_nkc(){
     straight(14.7, -30);
     arm_mode_change(RIGHTDOWN);
     ev3_motor_set_power(EV3_PORT_A, 40);
-    tslp_tsk(500*MSEC);
+    tslp_tsk(400*MSEC);
     ev3_motor_stop(EV3_PORT_A, true);
     arm_mode_change(LEFTDOWN);
     tslp_tsk(100*MSEC);
@@ -1365,6 +1365,7 @@ void main_task(intptr_t unused) {
 
     while(ev3_button_is_pressed(ENTER_BUTTON) == false) {}    
     tslp_tsk(500*MSEC);
+
 
     /*while (true)
     {
