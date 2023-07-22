@@ -974,13 +974,13 @@ void objprepare_nkc(){
     linetrace_cm_pd_SP(8, 30, false);
     linetrace_cm_pd_SP(30, 60, false);
     linetrace_color_pd_SP(BOTH, COLOR_BLACK, 40, false);
-    linetrace_cm_pd_SP(6.5, 40, true);
+    linetrace_cm_pd_SP(6.5, 30, true);
     turn(90, -30, 30);
     //ev3_motor_rotate();
     linetrace_cm_pd_SP(19, 30, false);
     linetrace_cm_pd_SP(7.5, 10, true);
     tslp_tsk(200*MSEC);
-    turn(180, 30, 0);
+    turn(180, 55, 0);
 
     straight_on(-30);
     straight_off(3.6, false);
@@ -1053,7 +1053,7 @@ void pattern1122(){
     straight(10, -20);
     turn(90, 30, -30);
     arm_reset_A();
-    straight(14, 30);
+    straight(14.7, 30);
     turn(90, -30, 30);
     arm_set_A(90, true);
     straight(10, 20);
@@ -1062,7 +1062,7 @@ void pattern1122(){
     arm_take_obj();
     straight(10, -20);
     turn(90, -30, 30);
-    straight(7, 30);
+    straight(7.7, 30);
     turn(90, -30, 30);
     arm_reset_A();
 }
@@ -1225,9 +1225,10 @@ void pattern1212(){
 
 void smallship_nkc(){
     linetrace_cm_pd_SP(10, 20, false);
-    arm_set_A(100, false);
     linetrace_color_pd_SP(BOTH, COLOR_BLACK, 40, true);
-    straight(25.5, 50);
+    arm_set_A(100, false);
+    linetrace_cm_pd_SP(20, 50, false);
+    linetrace_cm_pd_SP(5, 30, true);
     /*linetrace_cm_pd_SP(20, 40, false);
     linetrace_cm_pd_SP(5.5, 20, true);*/
     //armで船掴む
@@ -1269,13 +1270,13 @@ void whiteobj_nkc(){
     turn(90, 30, -30);
     arm_set_A(70, false);
     linetrace_cm_pd_SP(15, 30, false);
-    linetrace_cm_pd_SP(21, 60, true);
+    linetrace_cm_pd_SP(20.5, 60, true);
     tslp_tsk(100*MSEC);
     arm_set_A(80, true);
     tslp_tsk(100*MSEC);
     arm_take_obj();
     //armでオブジェクトとる
-    straight(34.5, -60);
+    straight(35.5, -60);
     turn(90, -30, 30);
 }
 
@@ -1300,29 +1301,28 @@ void bigship_nkc(){
     turn(180, 0, 40);
     straight(23, 30);
     turn_color(-20, 20);
-    linetrace_cm_pd(20, 0.7, 55, 30);
+    linetrace_cm_pd(20, 0.7, 70, 32);
     straight(40, 80);
     //linetrace_cm_pd(40, 0.2, 45, 80);
     linetrace_color_pd_SP(BOTH, COLOR_BLACK, 30, false);
     straight(6.5, 30);
     turn(90, 24, -24);
-    linetrace_cm_pd_SP(5.5, 20, false);
-    linetrace_cm_pd_SP(16, 40, true);
+    linetrace_cm_pd_SP(8.5, 20, false);
+    linetrace_cm_pd_SP(13, 30, true);
     straight(13, -30);
     //arm戻す
     arm_reset_A();
     tslp_tsk(700*MSEC);
     turn(180, 30, -30);
-    straight(4.5, -15);
+    straight(5, -15);
     arm_mode_change(LEFTDOWN);
     tslp_tsk(200*MSEC);
-    turn(100, 80, 0);
-    turn(100, 0, 80);
-    straight(14.7, -30);
+    turn(90, 70, 0);
+    turn(90, 0, 70);
+    straight(13.5, -30);
     arm_mode_change(RIGHTDOWN);
     ev3_motor_set_power(EV3_PORT_A, 40);
     tslp_tsk(400*MSEC);
-    ev3_motor_stop(EV3_PORT_A, true);
     arm_mode_change(LEFTDOWN);
     tslp_tsk(100*MSEC);
     arm_mode_change(SET);
@@ -1330,9 +1330,10 @@ void bigship_nkc(){
 }
 
 void goal_nkc(){
-    turn(110, 0, 80);
-    turn(110, 80, 0);
-    linetrace_cm_pd_SP(17, 30, false);
+    straight(3, 30);
+    turn(94, 0, 80);
+    turn(94, 80, 0);
+    linetrace_cm_pd_SP(14.5, 30, false);
     straight(24, 70);
 
 }
