@@ -706,10 +706,10 @@ void arm_mode_change(armmode_t mode) {
             else ev3_motor_set_power(EV3_PORT_D, 20);
             break;
         case LEFTDOWN:
-            ev3_motor_set_power(EV3_PORT_D, 8);
+            ev3_motor_set_power(EV3_PORT_D, 7);
             break;
         case RIGHTDOWN:
-            ev3_motor_set_power(EV3_PORT_D, -8);
+            ev3_motor_set_power(EV3_PORT_D, -7);
             break;
         default:
             break;
@@ -989,11 +989,11 @@ void start_nkc(){
     
     
     straight_on(-30);
-    straight_off(1, false);
+    straight_off(3, false);
     obj_check(1, LEFT);
     straight_off(5, false);
     obj_check(0, LEFT);
-    straight_off(4, true);
+    straight_off(2, true);
 
     turn(90, 80, -80);
 }
@@ -1382,10 +1382,10 @@ void bigship_nkc(){
     //arm戻す
     arm_reset_A();
     tslp_tsk(300*MSEC);
-    turn(195, 30, -30);
-    straight(7, -15);
+    turn(190, 30, -30);
+    straight(8, -20);
     arm_mode_change(LEFTDOWN);
-    turn(15, -30, 30);
+    turn(15, -25, 25);
     arm_mode_change(RIGHTDOWN);
     ev3_motor_set_power(EV3_PORT_A, 40);
     tslp_tsk(400*MSEC);
