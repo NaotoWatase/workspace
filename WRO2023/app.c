@@ -1020,7 +1020,7 @@ void objprepare_nkc(){
     linetrace_cm_pd_SP(15, 30, false);
     linetrace_cm_pd_SP(8.5, 10, true);
     tslp_tsk(200*MSEC);
-    turn(180, 55, 0);
+    turn(180, 65, 0);
     tslp_tsk(100*MSEC);
 
     straight(0.7, 30);
@@ -1240,7 +1240,7 @@ void pattern1221(){
 
 
 void pattern2121(){
-   straight(20.5, 30);
+   straight(21.3, 30);
    turn(90, -30, 30);
    straight(7, -20);
    arm_reset_A();
@@ -1374,12 +1374,12 @@ void whiteobj_nkc(){
     tslp_tsk(100*MSEC);
     arm_take_obj();
     //armでオブジェクトとる
-    /*straight(35.5, -60);
-    turn(90, -30, 30);*/
+    straight(35.5, -60);
+    turn(90, -30, 30);
 }
 
 void bigprepare_nkc(){
-    /*arm_reset_A();
+    arm_reset_A();
     linetrace_cm_pd_SP(15, 20, false);
     linetrace_color_pd_SP(BOTH, COLOR_BLACK, 60, false);
     arm_set_A(100, false);
@@ -1387,13 +1387,14 @@ void bigprepare_nkc(){
     turn(90, 30, -30);
     straight(32.5, 50);
     turn(90, -30, 30);
-    straight(7.5, 15);*/
+    straight(7.5, 15);
     /* SPEED UP*/
-    arm_reset_A();
+    /*arm_reset_A();
     straight(5, -30);
     turn(90, -30, 30);
     straight(103, 80);
     stopping();
+    */
 }
 
 void bigship_nkc(){
@@ -1502,65 +1503,6 @@ void main_task(intptr_t unused) {
         arm_mode_change(LEFTDOWN);
         tslp_tsk(1500*MSEC);
     }*/
-
-    arm_reset_A();
-    tslp_tsk(300*MSEC);
-    turn(180, 30, -30);
-    straight(6, -15);
-    arm_mode_change(LEFTDOWN);
-    arm_mode_change(RIGHTDOWNRIGHT);
-    arm_mode_change(LEFTDOWN);
-    turn(100, 0, 30);
-    turn(100, 30, 0);
-    straight(15, -30);
-    arm_mode_change(RIGHTDOWNRIGHT);
-    turn(100, 30, 0);
-    turn(100, 0, 30);
-    //上の分岐と逆のことをすればいい
-    /*if (arm_place[0] =! target_1){
-        arm_mode_change(RIGHTDOWNRIGHT);
-        arm_mode_change(LEFTDOWN);
-        turn(100, 0, 30);
-        turn(100, 30, 0);
-        straight(15, -30);
-        arm_mode_change(RIGHTDOWNRIGHT);
-        turn(100, 30, 0);
-        turn(100, 0, 30);
-    }
-    else {
-        arm_mode_change(LEFTDOWNLEFT);
-        arm_mode_change(RIGHTDOWN);
-        turn(100, 30, 0);
-        turn(100, 0, 30);
-        straight(15, -30);
-        arm_mode_change(LEFTDOWNLEFT);
-        turn(100, 0, 30);
-        turn(100, 30, 0);
-    }
-    if(arm_place[2] == surprise_object){
-        turn(100, 0, 30);
-        turn(100, 30, 0);
-        straight(30, -30);
-        arm_mode_change(RIGHTDOWN);
-        arm_mode_change(LEFTDOWN);
-        turn(100, 30, 0);
-        turn(100, 0, 30);
-    }
-    else {
-        turn(90, -30, 30);
-        straight(10, 30);
-        turn(90, 30, -30);
-        straight(15, -30);
-        arm_mode_change(LEFTDOWN);
-        arm_mode_change(RIGHTDOWN);
-        straight(15, 30);
-        turn(90, 30, -30);
-        straight(10, 30);
-        turn(90, -30, 30);
-    }*/
-
-    stopping();
-
 
     start_nkc();
     //マーキングの色読んでターンまでまで　アームは上
