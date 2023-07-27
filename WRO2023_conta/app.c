@@ -1494,20 +1494,7 @@ void main_task(intptr_t unused) {
     tslp_tsk(500*MSEC);
     arm_mode_change(RIGHTDOWN);
 
-    while (true)
-    {
-        arm_mode_change(LEFTDOWNLEFT);
-        arm_mode_change(RIGHTDOWN);
-        arm_mode_change(LEFTDOWN);
-        arm_mode_change(RIGHTDOWNRIGHT);
-        arm_mode_change(LEFTDOWN);
-        arm_mode_change(RIGHTDOWN);
-        stopping();
-
-
-    }
     
-
     /*while (true)
     {
         arm_mode_change(RIGHTDOWN);
