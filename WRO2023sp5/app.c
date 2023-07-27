@@ -51,7 +51,7 @@ rgb_raw_t rgb_val;//カラーセンサーの値を保存するために必要な
 int location_t[2] = {0, 0};
 int location_f[4] = {0, 0, 0, 0};
 int location[6] = {0, 0, 0, 0, 0, 0};
-int location_aim[4] = {2, 2, 2, 2};
+int location_aim[4] = {1, 1, 1, 1};
 int pattern;
 
 int arm_set = 0;
@@ -65,8 +65,8 @@ float green = 0;
 float blue = 0;
 float judgement = 0;
 
-int target_1;
-int target_2;
+int line2_1;
+int line2_2;
 
 
 armmode_t now_armmode = SET;
@@ -607,9 +607,12 @@ void obj_know(int num){
         case 3:
             location[num] = 3;
             break;
+        case 4:
+        case 7:
+            location[num] = 4;
+            break;
         case 0:
         case 1:
-        case 4:
         case 5:
         case 6:
             if(h < 150) location[num] = 3;
@@ -627,41 +630,41 @@ void obj_know(int num){
 }
 
 void check_pattern(){
-    int target_1_count = 1;
-    int target_2_count = 1;
-    target_1 = 5 - location_t[0];
-    target_2 = 5 - location_t[1];
-    if (location_f[0] == target_1 && target_1_count == 1) {
-        target_1_count = target_1_count - 1;
-        location_aim[0] = 1;
+    int line2_1_count = 1;
+    int line2_2_count = 1;
+    line2_1 = location_t[0];
+    line2_2 = location_t[1];
+    if (location_f[0] == line2_1 && line2_1_count == 1) {
+        line2_1_count = line2_1_count - 1;
+        location_aim[0] = 2;
     }
-    else if (location_f[0] == target_2 && target_2_count == 1) {
-        target_2_count = target_2_count - 1;
-        location_aim[0] = 1;
+    else if (location_f[0] == line2_2 && line2_2_count == 1) {
+        line2_2_count = line2_2_count - 1;
+        location_aim[0] = 2;
     }
-    if (location_f[1] == target_1 && target_1_count == 1) {
-        target_1_count = target_1_count - 1;
-        location_aim[1] = 1;
+    if (location_f[1] == line2_1 && line2_1_count == 1) {
+        line2_1_count = line2_1_count - 1;
+        location_aim[1] = 2;
     }
-    else if (location_f[1] == target_2 && target_2_count == 1) {
-        target_2_count = target_2_count - 1;
-        location_aim[1] = 1;
+    else if (location_f[1] == line2_2 && line2_2_count == 1) {
+        line2_2_count = line2_2_count - 1;
+        location_aim[1] = 2;
     }
-    if (location_f[2] == target_1 && target_1_count == 1) {
-        target_1_count = target_1_count - 1;
-        location_aim[2] = 1;
+    if (location_f[2] == line2_1 && line2_1_count == 1) {
+        line2_1_count = line2_1_count - 1;
+        location_aim[2] = 2;
     }
-    else if (location_f[2] == target_2 && target_2_count == 1) {
-        target_2_count = target_2_count - 1;
-        location_aim[2] = 1;
+    else if (location_f[2] == line2_2 && line2_2_count == 1) {
+        line2_2_count = line2_2_count - 1;
+        location_aim[2] = 2;
     }
-    if (location_f[3] == target_1 && target_1_count == 1) {
-        target_1_count = target_1_count - 1;
-        location_aim[3] = 1;
+    if (location_f[3] == line2_1 && line2_1_count == 1) {
+        line2_1_count = line2_1_count - 1;
+        location_aim[3] = 2;
     }
-    else if (location_f[3] == target_2 && target_2_count == 1) {
-        target_2_count = target_2_count - 1;
-        location_aim[3] = 1;
+    else if (location_f[3] == line2_2 && line2_2_count == 1) {
+        line2_2_count = line2_2_count - 1;
+        location_aim[3] = 2;
     }
     pattern = location_aim[0] * 1000 + location_aim[1] * 100 + location_aim[2] * 10 + location_aim[3];
 }
@@ -1032,7 +1035,7 @@ void objprepare_nkc(){
     obj_check(2, LEFT);
     straight_off(0.7, true);
     tslp_tsk(200*MSEC);
-    location[5] = 10 - location[4] - location[3] - location[2];
+    location[5] = 11 - location[4] - location[3] - location[2];
     location_f[3] = location[5];
     
     /*
@@ -1326,7 +1329,7 @@ void smallship_nkc(){
     arm_take_ship();
 
     straight(17, -40);
-    turn(90, -30, 30);
+    turn(90, -20, 20);
     linetrace_cm_pd(15, 0.6, 55, 28, false);
     //straight(15, 15);
     //linetrace_cm_pd(50, 0.15, 50, 15, false);
@@ -1334,7 +1337,20 @@ void smallship_nkc(){
     /*linetrace_cm_pd(20, 0.6, 55, 15, false);
     linetrace_cm_pd(50, 0.15, 50, 25, false);
     linetrace_cm_pd(20, 0.6, 55, 10, true);*/
-    straight(66, 80);
+
+    linetrace_color_pd_SP(BOTH, COLOR_BLACK, 30, false);
+    linetrace_cm_pd_SP(9, 20, true);
+    turn(90, 20, -20);
+    straight(21.5, 30);
+    tslp_tsk(100*MSEC);
+    turn(60, -20, 20);
+    turn(60, 20, -20);
+    straight(21.5, -30);
+    turn(90, -30, 30);
+    linetrace_cm_pd_SP(10, 20, false);
+    linetrace_cm_pd_SP(28, 40, true);
+
+
     tslp_tsk(100*MSEC);
     turn(194, 0, 50);
     //arm開く
