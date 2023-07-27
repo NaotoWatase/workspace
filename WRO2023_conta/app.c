@@ -65,6 +65,9 @@ float green = 0;
 float blue = 0;
 float judgement = 0;
 
+int target_1;
+int target_2;
+
 
 armmode_t now_armmode = SET;
 int now_arm_angle = 0;
@@ -624,8 +627,6 @@ void obj_know(int num){
 }
 
 void check_pattern(){
-    int target_1;
-    int target_2;
     int target_1_count = 1;
     int target_2_count = 1;
     target_1 = 5 - location_t[0];
@@ -1492,9 +1493,8 @@ void main_task(intptr_t unused) {
 
     while(ev3_button_is_pressed(ENTER_BUTTON) == false) {}    
     tslp_tsk(500*MSEC);
-    arm_mode_change(RIGHTDOWN);
 
-    
+
     /*while (true)
     {
         arm_mode_change(RIGHTDOWN);
@@ -1502,6 +1502,65 @@ void main_task(intptr_t unused) {
         arm_mode_change(LEFTDOWN);
         tslp_tsk(1500*MSEC);
     }*/
+
+    arm_reset_A();
+    tslp_tsk(300*MSEC);
+    turn(180, 30, -30);
+    straight(6, -15);
+    arm_mode_change(LEFTDOWN);
+    arm_mode_change(RIGHTDOWNRIGHT);
+    arm_mode_change(LEFTDOWN);
+    turn(100, 0, 30);
+    turn(100, 30, 0);
+    straight(15, -30);
+    arm_mode_change(RIGHTDOWNRIGHT);
+    turn(100, 30, 0);
+    turn(100, 0, 30);
+    //上の分岐と逆のことをすればいい
+    /*if (arm_place[0] =! target_1){
+        arm_mode_change(RIGHTDOWNRIGHT);
+        arm_mode_change(LEFTDOWN);
+        turn(100, 0, 30);
+        turn(100, 30, 0);
+        straight(15, -30);
+        arm_mode_change(RIGHTDOWNRIGHT);
+        turn(100, 30, 0);
+        turn(100, 0, 30);
+    }
+    else {
+        arm_mode_change(LEFTDOWNLEFT);
+        arm_mode_change(RIGHTDOWN);
+        turn(100, 30, 0);
+        turn(100, 0, 30);
+        straight(15, -30);
+        arm_mode_change(LEFTDOWNLEFT);
+        turn(100, 0, 30);
+        turn(100, 30, 0);
+    }
+    if(arm_place[2] == surprise_object){
+        turn(100, 0, 30);
+        turn(100, 30, 0);
+        straight(30, -30);
+        arm_mode_change(RIGHTDOWN);
+        arm_mode_change(LEFTDOWN);
+        turn(100, 30, 0);
+        turn(100, 0, 30);
+    }
+    else {
+        turn(90, -30, 30);
+        straight(10, 30);
+        turn(90, 30, -30);
+        straight(15, -30);
+        arm_mode_change(LEFTDOWN);
+        arm_mode_change(RIGHTDOWN);
+        straight(15, 30);
+        turn(90, 30, -30);
+        straight(10, 30);
+        turn(90, -30, 30);
+    }*/
+
+    stopping();
+
 
     start_nkc();
     //マーキングの色読んでターンまでまで　アームは上
