@@ -71,6 +71,8 @@ int now_arm_angle = 0;
 
 int battery;
 
+int arm_place[4] = {0, 0, 0, 0};
+
 
 void straight(float cm, int power);
 void turn(int angle, int lb_power, int rc_power);
@@ -711,6 +713,12 @@ void arm_mode_change(armmode_t mode) {
         case RIGHTDOWN:
             ev3_motor_set_power(EV3_PORT_D, -7);
             break;
+        case LEFTDOWNLEFT:
+            ev3_motor_set_power(EV3_PORT_D, 9);
+            break;
+        case RIGHTDOWNRIGHT:
+            ev3_motor_set_power(EV3_PORT_D, -9);
+            break;
         default:
             break;
     }
@@ -718,6 +726,8 @@ void arm_mode_change(armmode_t mode) {
         now_arm_angle = ev3_motor_get_counts(EV3_PORT_D);
         if(now_arm_angle >= 30 && mode == LEFTDOWN) break;
         if(now_arm_angle <= -30 && mode == RIGHTDOWN) break;
+        if(now_arm_angle >= 45 && mode == LEFTDOWNLEFT) break;
+        if(now_arm_angle <= -45 && mode == RIGHTDOWNRIGHT) break;
         if(now_arm_angle >= -2 && now_arm_angle <= 2 && mode == SET) break;
     }
     if(mode == LEFTDOWN) {
@@ -1049,21 +1059,45 @@ void obj_nkc(){
     switch (pattern){
     case 1122: 
         pattern1122();
+        arm_place[0] = location_f[0];
+        arm_place[1] = location_f[1];
+        arm_place[2] = location_f[2];
+        arm_place[3] = location_f[3];
         break;
     case 2211:
         pattern2211();
+        arm_place[0] = location_f[2];
+        arm_place[1] = location_f[3];
+        arm_place[2] = location_f[0];
+        arm_place[3] = location_f[1];
         break;
     case 2112: 
         pattern2112();
+        arm_place[0] = location_f[1];
+        arm_place[1] = location_f[2];
+        arm_place[2] = location_f[0];
+        arm_place[3] = location_f[3];
         break;
     case 1221:
         pattern1221();
+        arm_place[0] = location_f[3];
+        arm_place[1] = location_f[0];
+        arm_place[2] = location_f[1];
+        arm_place[3] = location_f[2];
         break;
     case 2121: 
         pattern2121();
+        arm_place[0] = location_f[3];
+        arm_place[1] = location_f[1];
+        arm_place[2] = location_f[0];
+        arm_place[3] = location_f[2];
         break;
     case 1212:
         pattern1212();
+        arm_place[0] = location_f[2];
+        arm_place[1] = location_f[0];
+        arm_place[2] = location_f[1];
+        arm_place[3] = location_f[3];
         break;
     default:
         pattern1122();
@@ -1315,7 +1349,7 @@ void smallship_nkc(){
     tslp_tsk(100*MSEC);
     arm_mode_change(RIGHTDOWN);
     tslp_tsk(100*MSEC);
-    straight_on(25);
+    straight_on(30);
     while (true)
     {
         if(ev3_color_sensor_get_color(EV3_PORT_2) == COLOR_WHITE && ev3_color_sensor_get_color(EV3_PORT_3) == COLOR_WHITE) break;
@@ -1339,12 +1373,12 @@ void whiteobj_nkc(){
     tslp_tsk(100*MSEC);
     arm_take_obj();
     //armでオブジェクトとる
-    straight(35.5, -60);
-    turn(90, -30, 30);
+    /*straight(35.5, -60);
+    turn(90, -30, 30);*/
 }
 
 void bigprepare_nkc(){
-    arm_reset_A();
+    /*arm_reset_A();
     linetrace_cm_pd_SP(15, 20, false);
     linetrace_color_pd_SP(BOTH, COLOR_BLACK, 60, false);
     arm_set_A(100, false);
@@ -1352,12 +1386,13 @@ void bigprepare_nkc(){
     turn(90, 30, -30);
     straight(32.5, 50);
     turn(90, -30, 30);
-    straight(7.5, 15);
-    /* SPEED UP
+    straight(7.5, 15);*/
+    /* SPEED UP*/
     arm_reset_A();
+    straight(5, -30);
     turn(90, -30, 30);
     straight(103, 80);
-    */
+    stopping();
 }
 
 void bigship_nkc(){
@@ -1457,6 +1492,21 @@ void main_task(intptr_t unused) {
 
     while(ev3_button_is_pressed(ENTER_BUTTON) == false) {}    
     tslp_tsk(500*MSEC);
+    arm_mode_change(RIGHTDOWN);
+
+    while (true)
+    {
+        arm_mode_change(LEFTDOWNLEFT);
+        arm_mode_change(RIGHTDOWN);
+        arm_mode_change(LEFTDOWN);
+        arm_mode_change(RIGHTDOWNRIGHT);
+        arm_mode_change(LEFTDOWN);
+        arm_mode_change(RIGHTDOWN);
+        stopping();
+
+
+    }
+    
 
     /*while (true)
     {
