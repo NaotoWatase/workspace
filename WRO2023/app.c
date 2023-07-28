@@ -709,10 +709,10 @@ void arm_mode_change(armmode_t mode) {
             else ev3_motor_set_power(EV3_PORT_D, 20);
             break;
         case LEFTDOWN:
-            ev3_motor_set_power(EV3_PORT_D, 7);
+            ev3_motor_set_power(EV3_PORT_D, 8);
             break;
         case RIGHTDOWN:
-            ev3_motor_set_power(EV3_PORT_D, -7);
+            ev3_motor_set_power(EV3_PORT_D, -8);
             break;
         case LEFTDOWNLEFT:
             ev3_motor_set_power(EV3_PORT_D, 9);
@@ -763,7 +763,7 @@ void arm_reset_A(){
     ev3_motor_stop(EV3_PORT_A, true);
     */
     //ev3_motor_set_power(EV3_PORT_A, -30);
-    ev3_motor_rotate(EV3_PORT_A, 400, -30, false);
+    ev3_motor_rotate(EV3_PORT_A, 400, -25, false);
 }
 
 void arm_set_A(int arm_angle, bool_t stop){
@@ -1340,7 +1340,7 @@ void smallship_nkc(){
     //arm開く
 
     arm_reset_A();
-    tslp_tsk(300*MSEC);
+    tslp_tsk(400*MSEC);
     turn(187, 30, -30);
     straight(6, -15);
     //armおろしてオブジェクト下ろす
@@ -1418,8 +1418,8 @@ void bigship_nkc(){
     straight(13, -30);
     //arm戻す
     arm_reset_A();
-    tslp_tsk(300*MSEC);
-    turn(190, 30, -30);
+    tslp_tsk(400*MSEC);
+    turn(192, 30, -30);
     straight(8, -20);
     arm_mode_change(LEFTDOWN);
     turn(15, -25, 25);

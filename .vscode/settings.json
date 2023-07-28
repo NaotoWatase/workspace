@@ -10,6 +10,7 @@
         "*.tcc": "c",
         "algorithm": "c",
         "iterator": "c",
-        "random": "c"
+        "random": "c",
+        "cstdlib": "c"
     }
 }
