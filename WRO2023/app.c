@@ -1228,9 +1228,9 @@ void pattern2112(){
     arm_set_A(35, true);
     arm_take_obj();
     straight(11, -20);
-    arm_reset_A();
     tslp_tsk(100*MSEC);
     turn(90, -30, 30);
+    arm_reset_A();
     straight(8.1, 20);
     tslp_tsk(100*MSEC);
     turn(90, 30, -30);
@@ -1394,7 +1394,7 @@ void pattern1212(){
 
 void smallship_nkc(){
     tslp_tsk(100*MSEC);
-    linetrace_cm_pd_SP(10, 20, false);
+    linetrace_cm_pd_SP(11, 20, false);
     linetrace_color_pd_SP(BOTH, COLOR_BLACK, 40, false);
     arm_set_A(115, false);
     linetrace_cm_pd_SP(16, 50, false);
@@ -1449,8 +1449,8 @@ void whiteobj_nkc(){
     turn(90, 30, -30);
     arm_set_A(85, false);
     linetrace_cm_pd_SP(19, 30, false);
-    linetrace_cm_pd_SP(11, 50, false);
-    linetrace_cm_pd_SP(10.5, 20, true);
+    linetrace_cm_pd_SP(10, 50, false);
+    linetrace_cm_pd_SP(11.5, 20, true);
     tslp_tsk(100*MSEC);
     arm_set_A(45, true);
     tslp_tsk(100*MSEC);
