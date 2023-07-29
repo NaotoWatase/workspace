@@ -40,7 +40,7 @@
 //bigshipの後に最初に落としたオブジェを持って、船のマークのところに置く。
     arm_reset_A();
 
-    linetrace_cm_pd_SP(10, 30, true);
+    linetrace_cm_pd_SP(5, 30, true);
     linetrace_color_pd_SP(LEFT, COLOR_BLACK, 30, false);
     straight(20, 30);
     turn(80, 30, 0);
@@ -83,7 +83,7 @@
 
 void arm_set_A(int arm_angle, bool_t stop){
     ev3_motor_stop(EV3_PORT_A, true);
-    int power = 30;
+    int power = 35;
     if (arm_angle == 30) power = 40;
     if (arm_angle == 130) power = 10;
     ev3_motor_rotate(EV3_PORT_A, arm_angle, power, stop);
