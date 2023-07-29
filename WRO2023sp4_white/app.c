@@ -13,7 +13,8 @@ void sp_whiteobj_nkc(){
     tslp_tsk(100*MSEC);
 
     straight(2, 30);
-    //obj_check(4, LEFT);
+
+    obj_measure(100, LEFT); //numは関係ない！　if文とかの条件式で場合分けを頑張る
 
     if(両方とるやつ){
         straight(10.5, -30);

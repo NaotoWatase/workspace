@@ -105,7 +105,8 @@ void smallship_nkc(){
     turn(90, 30, -30);
     arm_set_A(85, false);
     linetrace_cm_pd_SP(19, 30, false);
-    linetrace_cm_pd_SP(16.5, 60, true);
+    linetrace_cm_pd_SP(13, 60, true);
+    linetrace_cm_pd_SP(8.5, 20, true);
     tslp_tsk(100*MSEC);
     arm_set_A(40, true);
     tslp_tsk(100*MSEC);
@@ -114,7 +115,7 @@ void smallship_nkc(){
 
 //ここまでがwhitenkc
    
-    straight(4, -30);
+    straight(10, -30);
     arm_reset_A();
     turn(90, -30, 30);
     straight(38, 60);
