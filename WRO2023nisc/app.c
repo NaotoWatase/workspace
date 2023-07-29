@@ -123,7 +123,7 @@ void smallship_nkc(){
         if(ev3_color_sensor_get_color(EV3_PORT_2) == COLOR_WHITE && ev3_color_sensor_get_color(EV3_PORT_3) == COLOR_WHITE) break;
     }
     while (true){
-        if(ev3_color_sensor_get_color(EV3_PORT_2) == COLOR_WHITE && ev3_color_sensor_get_color(EV3_PORT_3) == COLOR_BLACK) break;
+        if(ev3_color_sensor_get_color(EV3_PORT_2) == COLOR_BLACK && ev3_color_sensor_get_color(EV3_PORT_3) == COLOR_BLACK) break;
     }
 
 

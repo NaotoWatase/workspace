@@ -697,7 +697,7 @@ void arm_take_ship(){
         now_counts = ev3_motor_get_counts(EV3_PORT_A);
         if(now_counts > (goal_counts - 20))break;
     }*/
-    ev3_motor_set_power(EV3_PORT_A, 40);
+    ev3_motor_set_power(EV3_PORT_A, 45);
     tslp_tsk(500*MSEC);
     ev3_motor_set_power(EV3_PORT_A, 70);
 }
@@ -732,6 +732,8 @@ void arm_mode_change(armmode_t mode) {
         if(now_arm_angle >= -2 && now_arm_angle <= 2 && mode == SET) break;
     }
     if(mode == LEFTDOWN) {
+        ev3_motor_stop(EV3_PORT_D, true);
+        tslp_tsk(100*MSEC);
         ev3_motor_set_power(EV3_PORT_D, 7);
         tslp_tsk(200*MSEC);
         ev3_motor_stop(EV3_PORT_D, true);
@@ -740,6 +742,8 @@ void arm_mode_change(armmode_t mode) {
         tslp_tsk(200*MSEC);
     }
     if(mode == RIGHTDOWN) {
+        ev3_motor_stop(EV3_PORT_D, true);
+        tslp_tsk(100*MSEC);
         ev3_motor_set_power(EV3_PORT_D, -7);
         tslp_tsk(200*MSEC);
         ev3_motor_stop(EV3_PORT_D, true);
@@ -768,7 +772,7 @@ void arm_reset_A(){
 
 void arm_set_A(int arm_angle, bool_t stop){
     ev3_motor_stop(EV3_PORT_A, true);
-    int power = 30;
+    int power = 35;
     if (arm_angle == 30) power = 40;
     ev3_motor_rotate(EV3_PORT_A, arm_angle, power, stop);
     arm_set = arm_angle + arm_set;
@@ -999,7 +1003,7 @@ void start_nkc(){
     */
     
     
-    straight_on(-30);
+    straight_on(-20);
     straight_off(3, false);
     obj_check(1, LEFT);
     straight_off(5, false);
@@ -1028,10 +1032,19 @@ void objprepare_nkc(){
     straight_on(-20);
     straight_off(7.2, false);
     obj_check(3, LEFT);
-    straight_off(7.4, false);
+    while (true){
+        if(ev3_color_sensor_get_reflect(EV3_PORT_3) > 60 && ev3_color_sensor_get_reflect(EV3_PORT_2) > 60) break;
+    }
+    while (true){
+        if(ev3_color_sensor_get_reflect(EV3_PORT_3) < 10 && ev3_color_sensor_get_reflect(EV3_PORT_2) < 10) break;
+    }
+    ev3_motor_reset_counts(EV3_PORT_B);
+    ev3_motor_reset_counts(EV3_PORT_C);
     obj_check(2, LEFT);
     straight_off(0.7, true);
-    tslp_tsk(200*MSEC);
+    ev3_motor_stop(EV3_PORT_B, true);
+    ev3_motor_stop(EV3_PORT_C, true);
+    tslp_tsk(100*MSEC);
     location[5] = 10 - location[4] - location[3] - location[2];
     location_f[3] = location[5];
     
@@ -1136,7 +1149,7 @@ void pattern1122(){
 }
 
 void pattern2211(){
-   straight(13.8, 30);
+   straight(14.5, 30);
    turn(90, -30, 30);
    straight(8, -30);
    arm_reset_A();
@@ -1149,7 +1162,7 @@ void pattern2211(){
    straight(11, -20);
    turn(90, -30, 30);
    arm_reset_A();
-   straight(14.5, 30);
+   straight(15.1, 30);
    turn(90, 30, -30);
    arm_set_A(90, true);
    straight(11.5, 20);
@@ -1164,7 +1177,7 @@ void pattern2211(){
 }
 
 void pattern2112(){
-   straight(6.9, 30);
+   straight(7.5, 30);
    turn(90, -30, 30);
    straight(8, -30);
    arm_reset_A();
@@ -1187,7 +1200,7 @@ void pattern2112(){
    straight(11, -20);
    turn(90, 30, -30);
    arm_reset_A();
-   straight(14.9, 30);
+   straight(15.1, 30);
    turn(90, -30, 30);
    arm_set_A(90, true);
    straight(11.5, 20);
@@ -1196,7 +1209,7 @@ void pattern2112(){
    arm_take_obj();
    straight(11.5, -20);
    turn(90, -30, 30);
-   straight(8, 30);
+   straight(7.5, 30);
    turn(90, -30, 30);
    arm_reset_A();
 }
@@ -1289,7 +1302,7 @@ void pattern1212(){
    straight(11, -20);
    turn(90, 30, -30);
    arm_reset_A();
-   straight(22.4, 30);
+   straight(22.7, 30);
    turn(90, -30, 30);
    arm_set_A(90, true);
    straight(11.5, 20);
@@ -1299,7 +1312,7 @@ void pattern1212(){
    straight(11.5, -20);
    arm_reset_A();
    turn(90, -30, 30);
-   straight(7.1, 20);
+   straight(6.8, 20);
    turn(90, 30, -30);
    arm_set_A(90, true);
    straight(11.5, 20);
@@ -1313,6 +1326,7 @@ void pattern1212(){
 
 
 void smallship_nkc(){
+    tslp_tsk(100*MSEC);
     linetrace_cm_pd_SP(10, 20, false);
     linetrace_color_pd_SP(BOTH, COLOR_BLACK, 40, false);
     arm_set_A(115, false);
@@ -1341,7 +1355,7 @@ void smallship_nkc(){
     arm_reset_A();
     tslp_tsk(400*MSEC);
     turn(186, 30, -30);
-    straight(6, -15);
+    straight(6.5, -10);
     //armおろしてオブジェクト下ろす
     arm_mode_change(RIGHTDOWN);
     tslp_tsk(100*MSEC);
@@ -1404,7 +1418,7 @@ void bigship_nkc(){
     straight(75, -50);
     tslp_tsk(100*MSEC);
     turn(190, 0, 40);
-    straight(21.5, 30);
+    straight(22.4, 30);
     turn_color(-20, 20);
     linetrace_cm_pd(20, 0.7, 70, 32, false);
     straight(60, 80);
@@ -1419,8 +1433,9 @@ void bigship_nkc(){
     //arm戻す
     arm_reset_A();
     tslp_tsk(400*MSEC);
-    turn(197, 30, -30);
-    straight(8, -20);
+    turn(192, 30, -30);
+    straight_on(-25);
+    straight_off(8, true);
     arm_mode_change(LEFTDOWN);
     turn(15, -25, 25);
     arm_mode_change(RIGHTDOWN);
@@ -1494,33 +1509,7 @@ void main_task(intptr_t unused) {
 
     while(ev3_button_is_pressed(ENTER_BUTTON) == false) {}    
     tslp_tsk(500*MSEC);
-
-
-    linetrace_cm_pd_SP(8, 30, false);
-    linetrace_cm_pd_SP(30, 60, false);
-    linetrace_color_pd_SP(BOTH, COLOR_BLACK, 40, false);
-    linetrace_cm_pd_SP(6.5, 30, true);
-    turn(90, -30, 30);
-    //ev3_motor_rotate();
-    linetrace_cm_pd_SP(4, 20, false);
-    linetrace_cm_pd_SP(15, 30, false);
-    linetrace_cm_pd_SP(8.5, 10, true);
-    tslp_tsk(200*MSEC);
-    turn(180, 65, 0);
-    tslp_tsk(100*MSEC);
-
-    straight(1.5, 30);
-    obj_check(4, LEFT);
-    straight_on(-20);
-    straight_off(7.2, false);
-    obj_check(3, LEFT);
-    straight_off(7.4, false);
-    obj_check(2, LEFT);
-    straight_off(2, true);
-    tslp_tsk(200*MSEC);
-
-    pattern1122();
-    stopping();
+    
 
 
 

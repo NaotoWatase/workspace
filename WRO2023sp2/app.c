@@ -1,3 +1,23 @@
+//objprepareの最初。真ん中クレーンにオブジェを置く。
+    linetrace_cm_pd_SP(70, 30);
+    linetrace_color_pd_SP(BOTH, COLOR_BLACK, 20);
+    straight(4, -20);
+    turn(90, -20, 20);
+    straight(32, -30);
+    ev3_motor_rotate(EV3_PORT_D, 50, -30, true);    //arm下ろす
+    straight(32, 30);
+    ev3_motor_rotate(EV3_PORT_D, 50, 30, true);    //armあげる
+    turn(90, -30, 30);
+    linetrace_cm_pd_SP(11, 30);
+    linetrace_color_pd_SP(BOTH, COLOR_BLACK, 20);
+
+    straight(6.5, 30);
+    turn(90, 30, -30);
+
+
+
+
+
 /**
  * This sample program shows a PID controller for line following.
  *
