@@ -83,17 +83,8 @@ typedef enum armmode {
 typedef enum armmode_new {
     UP,
     DOWN,
-    SETNEW,
-    SETNORMAL,
-    SETSHIP
+    SETNEW
 } armmode_new_t ;
-
-typedef enum armmode_a {
-    OPEN,
-    CLOSE,
-    SETOPEN,
-    SETCLOSE,
-} armmode_a_t ;
 
 
 /*
