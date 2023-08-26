@@ -804,7 +804,7 @@ void arm_A(armmode_new_t mode) {
             if(now_arm_angle_A >= -270)ev3_motor_set_power(EV3_PORT_A, -25);
             else ev3_motor_set_power(EV3_PORT_A, 30);
             break;
-        case SETSMALL:
+        case CLOSESHIP:
             /*if(now_arm_angle_A >= -205)ev3_motor_set_power(EV3_PORT_A, -30);
             else ev3_motor_set_power(EV3_PORT_A, 30);*/
             ev3_motor_set_power(EV3_PORT_A, 40);
@@ -817,7 +817,7 @@ void arm_A(armmode_new_t mode) {
         if(mode == CLOSE) break;
         //if(now_arm_angle >= -2 && mode == UP) break;
         if(now_arm_angle_A <= -269 && now_arm_angle_A >= -271 &&mode == SETSHIP) break;
-        if (mode == SETSMALL) break;
+        if (mode == CLOSESHIP) break;
         if(now_arm_angle_A <= -164 && now_arm_angle_A >= -166 &&mode == OPEN) break;
         if(now_arm_angle_A <= -84 && now_arm_angle_A >= -86 && mode == SETNEW) break;
         if(now_arm_angle_A <= -69 && now_arm_angle_A >= -71 && mode == SETNEWSHIP) break;
@@ -826,7 +826,7 @@ void arm_A(armmode_new_t mode) {
         tslp_tsk(400*MSEC);
             ev3_motor_set_power(EV3_PORT_A, 30);
     }
-    else if (mode == SETSMALL) {
+    else if (mode == CLOSESHIP) {
         tslp_tsk(400*MSEC);
             ev3_motor_set_power(EV3_PORT_A, 7);
     }
