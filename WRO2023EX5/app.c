@@ -254,6 +254,12 @@ void turn(int angle, int lb_power, int rc_power){
     if (abs(lb_power) == 0 || abs(rc_power) == 0) {
         turn_num = 0.152;
     }
+    if (angle == 180) {
+        turn_num = 0.1485;
+    }
+    if (angle == 170) {
+        turn_num = 0.1485;
+    }
     if (abs(lb_power) >= abs(rc_power)) maximum = abs(lb_power);
     if (abs(rc_power) > abs(lb_power)) maximum = abs(rc_power);
     float changing_power = 15;
@@ -632,10 +638,15 @@ void obj_know(int num){
         case 3:
             location[num] = 3;
             break;
+        case 5:
+        case 7:
+            location[num] = 5;
+            break;
+        case 4:
+            location[num] = 4;
+            break;
         case 0:
         case 1:
-        case 4:
-        case 5:
         case 6:
             if(h < 150) location[num] = 3;
             else location[num] = 2;
@@ -1349,7 +1360,9 @@ void linetrace_color_pd_SP(port_t port, colorid_t color, int power, bool_t stop)
 
 
 void start_nkc(){
-    straight(6, 30);
+    straight(8, 30);
+    turn(45, 0, 30);
+    turn(45, 30, 0);
     linetrace_color_pd_SP(RIGHT, COLOR_BLACK, 24, false); //p=24でrightセンサーだけのライントレース
     straight(10.6, 30);
     //船押して燃料補給
@@ -1918,7 +1931,6 @@ void bigship_nkc(){
     arm_mode_change_new(UP);
     tslp_tsk(200*MSEC);
     straight(1, 30);
-    stopping();
     /*tslp_tsk(500*MSEC);
     turn(40, 0, 30);*/
     /*arm_mode_change(SET);
@@ -2065,29 +2077,328 @@ void main_task(intptr_t unused) {
 
     now_arm_angle = 0;
     now_arm_angle_A = 0;
-    //ev3_motor_set_power(EV3_PORT_A, 20);
-    //ev3_motor_set_power(EV3_PORT_D, 20);
-    //tslp_tsk(900*MSEC);
-    //ev3_motor_stop(EV3_PORT_D, true);
-    //ev3_motor_stop(EV3_PORT_A, true);
+    ev3_motor_set_power(EV3_PORT_A, 20);
+    ev3_motor_set_power(EV3_PORT_D, 20);
+    tslp_tsk(900*MSEC);
+    ev3_motor_stop(EV3_PORT_D, true);
+    ev3_motor_stop(EV3_PORT_A, true);
     ev3_motor_reset_counts(EV3_PORT_D);
     ev3_motor_reset_counts(EV3_PORT_A);
 
+
+    stopping();
+
+    arm_D(DOWN);
+    arm_A(SETSHIP);
+    stopping();
+    arm_A(SETSMALL);
+    straight(30, 30);
+    turn(90, 30, -30);
+    straight(30, -30);
+    straight(30, 30);
+    stopping();
+
     start_nkc();
-    //マーキングの色読んでターンまでまで　アームは上
-    objprepare_nkc();
-    //オブジェクトの色読むまで　アームは下
-    obj_nkc();
-    //オブジェクトを取る　アームは下
-    smallship_nkc();
-    //ライントレースからsmallshipとって運びオブジェクトを置く　アームは下
-    whiteobj_nkc();
-    //白のオブジェクトとって回転まで　アームは上
-    bigprepare_nkc();
-    //bigship取るまで　アームは下
-    bigship_nkc();
-    //bigship置いてオブジェクト置くまで　アームは上
-    goal_nkc();
+
+    linetrace_cm_pd_pro(20, 12, 6, 70, false);
+    linetrace_color_pd_SP(BOTH, COLOR_BLACK, 40, false);
+    linetrace_cm_pd_SP(6.5, 30, true);
+    turn(90, -30, 30);
+
+
+
+
+    
+
+    //obj
+
+    if(location_t[0] == 4) {
+        linetrace_cm_pd_pro(15, 0, 13.5, 40, true);
+        arm_D(DOWN);
+        arm_A(SETNEW);
+        tslp_tsk(100*MSEC);
+        turn(10, 30, -30);
+        tslp_tsk(100*MSEC);
+        straight(9, 30);
+        arm_A(CLOSE);
+        straight(9, -30);
+        turn(170, 30, -30);
+        linetrace_color_pd_SP(BOTH, COLOR_BLACK, 30, false);
+        linetrace_cm_pd_SP(6.5, 20, true);
+        
+    }
+    if(location_t[0] == 2) {
+        linetrace_cm_pd_pro(15, 0, 13.5, 40, true);
+        arm_D(DOWN);
+        arm_A(SETNEW);
+        tslp_tsk(100*MSEC);
+        turn(10, -30, 30);
+        tslp_tsk(100*MSEC);
+        straight(9, 30);
+        arm_A(CLOSE);
+        straight(9, -30);
+        turn(170, -30, 30);
+        linetrace_color_pd_SP(BOTH, COLOR_BLACK, 30, false);
+        linetrace_cm_pd_SP(6.5, 20, true);
+        
+    }
+    if(location_t[0] == 3) {
+        linetrace_cm_pd_pro(12, 0, 14, 30, true);
+        turn(90, -30, 30);
+        straight(12, 20);
+        turn(90, 30, -30);
+        arm_D(DOWN);
+        arm_A(SETNEW);
+        straight(10, 20);
+        arm_A(CLOSE);
+        straight(10, -20);
+        turn(90, 30, -30);
+        straight(12, 20);
+        turn(90, 30, -30);
+        linetrace_color_pd_SP(BOTH, COLOR_BLACK, 30, false);
+        linetrace_cm_pd_SP(6.5, 20, true);
+    }
+    if(location_t[0] == 5) {
+        linetrace_cm_pd_pro(12, 0, 14, 30, true);
+        turn(90, 30, -30);
+        straight(12, 20);
+        turn(90, -30, 30);
+        arm_D(DOWN);
+        arm_A(SETNEW);
+        straight(10, 20);
+        arm_A(CLOSE);
+        straight(10, -20);
+        turn(90, -30, 30);
+        straight(12, 20);
+        turn(90, -30, 30);
+        linetrace_color_pd_SP(BOTH, COLOR_BLACK, 30, false);
+        linetrace_cm_pd_SP(6.5, 20, true);
+    }
+
+    linetrace_cm_pd_SP(10, 20, true);
+    turn(90, 30, -30);
+    straight(3.7, 30);
+    turn(90, -30, 30);
+    arm_D(UP);
+    straight(12, 30);
+    arm_D(SETNEW);
+    arm_A(SETNEW);
+    arm_D(UP);
+    straight(12, -30);
+    turn(90, -30, 30);
+    straight(3.7, 30);
+    turn(90, -30, 30);
+    linetrace_color_pd_SP(BOTH, COLOR_BLACK, 20, false);
+    linetrace_cm_pd_SP(6.5, 20, true);
+
+    if(location_t[1] == 4) {
+        linetrace_cm_pd_pro(15, 0, 13.5, 40, true);
+        arm_D(DOWN);
+        arm_A(SETNEW);
+        tslp_tsk(100*MSEC);
+        turn(10, 30, -30);
+        tslp_tsk(100*MSEC);
+        straight(9, 30);
+        arm_A(CLOSE);
+        straight(9, -30);
+        turn(170, 30, -30);
+        linetrace_color_pd_SP(BOTH, COLOR_BLACK, 30, false);
+        linetrace_cm_pd_SP(6.5, 20, true);
+        
+    }
+    if(location_t[1] == 2) {
+        linetrace_cm_pd_pro(15, 0, 13.5, 40, true);
+        arm_D(DOWN);
+        arm_A(SETNEW);
+        tslp_tsk(100*MSEC);
+        turn(10, -30, 30);
+        tslp_tsk(100*MSEC);
+        straight(9, 30);
+        arm_A(CLOSE);
+        straight(9, -30);
+        turn(170, -30, 30);
+        linetrace_color_pd_SP(BOTH, COLOR_BLACK, 30, false);
+        linetrace_cm_pd_SP(6.5, 20, true);
+        
+    }
+    if(location_t[1] == 3) {
+        linetrace_cm_pd_pro(12, 0, 14, 30, true);
+        turn(90, -30, 30);
+        straight(12, 20);
+        turn(90, 30, -30);
+        arm_D(DOWN);
+        arm_A(SETNEW);
+        straight(10, 20);
+        arm_A(CLOSE);
+        straight(10, -20);
+        turn(90, 30, -30);
+        straight(12, 20);
+        turn(90, 30, -30);
+        linetrace_color_pd_SP(BOTH, COLOR_BLACK, 30, false);
+        linetrace_cm_pd_SP(6.5, 20, true);
+    }
+    if(location_t[1] == 5) {
+        linetrace_cm_pd_pro(12, 0, 14, 30, true);
+        turn(90, 30, -30);
+        straight(12, 20);
+        turn(90, -30, 30);
+        arm_D(DOWN);
+        arm_A(SETNEW);
+        straight(10, 20);
+        arm_A(CLOSE);
+        straight(10, -20);
+        turn(90, -30, 30);
+        straight(12, 20);
+        turn(90, -30, 30);
+        linetrace_color_pd_SP(BOTH, COLOR_BLACK, 30, false);
+        linetrace_cm_pd_SP(6.5, 20, true);
+    }
+
+    linetrace_cm_pd_SP(10, 20, true);
+    turn(90, -30, 30);
+    straight(2, 30);
+    turn(90, 30, -30);
+    arm_D(UP);
+    straight(12, 30);
+    arm_D(SETNEW);
+    tslp_tsk(400*MSEC);
+    arm_A(SETNEWSHIP);
+    tslp_tsk(400*MSEC);
+    arm_D(SETNEW);
+
+
+
+    straight(13, -30);
+    turn(90, 30, -30);
+    straight(2, 30);
+    turn(90, -30, 30);
+    arm_D(DOWN);
+    arm_A(SETSHIP);
+    linetrace_cm_pd_SP(15, 20, true);
+    arm_A(CLOSE);
+    //ship take
+
+
+
+    turn(180, -20, 20);
+
+    linetrace_cm_pd_SP(8, 30, false);
+    linetrace_color_pd_SP(BOTH, COLOR_BLACK, 30, false);
+    linetrace_cm_pd_SP(6.5, 30, true);
+    turn(90, 30, -30);
+    linetrace_cm_pd_pro_ship(25, 60, 23, 80, true);
+    tslp_tsk(150*MSEC);
+    turn(90, -20, 20);
+    straight(15, 30);
+
+    arm_A(SETSHIP);
+
+
+    straight(15, -30);
+    arm_A(OPEN);
+    turn(90, -30, 30);
+    linetrace_cm_pd_pro(16, 4, 0, 60, false);
+    linetrace_color_pd_SP(BOTH, COLOR_BLACK, 40, false);
+    linetrace_cm_pd_SP(6.5, 40, true);
+    turn(90, 30, -30);
+    linetrace_cm_pd_SP(24, 30, true);
+    turn(90, 30, -30);
+    straight(6, 30);
+    turn(90, -30, 30);
+    arm_D(DOWN);
+    straight(13, 30);
+    arm_D(UP);
+
+
+    straight(37, -40);
+    turn(90, -30, 30);
+    straight(10, -30);
+    linetrace_color_pd_SP(BOTH, COLOR_BLACK, 30, false);
+    linetrace_cm_pd_SP(6.5, 30, true);
+    turn(90, -30, 30);
+    linetrace_cm_pd_SP(28, 30, true);
+    arm_D(DOWN);
+    straight(15, -30);
+    turn(90, -30, 30);
+    turn(180, -30, 0);
+    straight(14, -30);
+    straight_on(30);
+    while (true){
+        if(ev3_color_sensor_get_color(EV3_PORT_2) == COLOR_WHITE && ev3_color_sensor_get_color(EV3_PORT_3) == COLOR_WHITE) break;
+    }
+    while (true){
+        if(ev3_color_sensor_get_color(EV3_PORT_2) == COLOR_BLACK && ev3_color_sensor_get_color(EV3_PORT_3) == COLOR_BLACK) break;
+    }
+    straight(6.5, 30);
+    turn(90, -30, 30);
+    linetrace_cm_pd_SP(6.5, 30, false);
+    linetrace_color_pd_SP(BOTH, COLOR_BLACK, 30, false);
+
+
+
+    
+    linetrace_cm_pd_pro(0, 23, 13, 50, true);
+    tslp_tsk(100*MSEC);
+    arm_D(UP);
+    turn(90, 30, -30);
+    tslp_tsk(100*MSEC);
+    straight(31.8, 50);
+    tslp_tsk(100*MSEC);
+    turn(90, -30, 30);
+    straight(8, 30);
+    arm_D(SETNEW);
+    arm_A(CLOSE);
+    arm_D(UP);
+
+
+
+
+    straight(10, -30);
+    turn(90, -30, 30);
+    straight_on(30);
+    while (true){
+        if(ev3_color_sensor_get_color(EV3_PORT_2) == COLOR_WHITE && ev3_color_sensor_get_color(EV3_PORT_3) == COLOR_WHITE) break;
+    }
+    straight(9.5, 30);
+    turn(90, -30, 30);
+    linetrace_cm_pd_SP(10, 30, true);
+    linetrace_color_pd_SP(BOTH, COLOR_BLACK, 30, false);
+    linetrace_cm_pd_SP(6.5, 30, false);
+    linetrace_color_pd_SP(BOTH, COLOR_BLACK, 30, false);
+    linetrace_cm_pd_SP(6.5, 30, false);
+    linetrace_color_pd_SP(BOTH, COLOR_BLACK, 30, true);
+    turn(10, 30, -30);
+    straight(10, 30);
+    arm_D(DOWN);
+    arm_A(OPEN);
+    straight(10, -30);
+    turn(170, 30, -30);
+    linetrace_cm_pd_SP(10, 30, true);
+    linetrace_color_pd_SP(BOTH, COLOR_BLACK, 30, false);
+    linetrace_cm_pd_SP(6.5, 30, false);
+    linetrace_color_pd_SP(BOTH, COLOR_BLACK, 30, false);
+    linetrace_cm_pd_SP(6.5, 30, false);
+    linetrace_color_pd_SP(BOTH, COLOR_BLACK, 30, true);
+    straight(6.5, 30);
+    turn(90, -30, 30);
+    linetrace_cm_pd_SP(15, 30, true);
+    straight(20, 30);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
    
 
     battery = ev3_battery_voltage_mV();

@@ -85,12 +85,12 @@ typedef enum armmode_new {
     DOWN,
     SETNEW,
     SETNEWSHIP,
-    SETSMALL,
     OPEN,
     CLOSE,
     SETSHIP,
     SETOPEN,
-    SETCLOSE
+    SETCLOSE,
+    SETSMALL
 } armmode_new_t ;
 
 
