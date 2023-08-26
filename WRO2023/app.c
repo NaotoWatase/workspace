@@ -843,6 +843,10 @@ void arm_D(armmode_new_t mode) {
             if(now_arm_angle >= -80)ev3_motor_set_power(EV3_PORT_D, -15);
             else ev3_motor_set_power(EV3_PORT_D, 15);
             break;
+        case OBJDOWN:
+            if(now_arm_angle >= -120)ev3_motor_set_power(EV3_PORT_D, -15);
+            else ev3_motor_set_power(EV3_PORT_D, 15);
+            break;
         case DOWN:
             ev3_motor_set_power(EV3_PORT_D, -30);
             break;
@@ -859,6 +863,7 @@ void arm_D(armmode_new_t mode) {
         //if(now_arm_angle >= -2 && mode == UP) break;
         if(mode == UP) break;
         if(now_arm_angle <= -79 && now_arm_angle >= -81 && mode == SETNEW) break;
+        if(now_arm_angle <= -119 && now_arm_angle >= -121 && mode == OBJDOWN) break;
     }
     if (mode == DOWN) {
         tslp_tsk(400*MSEC);
@@ -1030,7 +1035,7 @@ void gain_set_pro(int power, float *p_gain, float *d_gain){
         *d_gain = 80;   
     }
     if(power > 10 && power <= 20){
-        *p_gain = 1;   
+        *p_gain = 0.9;   
         *d_gain = 75;   
     }
     if(power > 20 && power <= 30){
@@ -1075,7 +1080,7 @@ void gain_set_pro_ship(int power, float *p_gain, float *d_gain){
         *d_gain = 80;   
     }
     if(power > 30 && power <= 40){
-        *p_gain = 0.6;   
+        *p_gain = 0.7;   
         *d_gain = 70;   
     }
     if(power > 40 && power <= 50){
@@ -1709,7 +1714,7 @@ void pattern2121(){
     turn(90, 30, -30);
     tslp_tsk(100*MSEC);
     arm_reset_A();
-    straight(8.8, 20);
+    straight(8.6, 20);
     tslp_tsk(100*MSEC);
     ev3_motor_rotate(EV3_PORT_D, 30, -15, false);
     turn(90, -30, 30);
@@ -1833,8 +1838,8 @@ void whiteobj_nkc(){
     tslp_tsk(100*MSEC);
     turn(90, -30, 30);*/
 
-    linetrace_cm_pd_pro(16, 4, 0, 60, false);
-    linetrace_color_pd_SP(BOTH, COLOR_BLACK, 60, false);
+    linetrace_cm_pd_pro(16, 4, 0, 50, false);
+    linetrace_color_pd_SP(BOTH, COLOR_BLACK, 50, false);
     linetrace_cm_pd_SP(6.5, 40, true);
     turn(90, 30, -30);
     linetrace_cm_pd_pro(15, 0, 13.5, 40, true);
@@ -1846,7 +1851,7 @@ void whiteobj_nkc(){
     //armでオブジェクトとる
     turn(20, 30, -30);
     tslp_tsk(100*MSEC);
-    straight(36.3, -40);
+    straight(36.8, -40);
     arm_set_A(-110, false);
     tslp_tsk(100*MSEC);
     turn(90, -30, 30);
@@ -1855,7 +1860,8 @@ void whiteobj_nkc(){
 void bigprepare_nkc(){
     linetrace_cm_pd_pro(18, 8, 0, 50, false);
     linetrace_color_pd_SP(BOTH, COLOR_BLACK, 60, false);
-    linetrace_cm_pd_pro(0, 23, 18, 50, true);
+    linetrace_cm_pd_SP(23, 40, false);
+    linetrace_cm_pd_SP(18, 20, true);
     tslp_tsk(100*MSEC);
     turn(90, 30, -30);
     tslp_tsk(100*MSEC);
@@ -2065,13 +2071,29 @@ void main_task(intptr_t unused) {
 
     now_arm_angle = 0;
     now_arm_angle_A = 0;
-    //ev3_motor_set_power(EV3_PORT_A, 20);
-    //ev3_motor_set_power(EV3_PORT_D, 20);
-    //tslp_tsk(900*MSEC);
-    //ev3_motor_stop(EV3_PORT_D, true);
-    //ev3_motor_stop(EV3_PORT_A, true);
+    ev3_motor_set_power(EV3_PORT_A, 20);
+    ev3_motor_set_power(EV3_PORT_D, 20);
+    tslp_tsk(900*MSEC);
+    ev3_motor_stop(EV3_PORT_D, true);
+    ev3_motor_stop(EV3_PORT_A, true);
     ev3_motor_reset_counts(EV3_PORT_D);
     ev3_motor_reset_counts(EV3_PORT_A);
+
+    arm_A(SETNEW);
+
+
+    stopping();
+    arm_D(SETNEW);
+    arm_A(CLOSE);
+    stopping();
+    arm_D(OBJDOWN);
+    tslp_tsk(400*MSEC);
+    arm_A(OPEN);
+    stopping();
+
+
+
+
 
     start_nkc();
     //マーキングの色読んでターンまでまで　アームは上
