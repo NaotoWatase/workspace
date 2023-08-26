@@ -80,17 +80,6 @@ typedef enum armmode {
     LEFTDOWNLEFT
 } armmode_t ;
 
-typedef enum armmode_new {
-    UP,
-    DOWN,
-    SETNEW,
-    OPEN,
-    CLOSE,
-    SETSHIP,
-    SETOPEN,
-    SETCLOSE
-} armmode_new_t ;
-
 
 /*
  *  ターゲットに依存する可能性のある定数の定義
